@@ -6,6 +6,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
 import type { OrbitControls as ControlesDeOrbita } from 'three-stdlib'
 import {
+  conflitos,
   CORES_CHAPA,
   ehParede,
   encaixar,
@@ -16,7 +17,6 @@ import {
   PECAS_PISO,
   type Item,
   type ItemParede,
-  type ItemPiso,
   type Parede,
   type Projeto,
 } from '@/lib/montador'
@@ -168,7 +168,8 @@ function ParedeDoCasco({ tamanho, posicao, apagada, textura, repeticao, children
   )
 }
 
-function Casco({ projeto, porDentro, apagadas }: { projeto: Projeto; porDentro: boolean; apagadas: string }) {
+// Memorizado: arrastar uma peça não refaz o casco
+const Casco = memo(function Casco({ projeto, porDentro, apagadas }: { projeto: Projeto; porDentro: boolean; apagadas: string }) {
   const { c, l, a } = interno(projeto)
   const cor = CORES_CHAPA[projeto.cor].hex
   const modulo = MEDIDAS_METROS[projeto.tamanho].externa
@@ -279,7 +280,7 @@ function Casco({ projeto, porDentro, apagadas }: { projeto: Projeto; porDentro: 
       ))}
     </group>
   )
-}
+})
 
 function transformarParede(item: ItemParede, c: number, l: number): { pos: [number, number, number]; giro: number } {
   switch (item.parede) {
@@ -376,14 +377,15 @@ const PecaNaCena = memo(function PecaNaCena({ item, c, l, selecionada, alerta, a
 
 // A sombra é calculada só quando algo que a projeta muda (peça, forma, parede apagada),
 // não a cada quadro em que a câmera gira.
-function SombraSobDemanda({ chave }: { chave: string }) {
+// Enquanto uma peça é arrastada a sombra acompanha a cada quadro, para não ficar a sombra velha no chão.
+function SombraSobDemanda({ chave, viva }: { chave: string; viva: boolean }) {
   const get = useThree((s) => s.get)
   useEffect(() => {
     const { gl, invalidate } = get()
-    gl.shadowMap.autoUpdate = false
+    gl.shadowMap.autoUpdate = viva
     gl.shadowMap.needsUpdate = true
     invalidate()
-  }, [get, chave])
+  }, [get, chave, viva])
   return null
 }
 
@@ -477,15 +479,64 @@ function Conteudo(props: PropsCena & { leveInicial: boolean }) {
     setDpr(1)
   }, [setDpr])
 
+  // O arrasto é local: a peça anda só aqui dentro (prévia) e a página recebe a posição uma vez,
+  // ao soltar. Antes cada movimento refazia o montador inteiro, a conferência e a sombra.
+  const [previa, setPrevia] = useState<Item | null>(null)
+  const get = useThree((s) => s.get)
+  // Por ref: a página pode se redesenhar no meio do arrasto sem reiniciá-lo
+  const aoMover = useRef(onMover)
+  useEffect(() => {
+    aoMover.current = onMover
+  }, [onMover])
+  const itens = useMemo(
+    () => (previa ? projeto.itens.map((i) => (i.id === previa.id ? previa : i)) : projeto.itens),
+    [projeto.itens, previa],
+  )
+  const alertas = useMemo(() => (previa ? conflitos({ ...projeto, itens }) : emConflito), [previa, projeto, itens, emConflito])
+
   useEffect(() => {
     if (!arrasto) return
+    const { gl, camera, invalidate } = get()
+    const raio = new THREE.Raycaster()
+    const ndc = new THREE.Vector2()
+    const alvo = new THREE.Vector3()
+    let atual: Item | null = null
+    // Sem o sistema de eventos do 3D durante o arrasto: nada de procurar peça sob o ponteiro
+    setEvents({ enabled: false })
+
+    const mover = (e: PointerEvent) => {
+      const caixa = gl.domElement.getBoundingClientRect()
+      ndc.set(((e.clientX - caixa.left) / caixa.width) * 2 - 1, -((e.clientY - caixa.top) / caixa.height) * 2 + 1)
+      raio.setFromCamera(ndc, camera)
+      if (!raio.ray.intersectPlane(PISO, alvo)) return
+      const px = alvo.x + c / 2
+      const pz = alvo.z + l / 2
+      const base = atual ?? projeto.itens.find((i) => i.id === arrasto.id)
+      if (!base) return
+      const novo = ehParede(base)
+        ? limitarParede({ ...base, ...paredeMaisPerto(px, pz, c, l) }, projeto)
+        : limitarPiso({ ...base, x: encaixar(px + arrasto.dx), z: encaixar(pz + arrasto.dz) }, projeto)
+      if (atual && JSON.stringify(novo) === JSON.stringify(atual)) return
+      atual = novo
+      setPrevia(novo)
+      invalidate()
+    }
     const soltar = () => {
+      if (atual) aoMover.current(atual)
+      setPrevia(null)
       setArrasto(null)
       document.body.style.cursor = ''
     }
+    window.addEventListener('pointermove', mover)
     window.addEventListener('pointerup', soltar)
-    return () => window.removeEventListener('pointerup', soltar)
-  }, [arrasto])
+    window.addEventListener('pointercancel', soltar)
+    return () => {
+      window.removeEventListener('pointermove', mover)
+      window.removeEventListener('pointerup', soltar)
+      window.removeEventListener('pointercancel', soltar)
+      setEvents({ enabled: true })
+    }
+  }, [arrasto, get, setEvents, projeto, c, l])
 
   const noPiso = useCallback(
     (e: ThreeEvent<PointerEvent>) => {
@@ -507,21 +558,6 @@ function Conteudo(props: PropsCena & { leveInicial: boolean }) {
     [onSelecionar, noPiso],
   )
 
-  const mover = (e: ThreeEvent<PointerEvent>) => {
-    if (!arrasto) return
-    const item = projeto.itens.find((i) => i.id === arrasto.id)
-    const p = noPiso(e)
-    if (!item || !p) return
-    if (ehParede(item)) {
-      const { parede, t } = paredeMaisPerto(p.x, p.z, c, l)
-      const novo = limitarParede({ ...item, parede, t }, projeto)
-      if (novo.parede !== item.parede || novo.t !== item.t) onMover(novo)
-    } else {
-      const novo: ItemPiso = limitarPiso({ ...item, x: encaixar(p.x + arrasto.dx), z: encaixar(p.z + arrasto.dz) }, projeto)
-      if (novo.x !== item.x || novo.z !== item.z) onMover(novo)
-    }
-  }
-
   return (
     <>
       <color attach="background" args={['#eef2f6']} />
@@ -538,7 +574,7 @@ function Conteudo(props: PropsCena & { leveInicial: boolean }) {
         shadow-camera-far={30}
         shadow-bias={-0.0004}
       />
-      <SombraSobDemanda chave={`${codigoDaCena(projeto)}|${apagadas}|${leve}|${alcance}`} />
+      <SombraSobDemanda chave={`${codigoDaCena(projeto)}|${apagadas}|${leve}|${alcance}`} viva={previa !== null} />
       <VigiaDeQuadros ativo={!leve} onLento={ficarLeve} />
 
       <mesh position={[0, -0.2, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
@@ -549,24 +585,23 @@ function Conteudo(props: PropsCena & { leveInicial: boolean }) {
       <VigiaDasParedes porDentro={porDentro} onMudar={setApagadas} />
       <Casco projeto={projeto} porDentro={porDentro} apagadas={apagadas} />
 
-      {projeto.itens.map((item) => (
+      {itens.map((item) => (
         <PecaNaCena
           key={item.id}
           item={item}
           c={c}
           l={l}
           selecionada={item.id === selecionado}
-          alerta={emConflito.has(item.id)}
+          alerta={alertas.has(item.id)}
           apagada={ehParede(item) && apagadas.includes(item.parede)}
           onAgarrar={agarrar}
         />
       ))}
 
-      {/* Plano invisível no nível do piso: recebe o arrasto e o clique que desmarca */}
+      {/* Plano invisível no nível do piso: recebe o clique que desmarca */}
       <mesh
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, 0.001, 0]}
-        onPointerMove={mover}
         onClick={(e) => {
           if (e.delta < 4 && !arrasto) onSelecionar(null)
         }}

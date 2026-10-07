@@ -129,6 +129,55 @@ export function Montador() {
   const capturar = useRef<(() => string) | null>(null)
   // Link de projeto ou ponto de partida vindo de outra página já é um pedido de 3D: abre direto
   const [iniciado, setIniciado] = useState(() => parametros.has('p') || parametros.has('partida'))
+  const raiz = useRef<HTMLDivElement>(null)
+  const [telaCheia, setTelaCheia] = useState(false)
+  const [dicaGiro, setDicaGiro] = useState(true)
+
+  // Tela cheia pela API do navegador quando existe; no iPhone, que não a tem para página, o mesmo
+  // efeito vem do CSS (data-tela-cheia). No celular tenta deitar a tela (só o Android aceita).
+  const alternarTelaCheia = async () => {
+    if (telaCheia) {
+      if (document.fullscreenElement) await document.exitFullscreen().catch(() => {})
+      setTelaCheia(false)
+      return
+    }
+    setTelaCheia(true)
+    setIniciado(true)
+    try {
+      await raiz.current?.requestFullscreen?.({ navigationUI: 'hide' })
+      const orientacao = screen.orientation as ScreenOrientation & { lock?: (o: string) => Promise<void> }
+      if (window.matchMedia('(pointer: coarse)').matches) await orientacao.lock?.('landscape')
+    } catch {}
+  }
+
+  useEffect(() => {
+    // Saiu da tela cheia pelo Esc ou pelo gesto do sistema: o estado acompanha
+    const aoMudar = () => {
+      if (!document.fullscreenElement) setTelaCheia(false)
+    }
+    document.addEventListener('fullscreenchange', aoMudar)
+    return () => document.removeEventListener('fullscreenchange', aoMudar)
+  }, [])
+
+  // Marca no <html> para o botão flutuante do WhatsApp sair da frente da barra da peça (celular)
+  const temSelecao = selecionado !== null
+  useEffect(() => {
+    if (!temSelecao) return
+    document.documentElement.dataset.pecaSelecionada = ''
+    return () => {
+      delete document.documentElement.dataset.pecaSelecionada
+    }
+  }, [temSelecao])
+
+  useEffect(() => {
+    if (!telaCheia) return
+    const html = document.documentElement
+    const antes = html.style.overflow
+    html.style.overflow = 'hidden'
+    return () => {
+      html.style.overflow = antes
+    }
+  }, [telaCheia])
 
   const emConflito = useMemo(() => conflitos(projeto), [projeto])
   const itemSelecionado = projeto.itens.find((i) => i.id === selecionado) ?? null
@@ -195,7 +244,10 @@ export function Montador() {
     const aoTeclar = (e: KeyboardEvent) => {
       const alvo = e.target as HTMLElement
       if (alvo.closest('input, textarea, select')) return
-      if (e.key === 'Escape') setSelecionado(null)
+      if (e.key === 'Escape') {
+        if (!itemSelecionado && telaCheia && !document.fullscreenElement) setTelaCheia(false)
+        setSelecionado(null)
+      }
       if (!itemSelecionado) return
       const tecla = e.key.toLowerCase()
       if (tecla === 'r') girarSelecionado()
@@ -214,7 +266,7 @@ export function Montador() {
     }
     window.addEventListener('keydown', aoTeclar)
     return () => window.removeEventListener('keydown', aoTeclar)
-  }, [itemSelecionado, girarSelecionado, duplicarSelecionado, removerSelecionado, projeto])
+  }, [itemSelecionado, girarSelecionado, duplicarSelecionado, removerSelecionado, projeto, telaCheia])
 
   const linkDoProjeto = () => {
     const url = new URL(window.location.href)
@@ -245,7 +297,7 @@ export function Montador() {
   const ocupada = areaOcupada(projeto)
 
   return (
-    <div className={estilos.montador}>
+    <div ref={raiz} className={estilos.montador} data-tela-cheia={telaCheia}>
       <aside className={estilos.painel} aria-label="Opções do container">
         <section className={estilos.bloco}>
           <h2>Tamanho</h2>
@@ -409,7 +461,35 @@ export function Montador() {
             <button type="button" onClick={() => setVista((v) => ({ ...v, versao: v.versao + 1 }))}>
               Centralizar
             </button>
+            <button type="button" className={estilos.botaoTelaCheia} aria-pressed={telaCheia} onClick={alternarTelaCheia}>
+              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                <path
+                  d={telaCheia ? 'M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5' : 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5'}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              {telaCheia ? 'Sair da tela cheia' : 'Tela cheia'}
+            </button>
+            <span className={estilos.quebra} aria-hidden="true" />
+            {/* Só no celular em pé (o CSS decide): deitado, o 3D fica bem maior */}
+            {iniciado && dicaGiro && (
+              <span className={estilos.dicaGiro}>
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                  <rect x="7" y="2" width="10" height="16" rx="2" fill="none" stroke="currentColor" strokeWidth="1.8" />
+                  <path d="M20 14a8 8 0 0 1-6 7.7M14 21.7l1.6-2.4M14 21.7l2.7.6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                </svg>
+                Gire o celular ou use a tela cheia para ver maior
+                <button type="button" aria-label="Fechar a dica" onClick={() => setDicaGiro(false)}>
+                  ×
+                </button>
+                </span>
+            )}
           </div>
+
 
           <p className={estilos.ocupacao} aria-live="polite" hidden={!iniciado}>
             <span className="marcacao">{ocupada}%</span> do piso ocupado · {metros(interno(projeto).c)} ×{' '}

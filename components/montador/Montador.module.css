@@ -564,3 +564,152 @@
     font-size: 0.8rem;
   }
 }
+
+/* ---------- Tela cheia ---------- */
+
+.botaoTelaCheia {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Vale para a tela cheia do navegador e para o modo do iPhone, que não tem a API para página */
+.montador[data-tela-cheia='true'] {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  margin: 0;
+  padding: 16px;
+  overflow: auto;
+  background: var(--branco);
+}
+
+/* No computador o montador inteiro (peças e 3D) ocupa a tela */
+@media (min-width: 1000px) {
+  .montador[data-tela-cheia='true'] {
+    height: 100dvh;
+  }
+  .montador[data-tela-cheia='true'] .painel {
+    top: 0;
+    max-height: calc(100dvh - 32px);
+  }
+  .montador[data-tela-cheia='true'] .palco {
+    grid-template-rows: 1fr auto;
+    height: calc(100dvh - 32px);
+  }
+  .montador[data-tela-cheia='true'] .canvas {
+    height: auto;
+    min-height: 0;
+  }
+}
+
+/* No celular, só o 3D, de borda a borda */
+@media (max-width: 999px) {
+  .montador[data-tela-cheia='true'] {
+    padding: 0;
+  }
+  .montador[data-tela-cheia='true'] .canvas {
+    position: fixed;
+    inset: 0;
+    height: 100dvh;
+    margin: 0;
+    border: 0;
+  }
+  .montador[data-tela-cheia='true'] .dicaGiro {
+    display: none;
+  }
+  /* Celular deitado fora da tela cheia: o 3D ganha altura */
+  @media (orientation: landscape) {
+    .canvas {
+      height: 82svh;
+    }
+  }
+}
+
+/* ---------- Dica de girar o celular ---------- */
+
+.dicaGiro {
+  display: none;
+}
+
+/* A dica vai numa linha própria logo abaixo dos botões da barra, acompanhando a quebra deles */
+.quebra {
+  flex-basis: 100%;
+  height: 0;
+}
+
+@media (pointer: coarse) and (orientation: portrait) {
+  .dicaGiro {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 6px 6px 12px;
+    font-size: 0.8rem;
+    color: var(--branco);
+    background: rgba(10, 18, 34, 0.82);
+    border-radius: 999px;
+  }
+  .dicaGiro button {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    min-height: 0;
+    padding: 0;
+    box-shadow: none;
+    font-size: 1.1rem;
+    line-height: 1;
+    color: var(--branco);
+    background: rgba(255, 255, 255, 0.12);
+    border: 0;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  /* Teclas de atalho não fazem sentido no toque */
+  .selecao kbd {
+    display: none;
+  }
+}
+
+/* ---------- Peça selecionada no celular: barra fina na base da tela, fora do 3D ---------- */
+
+@media (max-width: 999px) {
+  .selecao {
+    position: fixed;
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 210;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    gap: 6px;
+    max-width: none;
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+    border-radius: 16px 16px 0 0;
+    transform: none;
+    animation: subirBarra calc(0.3s * var(--tempo)) var(--curva);
+  }
+  .selecao strong {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    font-size: 0.9rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .selecao .alerta {
+    display: none;
+  }
+  .selecao button {
+    min-height: 40px;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+}
+
+@keyframes subirBarra {
+  from {
+    transform: translateY(100%);
+  }
+}

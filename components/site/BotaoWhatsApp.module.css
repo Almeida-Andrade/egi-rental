@@ -34,3 +34,10 @@
     display: inline;
   }
 }
+
+/* Com uma peça selecionada no montador, a barra da peça ocupa a base da tela no celular */
+@media (max-width: 999px) {
+  :global(html[data-peca-selecionada]) .botao {
+    display: none;
+  }
+}
