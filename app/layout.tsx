@@ -29,7 +29,7 @@ const stencil = Big_Shoulders_Stencil({
 const TITULO = 'EGI Rental — Locação de containers em São Luís'
 const DESCRICAO =
   'Containers para escritório, almoxarifado, sanitário e stand em locação de curto, médio e longo prazo, ' +
-  'com entrega e retirada no local. Projetos sob medida para obras, indústrias e eventos no Maranhão.'
+  'com entrega e retirada no local. Projetos sob medida para obras e indústrias no Maranhão.'
 
 export const metadata: Metadata = {
   metadataBase: new URL(URL_SITE),

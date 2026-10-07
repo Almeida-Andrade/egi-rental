@@ -24,7 +24,6 @@ export const CREDITOS: Credito[] = [
   { arquivo: 'sob-medida-casa.jpg', autor: 'Declan Sun', url: 'https://unsplash.com/photos/NvRI_oL0hBY' },
   { arquivo: 'aplicacao-canteiro.jpg', autor: 'Turquo Cabbit', url: 'https://unsplash.com/photos/9MNvPVnu4yg' },
   { arquivo: 'aplicacao-porto.jpg', autor: 'CHUTTERSNAP', url: 'https://unsplash.com/photos/kyCNGGKCvyw' },
-  { arquivo: 'aplicacao-eventos.jpg', autor: 'Tony Pham', url: 'https://unsplash.com/photos/FUmDe-Bx1LA' },
   { arquivo: 'aplicacao-obras.jpg', autor: 'Kristian Møller', url: 'https://unsplash.com/photos/UAprF9XuOFQ' },
   { arquivo: 'aplicacao-modulos.jpg', autor: 'MChe Lee', url: 'https://unsplash.com/photos/53q0Rtf9owc' },
   { arquivo: 'qualidade-solda.jpg', autor: 'Christopher Burns', url: 'https://unsplash.com/photos/Wiu3w-99tNg' },

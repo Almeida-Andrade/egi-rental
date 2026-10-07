@@ -18,11 +18,6 @@ export const APLICACOES: Aplicacao[] = [
     foto: { src: '/fotos/aplicacao-porto.jpg', alt: 'Vista aérea de um pátio portuário com containers' },
   },
   {
-    titulo: 'Eventos e feiras',
-    texto: 'Stands, bilheterias, camarins e sanitários que montam rápido e saem no fim do evento.',
-    foto: { src: '/fotos/aplicacao-eventos.jpg', alt: 'Público num festival ao ar livre' },
-  },
-  {
     titulo: 'Obras públicas e privadas',
     texto: 'Estrutura de apoio para obras de infraestrutura, loteamentos e grandes empreendimentos.',
     foto: { src: '/fotos/aplicacao-obras.jpg', alt: 'Vista aérea de uma obra de loteamento' },
@@ -45,7 +40,7 @@ export const PASSOS = [
   { titulo: 'Conte o que precisa', texto: 'Pelo WhatsApp ou pelo formulário: o uso, o tamanho e onde o container vai ficar.' },
   { titulo: 'Receba a proposta', texto: 'Indicamos o modelo certo e enviamos o orçamento com prazo e condições.' },
   { titulo: 'Entregamos no local', texto: 'Levamos o container e deixamos posicionado, pronto para uso.' },
-  { titulo: 'Retiramos no fim', texto: 'Terminou a obra ou o evento, buscamos o container no local.' },
+  { titulo: 'Retiramos no fim', texto: 'Terminou a obra ou o contrato, buscamos o container no local.' },
 ]
 
 export const ADAPTACOES = [
