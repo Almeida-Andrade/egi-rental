@@ -98,7 +98,7 @@ export function capitulosDaAbertura(usos: string[]): Capitulo[] {
       rotulo: 'Sob medida',
       titulo: 'Monte o seu em 3D',
       texto: 'Escolha o tamanho, os móveis, as portas e as janelas, e mande o projeto pelo WhatsApp.',
-      foto: { src: '/montador/previa.jpg', alt: 'Container montado no montador 3D do site' },
+      foto: { src: '/fotos/sob-medida-janelas.jpg', alt: 'Container azul-claro adaptado com janelões de vidro' },
       href: '/sob-medida/montar',
       acao: 'Abrir o montador',
     },

@@ -10,12 +10,14 @@ import { Icone } from './Icone'
 import estilos from './ContainerAbrindo.module.css'
 
 // A linha do tempo vai de 0 a 1000 e acompanha a rolagem do trilho inteiro: as portas destravam e
-// abrem, a câmera entra e o fundo do container mostra um capítulo de cada vez.
+// abrem, a câmera entra e o fundo do container mostra um capítulo de cada vez. O último ganha a
+// sobra do fim, senão ele aparecia quando a seção já saía da tela.
 const INICIO_CAPITULOS = 480
 const FIM = 1000
+const SOBRA_DO_ULTIMO = 110
 
 function inicioDoCapitulo(i: number, total: number): number {
-  return INICIO_CAPITULOS + (i * (FIM - INICIO_CAPITULOS)) / total
+  return INICIO_CAPITULOS + (i * (FIM - INICIO_CAPITULOS - SOBRA_DO_ULTIMO)) / total
 }
 
 function Folha({ lado, codigo }: { lado: 'esquerda' | 'direita'; codigo: string }) {
@@ -44,6 +46,9 @@ export function ContainerAbrindo({ capitulos, children }: Props) {
   const trilho = useRef<HTMLElement>(null)
   const palco = useRef<HTMLDivElement>(null)
   const [atual, setAtual] = useState(-1)
+  // As fotos do fundo ficam escondidas (opacidade 0, dentro do 3D) e o carregamento preguiçoso não
+  // as busca a tempo: com a animação pronta, todas passam a carregar.
+  const [fotosJa, setFotosJa] = useState(false)
 
   useEffect(() => {
     const raiz = trilho.current
@@ -56,6 +61,7 @@ export function ContainerAbrindo({ capitulos, children }: Props) {
       if (cancelado) return
       // O trilho só fica alto quando a animação existe: sem JS, a abertura é uma tela só.
       raiz.dataset.viva = ''
+      setFotosJa(true)
       if (lerNivelDoAparelho() === 'leve') raiz.dataset.leve = ''
       const reduzido = window.matchMedia('(prefers-reduced-motion: reduce)').matches
       const $ = (seletor: string) => [...raiz.querySelectorAll<HTMLElement>(`[data-a="${seletor}"]`)]
@@ -138,8 +144,8 @@ export function ContainerAbrindo({ capitulos, children }: Props) {
         capitulos.forEach((_, i) => {
           const inicio = inicioDoCapitulo(i, capitulos.length)
           const fim = inicioDoCapitulo(i + 1, capitulos.length)
-          // A primeira foto acende enquanto a câmera entra; as outras cobrem a anterior.
-          linha.add(fotos[i], { opacity: [0, 1], duration: i === 0 ? 120 : 50 }, i === 0 ? 360 : inicio - 25)
+          // A primeira foto acende enquanto a câmera entra; as outras cobrem a anterior junto com o texto.
+          linha.add(fotos[i], { opacity: [0, 1], duration: i === 0 ? 120 : 40 }, i === 0 ? 360 : inicio - 10)
           linha.add(cartoes[i], { opacity: [0, 1], y: [40, 0], duration: 45, ease: 'outQuad' }, inicio)
           if (i < capitulos.length - 1)
             linha.add(cartoes[i], { opacity: [1, 0], y: [0, -30], duration: 30, ease: 'inQuad' }, fim - 35)
@@ -186,7 +192,7 @@ export function ContainerAbrindo({ capitulos, children }: Props) {
               <div className={estilos.tela}>
                 {capitulos.map((c) => (
                   <div key={c.href} className={estilos.foto} data-a="foto">
-                    <Image src={c.foto.src} alt="" fill sizes="(min-width: 760px) 45vw, 80vw" />
+                    <Image src={c.foto.src} alt="" fill sizes="(min-width: 760px) 45vw, 80vw" loading={fotosJa ? 'eager' : 'lazy'} />
                   </div>
                 ))}
               </div>
