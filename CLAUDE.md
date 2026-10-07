@@ -40,4 +40,6 @@ npm run build && npm run test:e2e   # Playwright contra o build, porta 3008
 - `.env.local` só com `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY` (chave pública). Nunca service role.
 
 ## Deploy
-Ainda sem projeto na Vercel nem domínio. Quando houver: projeto no mesmo time do OMNIS, região `gru1`, envs acima mais `NEXT_PUBLIC_URL_SITE`, e o autor do commit com o e-mail corporativo (`git config --local`). Deploy só com ordem do dono.
+- Repositório: `github.com/Almeida-Andrade/egi-rental` (privado). Autor do commit com o e-mail corporativo no `git config --local`.
+- Domínio: **`egi.rental.grupoaandrade.com.br`** (DNS no Cloudflare). É subdomínio de dois níveis: o certificado gratuito do Cloudflare só cobre `*.grupoaandrade.com.br`, então o registro fica **DNS only (nuvem cinza)** e o certificado é o da Vercel.
+- Vercel: projeto no mesmo time do OMNIS, região `gru1`, envs `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` e `NEXT_PUBLIC_URL_SITE=https://egi.rental.grupoaandrade.com.br`. Deploy só com ordem do dono.
