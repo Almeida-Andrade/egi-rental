@@ -352,7 +352,10 @@ export function ComparadorTamanhos({ modelos }: { modelos: ModeloComparavel[] })
             <dd className="marcacao">{area.toLocaleString('pt-BR', { maximumFractionDigits: 1, minimumFractionDigits: 1 })} m²</dd>
           </div>
         </dl>
-        <p className={estilos.legenda}>{planta.legenda}. O layout final é combinado no orçamento.</p>
+        <p className={estilos.legenda}>
+          {planta.legenda}. Desenho e medidas de referência, meramente ilustrativos: o layout e a medida final são
+          confirmados com a equipe no orçamento.
+        </p>
         <div className={estilos.acoes}>
           <a className={estilos.pedir} href={linkWhatsApp(mensagemDoModelo(pedido))} target="_blank" rel="noopener">
             <IconeWhatsApp /> Pedir {modulos === 1 ? 'este' : 'estes'}

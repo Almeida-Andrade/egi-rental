@@ -1,5 +1,6 @@
 .painel {
   --linha-painel: rgba(255, 255, 255, 0.1);
+  position: relative;
   display: grid;
   grid-template-columns: 1fr;
   gap: 1px;
@@ -81,6 +82,53 @@
 .painel sup {
   font-size: 0.65em;
   color: #9db4e8;
+}
+
+/* ---------- Exemplo em tempo de obra ---------- */
+
+.exemplo {
+  display: grid;
+  gap: 6px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border-left: 3px solid var(--azul);
+  border-radius: 2px 8px 8px 2px;
+}
+
+.exemploRotulo {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.exemploTroca {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px var(--gap-5);
+  animation: trocar calc(0.5s * var(--tempo)) var(--curva) both;
+}
+
+.exemploTroca span {
+  color: var(--texto-claro-2);
+}
+
+.exemploTroca strong {
+  margin-left: 4px;
+  font-weight: 700;
+  color: var(--texto-claro);
+}
+
+/* O modular é o que importa: maior e no azul claro */
+.exemploModular strong {
+  font-size: 1.35rem;
+  color: #9db4e8;
+}
+
+@keyframes trocar {
+  from {
+    opacity: 0;
+    transform: translateY(calc(8px * var(--deslocar)));
+  }
 }
 
 /* ---------- Barras horizontais ---------- */
@@ -306,6 +354,85 @@
 
 .cartao[data-visivel='true'] :is(.colunaCinza, .colunaAzul) {
   transform: none;
+}
+
+/* ---------- Respiro: o desenho acompanha o número (--respiro de 0 a 1) ---------- */
+
+/* `scale` não briga com a entrada, que usa `transform` */
+.colunaAzul {
+  transform-origin: bottom;
+  scale: 1 calc(1 - var(--respiro, 0) * var(--encolhe, 0));
+}
+
+/* Os containers acesos saem e voltam um de cada vez, em sequência, enquanto o cartão está na tela */
+.painel[data-vivo='true'] .cartao[data-visivel='true'][data-na-tela='true'] .caixaAcesa {
+  animation: um-de-cada-vez 5.4s ease-in-out infinite;
+  animation-delay: calc(1.6s + var(--i) * 180ms);
+}
+
+@keyframes um-de-cada-vez {
+  0%,
+  62% {
+    opacity: 1;
+    scale: 1;
+  }
+  72%,
+  80% {
+    opacity: 0;
+    scale: 0.6;
+  }
+  92%,
+  100% {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+.pausa {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--texto-claro);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--linha-painel);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.pausa:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.pausa:focus-visible {
+  outline: 3px solid #9db4e8;
+  outline-offset: 2px;
+}
+
+.iconePausa,
+.iconeTocar {
+  display: inline-block;
+  width: 10px;
+  height: 11px;
+}
+
+.iconePausa {
+  border-left: 3px solid currentColor;
+  border-right: 3px solid currentColor;
+}
+
+.iconeTocar {
+  background: currentColor;
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
 }
 
 /* ---------- Dicas ---------- */

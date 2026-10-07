@@ -479,7 +479,8 @@ export function Montador() {
             </button>
           </div>
           <p className={estilos.nota}>
-            É um esboço para a conversa: a equipe confirma medidas, instalações e o que é viável antes do orçamento.
+            Projeto meramente ilustrativo, um esboço para a conversa: a equipe confirma medidas, instalações e o que é
+            viável antes do orçamento.
           </p>
         </section>
       </div>

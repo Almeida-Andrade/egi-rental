@@ -52,8 +52,13 @@ npm run build && npm run test:e2e   # Playwright contra o build, porta 3008
 - Sem `Html` do drei: os rótulos flutuantes davam erro de desmontagem no React 19. Informação vai nos painéis HTML em volta do canvas.
 - `public/montador/previa.jpg` é captura do próprio montador (ponto de partida "escritório"), não foto de banco: fica fora de `CREDITOS`.
 
+### Aviso de ilustração (evitar propaganda enganosa)
+- **Toda foto de modelo, medida, planta, desenho e projeto 3D vem com o aviso de que é meramente ilustrativo** e com o caminho para confirmar com a equipe: `AvisoIlustrativo` (texto em `AVISO_ILUSTRATIVO`, `lib/site.ts`) perto do conteúdo, e o texto completo no rodapé de todas as páginas. Seção nova com imagem de container ou medida ganha o aviso.
+- Número do setor sempre com a fonte e no melhor caso dito como tal ("a partir de", "no melhor caso"), nunca como promessa da EGI Rental.
+
 ### Desempenho (medir antes e depois)
 - **Aparelho fraco desliga efeitos, nunca a experiência**: `nivelDoAparelho` (`lib/desempenho.ts`, sinais do navegador) decide o nível ao abrir, e `quadrosLentos` (mediana acima de 20 ms ou mais de 10% acima de 33 ms) rebaixa no meio do uso. Na abertura da home, `data-leve` tira chapa ondulada, sombra do pátio e brilho da tela; no montador, sombra, antialias e resolução acima de 1.
+- **Animação que roda sozinha só roda na tela** (IntersectionObserver ou `animation-play-state`), e os gráficos dos números têm o botão de pausa (WCAG 2.2.2). No CSS Modules, `animation` sem nome no atalho sai do build como `none`: usar as propriedades separadas.
 - **Animação por rolagem escreve `transform`/`opacity` direto nas peças que mudam**, nunca variável CSS no palco: variável herdada recalculava o estilo da cena inteira a cada quadro (6,5 s em 3 s de rolagem com CPU 4x).
 - **Montador**: geometria única por forma e material do cache (`material()` em `Pecas3D`), sombra calculada só quando o projeto muda (`SombraSobDemanda`), mapa de 1024 ajustado ao container, `dpr` até 1,5, sem `preserveDrawingBuffer` (a imagem é capturada logo depois de um render), eventos desligados enquanto a câmera gira e `PecaNaCena` memorizada.
 - **Foto escondida por cortina ou opacidade carrega por proximidade** (IntersectionObserver), nem preguiçosa (não baixa enquanto escondida) nem eager no servidor (vira preload no topo da página).

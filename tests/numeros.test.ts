@@ -1,5 +1,16 @@
 import { describe, expect, it } from 'vitest'
-import { APROVACAO, economiaDeEnergia, FONTES, RESIDUO, REUSO, TEMPO, tempoRelativo } from '@/lib/numeros'
+import {
+  APROVACAO,
+  duracaoEmMeses,
+  economiaDeEnergia,
+  exemploDePrazo,
+  FONTES,
+  MESES_DE_EXEMPLO,
+  RESIDUO,
+  REUSO,
+  TEMPO,
+  tempoRelativo,
+} from '@/lib/numeros'
 
 describe('números do setor', () => {
   it('todo número aponta para uma fonte com link https', () => {
@@ -24,5 +35,20 @@ describe('números do setor', () => {
       expect(v).toBeGreaterThan(0)
       expect(v).toBeLessThanOrEqual(100)
     }
+  })
+})
+
+describe('exemplo de prazo', () => {
+  it('escreve a duração por extenso, de meio em meio mês', () => {
+    expect(duracaoEmMeses(1.5)).toBe('1 mês e meio')
+    expect(duracaoEmMeses(1)).toBe('1 mês')
+    expect(duracaoEmMeses(6)).toBe('6 meses')
+    expect(duracaoEmMeses(2.5)).toBe('2 meses e meio')
+  })
+
+  it('usa o melhor caso da fonte: 3 meses de obra viram 1 mês e meio', () => {
+    expect(exemploDePrazo(3)).toEqual({ tradicional: '3 meses', modular: '1 mês e meio' })
+    expect(exemploDePrazo(12)).toEqual({ tradicional: '12 meses', modular: '6 meses' })
+    for (const m of MESES_DE_EXEMPLO) expect(exemploDePrazo(m).modular).not.toBe('menos de um mês')
   })
 })

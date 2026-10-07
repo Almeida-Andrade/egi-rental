@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { AvisoIlustrativo } from '@/components/site/AvisoIlustrativo'
 import { CabecaPagina } from '@/components/site/CabecaPagina'
 import { CartaoModelo } from '@/components/site/CartaoModelo'
 import { ComparadorTamanhos } from '@/components/site/ComparadorTamanhos'
@@ -63,6 +64,7 @@ export default async function Containers() {
               </li>
             ))}
           </ul>
+          <AvisoIlustrativo />
         </div>
       </section>
 
@@ -88,8 +90,8 @@ export default async function Containers() {
           <details className={estilos.tabelaDetalhe}>
             <summary>Ver a tabela de medidas</summary>
             <p className={estilos.tabelaNota}>
-              Medidas de referência do padrão marítimo. Lado a lado, as paredes do meio saem e o espaço vira um só.
-              Container fabricado pode variar um pouco: confirmamos a medida exata no orçamento.
+              Medidas de referência do padrão marítimo, meramente ilustrativas. Lado a lado, as paredes do meio saem
+              e o espaço vira um só. O container entregue pode variar: confirmamos a medida exata no orçamento.
             </p>
             <div className={estilos.tabelaRolagem}>
               <table className={estilos.tabela}>

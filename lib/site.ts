@@ -4,6 +4,14 @@ export const URL_SITE =
     ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
     : 'http://localhost:3000')
 
+// Foto, medida, planta e 3D são exemplo: o que vale é o que a equipe confirma no atendimento.
+// Fica perto de toda imagem de modelo, medida e desenho, e inteiro no rodapé.
+export const AVISO_ILUSTRATIVO = {
+  curto: 'Imagens, medidas e layouts meramente ilustrativos. O container entregue pode variar: confirme com a equipe antes de contratar.',
+  completo:
+    'Imagens, medidas, plantas, desenhos e projetos em 3D deste site são meramente ilustrativos e servem de exemplo. O container entregue pode variar em medidas, acabamento e itens. Disponibilidade, medidas exatas e o que acompanha cada locação são confirmados pela equipe no atendimento, antes da contratação.',
+}
+
 export const EMPRESA = {
   nome: 'EGI Rental',
   slogan: 'Locação rápida, segura e sob medida',

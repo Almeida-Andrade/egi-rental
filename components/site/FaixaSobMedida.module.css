@@ -87,6 +87,117 @@
   }
 }
 
+/* ---------- Respiro: 20 pés, 10 pés e volta (9 s), só com o desenho na tela ---------- */
+
+.inferior,
+.porta,
+.somem,
+.superior,
+.cotaGrande,
+.cotaPequena {
+  transform-box: view-box;
+  /* Propriedades separadas: o atalho `animation` sem nome sai do build como `animation: none` */
+  animation-duration: 9s;
+  animation-timing-function: ease-in-out;
+  animation-delay: 1.5s;
+  animation-iteration-count: infinite;
+  animation-play-state: paused;
+}
+
+.desenho[data-na-tela='true'] :is(.inferior, .porta, .somem, .superior, .cotaGrande, .cotaPequena) {
+  animation-play-state: running;
+}
+
+/* 10 pés é 2,99 m contra 6,06 m: o módulo encolhe a 49%, preso na ponta esquerda */
+.inferior {
+  transform-origin: 60px 300px;
+  animation-name: encolher;
+}
+
+.porta {
+  animation-name: porta;
+}
+
+.somem {
+  animation-name: sumir;
+}
+
+.superior {
+  animation-name: subir;
+}
+
+.cotaGrande {
+  animation-name: sumir;
+}
+
+.cotaPequena {
+  opacity: 0;
+  animation-name: aparecer;
+}
+
+@keyframes encolher {
+  0%,
+  30%,
+  100% {
+    transform: scaleX(1);
+  }
+  45%,
+  85% {
+    transform: scaleX(0.49);
+  }
+}
+
+@keyframes porta {
+  0%,
+  30%,
+  100% {
+    transform: translateX(0);
+  }
+  45%,
+  85% {
+    transform: translateX(-156px);
+  }
+}
+
+@keyframes sumir {
+  0%,
+  28%,
+  100% {
+    opacity: 1;
+  }
+  40%,
+  88% {
+    opacity: 0;
+  }
+}
+
+@keyframes aparecer {
+  0%,
+  40%,
+  92%,
+  100% {
+    opacity: 0;
+  }
+  50%,
+  82% {
+    opacity: 1;
+  }
+}
+
+@keyframes subir {
+  0%,
+  22%,
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  36%,
+  90% {
+    opacity: 0;
+    transform: translateY(-36px);
+  }
+}
+
 @media (max-width: 520px) {
   .acoes > * {
     width: 100%;

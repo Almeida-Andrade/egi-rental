@@ -2,7 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { buscarCatalogo } from '@/lib/dados/catalogo'
 import { NAVEGACAO } from '@/lib/navegacao'
-import { CONTATO, EMPRESA } from '@/lib/site'
+import { AVISO_ILUSTRATIVO, CONTATO, EMPRESA } from '@/lib/site'
 import { linkWhatsApp, mensagemGeral } from '@/lib/whatsapp'
 import { Icone, IconeWhatsApp } from './Icone'
 import estilos from './Rodape.module.css'
@@ -90,9 +90,10 @@ export async function Rodape() {
           © {ano} {EMPRESA.nome} · {EMPRESA.cidade} — {EMPRESA.uf}
         </p>
         <p>
-          Fotos ilustrativas. <Link href="/creditos">Créditos das imagens</Link>
+          <Link href="/creditos">Créditos das imagens</Link>
         </p>
       </div>
+      <p className={estilos.aviso}>{AVISO_ILUSTRATIVO.completo}</p>
     </footer>
   )
 }

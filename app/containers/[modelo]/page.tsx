@@ -9,6 +9,7 @@ import { DadosEstruturados } from '@/components/site/DadosEstruturados'
 import { FaixaSobMedida } from '@/components/site/FaixaSobMedida'
 import { Icone } from '@/components/site/Icone'
 import { PlantaDoContainer } from '@/components/site/PlantaDoContainer'
+import { AvisoIlustrativo } from '@/components/site/AvisoIlustrativo'
 import { TituloSecao } from '@/components/site/TituloSecao'
 import { modeloPorSlug, outrosModelos } from '@/lib/catalogo'
 import { buscarCatalogo } from '@/lib/dados/catalogo'
@@ -159,8 +160,8 @@ export default async function FichaModelo({ params }: Parametros) {
               </BotaoLink>
             </div>
             <p className={estilos.nota}>
-              <Icone nome="relogio" tamanho={16} /> Disponibilidade confirmada no atendimento. Medidas de
-              referência do padrão marítimo.
+              <Icone nome="relogio" tamanho={16} /> Disponibilidade confirmada no atendimento. Fotos e medidas de
+              referência, meramente ilustrativas: o container entregue pode variar.
             </p>
           </div>
         </div>
@@ -228,6 +229,7 @@ export default async function FichaModelo({ params }: Parametros) {
           </div>
           <div className={estilos.plantaDesenho}>
             <PlantaDoContainer planta={planta} rotulo={`Planta de exemplo do ${modelo.nomeCompleto}: ${planta.legenda}`} />
+            <AvisoIlustrativo />
           </div>
         </div>
       </section>

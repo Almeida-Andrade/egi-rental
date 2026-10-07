@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { AvisoIlustrativo } from '@/components/site/AvisoIlustrativo'
 import { BotaoLink } from '@/components/site/Botao'
 import { CartaoModelo } from '@/components/site/CartaoModelo'
 import { ComparadorTamanhos } from '@/components/site/ComparadorTamanhos'
@@ -99,6 +100,7 @@ export default async function Inicio() {
               </li>
             ))}
           </ul>
+          <AvisoIlustrativo />
         </div>
       </section>
 

@@ -97,7 +97,7 @@ export default function SobMedida() {
             id="inspiracao-titulo"
             kicker="Inspiração"
             titulo="Container também é arquitetura"
-            texto="Referências do que um container bem adaptado pode virar. Fotos ilustrativas."
+            texto="Referências do que um container bem adaptado pode virar. Fotos meramente ilustrativas, de outros projetos: o seu é combinado com a equipe."
             claro
           />
           <ul className={estilos.inspiracoes}>

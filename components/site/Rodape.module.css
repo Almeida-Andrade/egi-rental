@@ -90,3 +90,13 @@
     padding-bottom: var(--gap-4);
   }
 }
+
+/* O aviso de que imagens, medidas e 3D são ilustrativos, para o site inteiro */
+.aviso {
+  max-width: var(--largura-max);
+  margin: 0 auto;
+  padding: 0 var(--margem) var(--gap-4);
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: var(--texto-claro-2);
+}

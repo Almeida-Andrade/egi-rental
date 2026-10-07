@@ -49,3 +49,20 @@ export function economiaDeEnergia(): { min: number; max: number } {
     max: Math.round((1 - REUSO.kwhReusarMin / REUSO.kwhDerreter) * 100),
   }
 }
+
+// Duração em meses por extenso, de meio em meio mês: 1,5 → "1 mês e meio".
+export function duracaoEmMeses(meses: number): string {
+  const inteiros = Math.floor(meses)
+  const meio = meses - inteiros >= 0.5
+  if (inteiros === 0) return meio ? 'meio mês' : 'menos de um mês'
+  const base = inteiros === 1 ? '1 mês' : `${inteiros} meses`
+  return meio ? `${base} e meio` : base
+}
+
+// Exemplos do cartão de prazo, no MELHOR caso da fonte (50% mais rápido): o site diz "a partir de".
+export const MESES_DE_EXEMPLO = [3, 4, 6, 12]
+
+export function exemploDePrazo(mesesTradicional: number): { tradicional: string; modular: string } {
+  const modular = Math.round(((mesesTradicional * tempoRelativo(TEMPO.menosMax)) / 100) * 2) / 2
+  return { tradicional: duracaoEmMeses(mesesTradicional), modular: duracaoEmMeses(modular) }
+}
