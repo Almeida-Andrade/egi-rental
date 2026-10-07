@@ -62,7 +62,7 @@
 
 .whatsapp:hover {
   border-color: var(--whatsapp);
-  background: #178a45;
+  background: var(--whatsapp-forte);
 }
 
 .horario {

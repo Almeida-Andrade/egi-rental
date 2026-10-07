@@ -6,6 +6,9 @@
 
 .secao {
   padding: var(--gap-7) 0;
+  /* Fora da tela, a seção não é desenhada: a rolagem da abertura não paga pelo resto da página */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
 }
 
 .secaoPapel {

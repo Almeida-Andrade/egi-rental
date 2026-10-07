@@ -52,6 +52,13 @@ npm run build && npm run test:e2e   # Playwright contra o build, porta 3008
 - Sem `Html` do drei: os rótulos flutuantes davam erro de desmontagem no React 19. Informação vai nos painéis HTML em volta do canvas.
 - `public/montador/previa.jpg` é captura do próprio montador (ponto de partida "escritório"), não foto de banco: fica fora de `CREDITOS`.
 
+### Desempenho (medir antes e depois)
+- **Aparelho fraco desliga efeitos, nunca a experiência**: `nivelDoAparelho` (`lib/desempenho.ts`, sinais do navegador) decide o nível ao abrir, e `quadrosLentos` (mediana acima de 20 ms ou mais de 10% acima de 33 ms) rebaixa no meio do uso. Na abertura da home, `data-leve` tira chapa ondulada, sombra do pátio e brilho da tela; no montador, sombra, antialias e resolução acima de 1.
+- **Animação por rolagem escreve `transform`/`opacity` direto nas peças que mudam**, nunca variável CSS no palco: variável herdada recalculava o estilo da cena inteira a cada quadro (6,5 s em 3 s de rolagem com CPU 4x).
+- **Montador**: geometria única por forma e material do cache (`material()` em `Pecas3D`), sombra calculada só quando o projeto muda (`SombraSobDemanda`), mapa de 1024 ajustado ao container, `dpr` até 1,5, sem `preserveDrawingBuffer` (a imagem é capturada logo depois de um render), eventos desligados enquanto a câmera gira e `PecaNaCena` memorizada.
+- **Foto escondida por cortina ou opacidade carrega por proximidade** (IntersectionObserver), nem preguiçosa (não baixa enquanto escondida) nem eager no servidor (vira preload no topo da página).
+- **Medir**: build de produção (`npm run build && npm run start`), Chrome com a GPU (`--use-angle=d3d11 --enable-gpu`), CPU 4x pelo DevTools Protocol, intervalos de `requestAnimationFrame` e `Performance.getMetrics`. Lighthouse sempre com o cache de imagens aquecido: a primeira otimização do `/_next/image` na mesma máquina atrasa a pintura e falseia a nota.
+
 ### Imagens
 - Fotos em `public/fotos`, do Unsplash (licença livre para uso comercial). **Foto nova entra em `lib/creditos.ts`**: o teste trava arquivo sem crédito e crédito sem arquivo.
 - Logo: `public/marca` (PNG transparente, normal e branca, vertical e horizontal, tirados do arquivo original). Cores medidas da logo: aço `#597B97`, azul `#2B4EA2`, tinta `#080C18`. A curva grande num canto só (`--raio-marca`) e o quadrado azul são os da logo.

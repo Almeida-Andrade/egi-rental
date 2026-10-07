@@ -51,8 +51,11 @@ export default async function Containers() {
         </BotaoLink>
       </CabecaPagina>
 
-      <section className={estilos.secao} aria-label="Modelos">
+      <section className={estilos.secao} aria-labelledby="modelos-titulo">
         <div className={estilos.interno}>
+          <h2 id="modelos-titulo" className="sr-only">
+            Modelos
+          </h2>
           <ul className={estilos.grade}>
             {catalogo.map((modelo, i) => (
               <li key={modelo.slug}>

@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext } from 'react'
+import * as THREE from 'three'
 import { PECAS_PAREDE, PECAS_PISO, type TipoParede, type TipoPiso } from '@/lib/montador'
 
 const COR = {
@@ -25,42 +26,50 @@ const Apagada = createContext(false)
 
 type Vetor = [number, number, number]
 
+// Geometria e material são compartilhados: cada peça só muda a escala, e o material sai de um
+// cache pela combinação de cor, transparência e alerta. Um material por caixa eram centenas.
+const GEO_CAIXA = new THREE.BoxGeometry(1, 1, 1)
+const GEO_CILINDRO = new THREE.CylinderGeometry(1, 1, 1, 16)
+const MATERIAIS = new Map<string, THREE.MeshStandardMaterial>()
+
+function material(cor: string, opacidade: number, alerta: boolean, rugosidade = 0.75): THREE.MeshStandardMaterial {
+  const chave = `${cor}|${opacidade}|${alerta}|${rugosidade}`
+  let m = MATERIAIS.get(chave)
+  if (!m) {
+    m = new THREE.MeshStandardMaterial({
+      color: cor,
+      roughness: rugosidade,
+      metalness: cor === COR.inox || cor === COR.metal ? 0.35 : 0,
+      transparent: opacidade < 1,
+      opacity: opacidade,
+      depthWrite: opacidade === 1,
+      emissive: alerta ? '#c62828' : '#000000',
+      emissiveIntensity: alerta ? 0.55 : 0,
+    })
+    MATERIAIS.set(chave, m)
+  }
+  return m
+}
+
 function Caixa({ tam, pos, cor, transparente }: { tam: Vetor; pos: Vetor; cor: string; transparente?: boolean }) {
   const alerta = useContext(Alerta)
   const apagada = useContext(Apagada)
   const opacidade = apagada ? 0.15 : transparente ? 0.35 : 1
   return (
-    <mesh position={pos} castShadow={!apagada} receiveShadow>
-      <boxGeometry args={tam} />
-      {/* O three.js não recompila o material quando `transparent` muda: a chave força um novo */}
-      <meshStandardMaterial
-        key={opacidade < 1 ? 'translucido' : 'opaco'}
-        color={cor}
-        roughness={0.75}
-        metalness={cor === COR.inox || cor === COR.metal ? 0.35 : 0}
-        transparent={opacidade < 1}
-        opacity={opacidade}
-        depthWrite={opacidade === 1}
-        emissive={alerta ? '#c62828' : '#000000'}
-        emissiveIntensity={alerta ? 0.55 : 0}
-      />
-    </mesh>
+    <mesh
+      geometry={GEO_CAIXA}
+      material={material(cor, opacidade, alerta)}
+      position={pos}
+      scale={tam}
+      castShadow={!apagada}
+      receiveShadow
+    />
   )
 }
 
 function Cilindro({ raio, alt, pos, cor }: { raio: number; alt: number; pos: Vetor; cor: string }) {
   const alerta = useContext(Alerta)
-  return (
-    <mesh position={pos} castShadow>
-      <cylinderGeometry args={[raio, raio, alt, 20]} />
-      <meshStandardMaterial
-        color={cor}
-        roughness={0.4}
-        emissive={alerta ? '#c62828' : '#000000'}
-        emissiveIntensity={alerta ? 0.55 : 0}
-      />
-    </mesh>
-  )
+  return <mesh geometry={GEO_CILINDRO} material={material(cor, 1, alerta, 0.4)} position={pos} scale={[raio, alt, raio]} castShadow />
 }
 
 function Pes({ w, d, h, cor, recuo = 0.04 }: { w: number; d: number; h: number; cor: string; recuo?: number }) {

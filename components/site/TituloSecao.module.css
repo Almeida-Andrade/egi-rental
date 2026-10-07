@@ -15,7 +15,7 @@
   margin-bottom: var(--gap-3);
   font-size: 0.95rem;
   font-weight: 650;
-  color: var(--aco);
+  color: var(--aco-texto);
 }
 
 .kicker::before {

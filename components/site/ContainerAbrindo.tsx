@@ -4,6 +4,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import type { Capitulo } from '@/lib/conteudo'
+import { quadrosLentos } from '@/lib/desempenho'
+import { lerNivelDoAparelho } from './nivelDoAparelho'
 import { Icone } from './Icone'
 import estilos from './ContainerAbrindo.module.css'
 
@@ -22,9 +24,11 @@ function Folha({ lado, codigo }: { lado: 'esquerda' | 'direita'; codigo: string 
       className={`${estilos.plano} ${estilos.folha} ${lado === 'esquerda' ? estilos.folhaEsquerda : estilos.folhaDireita}`}
       data-a="folha"
     >
-      <span className={`${estilos.codigo} marcacao`}>{codigo}</span>
-      <span className={estilos.haste}>
-        <i className={estilos.manopla} />
+      <span className={`${estilos.codigo} marcacao`} data-a="externo">
+        {codigo}
+      </span>
+      <span className={estilos.haste} data-a="externo">
+        <i className={estilos.manopla} data-a="manopla" />
       </span>
     </div>
   )
@@ -52,16 +56,62 @@ export function ContainerAbrindo({ capitulos, children }: Props) {
       if (cancelado) return
       // O trilho só fica alto quando a animação existe: sem JS, a abertura é uma tela só.
       raiz.dataset.viva = ''
+      if (lerNivelDoAparelho() === 'leve') raiz.dataset.leve = ''
       const reduzido = window.matchMedia('(prefers-reduced-motion: reduce)').matches
       const $ = (seletor: string) => [...raiz.querySelectorAll<HTMLElement>(`[data-a="${seletor}"]`)]
       const fotos = $('foto')
       const cartoes = $('capitulo')
+      const [caixa] = $('caixa')
+      const [breu] = $('breu')
+      const [folhaEsquerda, folhaDireita] = $('folha')
+      const externos = $('externo')
+      const manoplas = $('manopla')
+
+      // A linha do tempo anima só estes números; desenhar() escreve transform e opacidade direto
+      // nas poucas peças que mudam. Variável CSS animada no palco recalculava o estilo da cena
+      // inteira a cada quadro.
+      const e = { giro: -30, incl: 9, avanco: -0.8, porta: 0, trava: 0, luz: 0 }
+      const escrito = new Map<HTMLElement, string>()
+      const escrever = (el: HTMLElement | undefined, prop: 'transform' | 'opacity', valor: string) => {
+        if (!el || escrito.get(el) === prop + valor) return
+        escrito.set(el, prop + valor)
+        el.style[prop] = valor
+      }
+      const desenhar = () => {
+        escrever(caixa, 'transform', `translateZ(calc(var(--alto) * ${e.avanco.toFixed(4)})) rotateX(${(-e.incl).toFixed(2)}deg) rotateY(${e.giro.toFixed(2)}deg)`)
+        escrever(folhaEsquerda, 'transform', `translateZ(1px) rotateY(${(-e.porta).toFixed(2)}deg)`)
+        escrever(folhaDireita, 'transform', `translateZ(1px) rotateY(${e.porta.toFixed(2)}deg)`)
+        escrever(breu, 'opacity', (1 - e.luz).toFixed(3))
+        // Com a câmera de lado, o avesso da folha aparece antes dos 90°: a pintura some entre 60° e 80°
+        const externo = Math.min(1, Math.max(0, (80 - e.porta) / 20)).toFixed(3)
+        for (const el of externos) escrever(el, 'opacity', externo)
+        for (const el of manoplas) {
+          escrever(el, 'transform', `translateX(-50%) rotate(${(-78 * e.trava).toFixed(1)}deg)`)
+          escrever(el.parentElement ?? undefined, 'transform', `translateY(calc(var(--alto) * ${(-0.012 * e.trava).toFixed(4)}))`)
+        }
+      }
+
+      // Aparelho que não acompanha passa para o modo leve no meio do caminho.
+      let anterior = 0
+      const intervalos: number[] = []
+      const medir = () => {
+        if (raiz.dataset.leve !== undefined) return
+        const agora = performance.now()
+        if (anterior && agora - anterior < 250) intervalos.push(agora - anterior)
+        anterior = agora
+        if (intervalos.length > 90) intervalos.shift()
+        if (quadrosLentos(intervalos)) raiz.dataset.leve = ''
+      }
 
       const escopo = createScope({ root: raiz }).add(() => {
         const linha = createTimeline({
           defaults: { ease: 'linear' },
           // Com movimento reduzido a imagem segue a rolagem sem inércia; o resto é igual.
           autoplay: onScroll({ target: raiz, enter: 'top top', leave: 'bottom bottom', sync: reduzido ? true : 0.5 }),
+          onRender: () => {
+            desenhar()
+            medir()
+          },
           onUpdate: (self) => {
             const t = self.progress * FIM
             let indice = -1
@@ -74,15 +124,15 @@ export function ContainerAbrindo({ capitulos, children }: Props) {
         linha
           .add($('dica'), { opacity: [1, 0], duration: 60 }, 0)
           .add($('hero'), { opacity: [1, 0], y: [0, -60], duration: 150, ease: 'inQuad' }, 30)
-          .add(cena, { '--giro': [-30, 0], '--incl': [9, 0], duration: 480, ease: 'inOutSine' }, 0)
-          .add(cena, { '--trava': [0, 1], duration: 110, ease: 'inOutQuad' }, 40)
-          .add(cena, { '--porta': [0, 252], duration: 340, ease: 'inOutSine' }, 140)
-          .add(cena, { '--luz': [0, 1], duration: 170, ease: 'outQuad' }, 180)
+          .add(e, { giro: [-30, 0], incl: [9, 0], duration: 480, ease: 'inOutSine' }, 0)
+          .add(e, { trava: [0, 1], duration: 110, ease: 'inOutQuad' }, 40)
+          .add(e, { porta: [0, 252], duration: 340, ease: 'inOutSine' }, 140)
+          .add(e, { luz: [0, 1], duration: 170, ease: 'outQuad' }, 180)
           // Encostadas nas laterais, as folhas saem de cena quando a câmera passa por elas
           .add($('folha'), { opacity: [1, 0], duration: 80 }, 370)
           // A câmera sai do pátio, com o container inteiro à vista, e termina lá dentro
-          .add(cena, { '--avanco': [-0.8, 0.88], duration: 530, ease: 'inOutSine' }, 0)
-          .add(cena, { '--avanco': [0.88, 0.98], duration: FIM - 530 }, 530)
+          .add(e, { avanco: [-0.8, 0.88], duration: 530, ease: 'inOutSine' }, 0)
+          .add(e, { avanco: [0.88, 0.98], duration: FIM - 530 }, 530)
           .add($('barra'), { scaleX: [0, 1], duration: FIM }, 0)
 
         capitulos.forEach((_, i) => {
@@ -98,7 +148,9 @@ export function ContainerAbrindo({ capitulos, children }: Props) {
 
       desfazer = () => {
         escopo.revert()
+        for (const el of escrito.keys()) el.removeAttribute('style')
         delete raiz.dataset.viva
+        delete raiz.dataset.leve
       }
     })
 
@@ -124,7 +176,7 @@ export function ContainerAbrindo({ capitulos, children }: Props) {
         <div className={estilos.chao} aria-hidden="true" />
 
         <div className={estilos.tunel} aria-hidden="true">
-          <div className={estilos.caixa}>
+          <div className={estilos.caixa} data-a="caixa">
             <div className={`${estilos.plano} ${estilos.sombra}`} />
             <div className={`${estilos.plano} ${estilos.piso}`} />
             <div className={`${estilos.plano} ${estilos.teto}`} />
@@ -139,7 +191,7 @@ export function ContainerAbrindo({ capitulos, children }: Props) {
                 ))}
               </div>
             </div>
-            <div className={`${estilos.plano} ${estilos.breu}`} />
+            <div className={`${estilos.plano} ${estilos.breu}`} data-a="breu" />
             <div className={`${estilos.plano} ${estilos.moldura}`} />
             <Folha lado="esquerda" codigo="EGI" />
             <Folha lado="direita" codigo="RENTAL" />

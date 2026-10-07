@@ -99,5 +99,5 @@
   background: var(--whatsapp);
 }
 .whatsapp:hover {
-  background: #178a45;
+  background: var(--whatsapp-forte);
 }

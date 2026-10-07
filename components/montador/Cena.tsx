@@ -2,7 +2,7 @@
 
 import { Edges, OrbitControls } from '@react-three/drei'
 import { Canvas, useFrame, useThree, type ThreeEvent } from '@react-three/fiber'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
 import type { OrbitControls as ControlesDeOrbita } from 'three-stdlib'
 import {
@@ -21,6 +21,8 @@ import {
   type Projeto,
 } from '@/lib/montador'
 import { MEDIDAS_METROS } from '@/lib/medidas'
+import { quadrosLentos } from '@/lib/desempenho'
+import { lerNivelDoAparelho } from '@/components/site/nivelDoAparelho'
 import { PecaParede3D, PecaPiso3D } from './Pecas3D'
 
 export type Vista = { modo: 'perspectiva' | 'cima'; versao: number }
@@ -132,8 +134,10 @@ function ParedeDoCasco({ tamanho, posicao, apagada, textura, repeticao, children
     return t
   }, [textura, repeticao])
 
+  // Assentada no alvo, a parede não percorre mais os materiais a cada quadro
+  const assentada = useRef<boolean | null>(null)
   useFrame(({ invalidate }, delta) => {
-    if (!grupo.current) return
+    if (!grupo.current || assentada.current === apagada) return
     const alvo = apagada ? 0.1 : 1
     const passo = 1 - Math.exp(-delta * 10)
     let mudou = false
@@ -150,6 +154,7 @@ function ParedeDoCasco({ tamanho, posicao, apagada, textura, repeticao, children
       malha.castShadow = !apagada
     })
     if (mudou) invalidate()
+    else assentada.current = apagada
   })
 
   return (
@@ -310,7 +315,8 @@ interface PropsPeca {
   onAgarrar: (item: Item, e: ThreeEvent<PointerEvent>) => void
 }
 
-function PecaNaCena({ item, c, l, selecionada, alerta, apagada, onAgarrar }: PropsPeca) {
+// Só redesenha a peça cujas props mudaram: arrastar uma não re-renderiza as outras
+const PecaNaCena = memo(function PecaNaCena({ item, c, l, selecionada, alerta, apagada, onAgarrar }: PropsPeca) {
   const eventos = {
     onPointerDown: (e: ThreeEvent<PointerEvent>) => {
       e.stopPropagation()
@@ -366,6 +372,43 @@ function PecaNaCena({ item, c, l, selecionada, alerta, apagada, onAgarrar }: Pro
       )}
     </group>
   )
+})
+
+// A sombra é calculada só quando algo que a projeta muda (peça, forma, parede apagada),
+// não a cada quadro em que a câmera gira.
+function SombraSobDemanda({ chave }: { chave: string }) {
+  const get = useThree((s) => s.get)
+  useEffect(() => {
+    const { gl, invalidate } = get()
+    gl.shadowMap.autoUpdate = false
+    gl.shadowMap.needsUpdate = true
+    invalidate()
+  }, [get, chave])
+  return null
+}
+
+// Mede os quadros enquanto a cena está em movimento; se o aparelho não acompanha, pede o modo leve.
+function VigiaDeQuadros({ ativo, onLento }: { ativo: boolean; onLento: () => void }) {
+  const intervalos = useRef<number[]>([])
+  const anterior = useRef(0)
+  useFrame(() => {
+    if (!ativo) return
+    const agora = performance.now()
+    if (anterior.current && agora - anterior.current < 250) intervalos.current.push(agora - anterior.current)
+    anterior.current = agora
+    if (intervalos.current.length > 90) intervalos.current.shift()
+    if (quadrosLentos(intervalos.current)) {
+      intervalos.current = []
+      onLento()
+    }
+  })
+  return null
+}
+
+// O que muda a sombra: forma e posição/giro das peças (a cor da chapa não)
+function codigoDaCena(projeto: Projeto): string {
+  const itens = projeto.itens.map((i) => (ehParede(i) ? `${i.id}${i.parede}${i.t}` : `${i.id}:${i.x},${i.z},${i.giro}`))
+  return `${projeto.tamanho}${projeto.modulos}|${itens.join(';')}`
 }
 
 function Camera({ c, l, vista }: { c: number; l: number; vista: Vista }) {
@@ -417,12 +460,22 @@ interface Arrasto {
   dz: number
 }
 
-function Conteudo(props: PropsCena) {
-  const { projeto, selecionado, emConflito, porDentro, vista, onSelecionar, onMover } = props
+function Conteudo(props: PropsCena & { leveInicial: boolean }) {
+  const { projeto, selecionado, emConflito, porDentro, vista, onSelecionar, onMover, leveInicial } = props
   const { c, l } = interno(projeto)
   const [arrasto, setArrasto] = useState<Arrasto | null>(null)
   const [apagadas, setApagadas] = useState('')
+  const [leve, setLeve] = useState(leveInicial)
+  const setDpr = useThree((s) => s.setDpr)
+  const setEvents = useThree((s) => s.setEvents)
   const ponto = useMemo(() => new THREE.Vector3(), [])
+  // A sombra cobre só o container, não um quadrado fixo de 18 m
+  const alcance = Math.max(c, l) / 2 + 1.5
+
+  const ficarLeve = useCallback(() => {
+    setLeve(true)
+    setDpr(1)
+  }, [setDpr])
 
   useEffect(() => {
     if (!arrasto) return
@@ -434,19 +487,25 @@ function Conteudo(props: PropsCena) {
     return () => window.removeEventListener('pointerup', soltar)
   }, [arrasto])
 
-  const noPiso = (e: ThreeEvent<PointerEvent>) => {
-    if (!e.ray.intersectPlane(PISO, ponto)) return null
-    return { x: ponto.x + c / 2, z: ponto.z + l / 2 }
-  }
+  const noPiso = useCallback(
+    (e: ThreeEvent<PointerEvent>) => {
+      if (!e.ray.intersectPlane(PISO, ponto)) return null
+      return { x: ponto.x + c / 2, z: ponto.z + l / 2 }
+    },
+    [ponto, c, l],
+  )
 
-  const agarrar = (item: Item, e: ThreeEvent<PointerEvent>) => {
-    onSelecionar(item.id)
-    const p = noPiso(e)
-    if (!p) return
-    const centro = ehParede(item) ? { x: p.x, z: p.z } : { x: item.x, z: item.z }
-    setArrasto({ id: item.id, dx: centro.x - p.x, dz: centro.z - p.z })
-    document.body.style.cursor = 'grabbing'
-  }
+  const agarrar = useCallback(
+    (item: Item, e: ThreeEvent<PointerEvent>) => {
+      onSelecionar(item.id)
+      const p = noPiso(e)
+      if (!p) return
+      const centro = ehParede(item) ? { x: p.x, z: p.z } : { x: item.x, z: item.z }
+      setArrasto({ id: item.id, dx: centro.x - p.x, dz: centro.z - p.z })
+      document.body.style.cursor = 'grabbing'
+    },
+    [onSelecionar, noPiso],
+  )
 
   const mover = (e: ThreeEvent<PointerEvent>) => {
     if (!arrasto) return
@@ -470,14 +529,17 @@ function Conteudo(props: PropsCena) {
       <directionalLight
         position={[c * 0.4, 9, 6]}
         intensity={1.8}
-        castShadow
-        shadow-mapSize={[2048, 2048]}
-        shadow-camera-left={-9}
-        shadow-camera-right={9}
-        shadow-camera-top={9}
-        shadow-camera-bottom={-9}
+        castShadow={!leve}
+        shadow-mapSize={[1024, 1024]}
+        shadow-camera-left={-alcance}
+        shadow-camera-right={alcance}
+        shadow-camera-top={alcance}
+        shadow-camera-bottom={-alcance}
+        shadow-camera-far={30}
         shadow-bias={-0.0004}
       />
+      <SombraSobDemanda chave={`${codigoDaCena(projeto)}|${apagadas}|${leve}|${alcance}`} />
+      <VigiaDeQuadros ativo={!leve} onLento={ficarLeve} />
 
       <mesh position={[0, -0.2, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <circleGeometry args={[30, 48]} />
@@ -513,8 +575,11 @@ function Conteudo(props: PropsCena) {
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
 
+      {/* Enquanto a câmera gira, o 3D não procura peça embaixo do ponteiro a cada movimento */}
       <OrbitControls
         makeDefault
+        onStart={() => setEvents({ enabled: false })}
+        onEnd={() => setEvents({ enabled: true })}
         enabled={!arrasto}
         enableDamping={false}
         minDistance={2}
@@ -528,17 +593,21 @@ function Conteudo(props: PropsCena) {
 }
 
 export default function Cena(props: PropsCena) {
+  // Antialias e o tipo de sombra só se escolhem ao criar o WebGL: o nível é lido uma vez.
+  // Sem preserveDrawingBuffer: a imagem é capturada logo depois de um render, na mesma tarefa.
+  const [leve] = useState(() => lerNivelDoAparelho() === 'leve')
   return (
     <Canvas
-      shadows
-      dpr={[1, 2]}
+      shadows={leve ? false : 'percentage'}
+      dpr={leve ? 1 : [1, 1.5]}
       frameloop="demand"
       camera={{ fov: 40, near: 0.1, far: 200, position: [-1, 6, 8] }}
-      gl={{ preserveDrawingBuffer: true, antialias: true }}
+      gl={{ antialias: !leve, powerPreference: 'high-performance' }}
       style={{ touchAction: 'none' }}
+      role="img"
       aria-label="Container em 3D: arraste as peças para mudar de lugar"
     >
-      <Conteudo {...props} />
+      <Conteudo {...props} leveInicial={leve} />
     </Canvas>
   )
 }

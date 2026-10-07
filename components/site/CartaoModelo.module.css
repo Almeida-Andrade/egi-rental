@@ -68,7 +68,7 @@
 .tipo {
   font-size: 0.82rem;
   font-weight: 600;
-  color: var(--aco);
+  color: var(--aco-texto);
 }
 
 .corpo h3 {

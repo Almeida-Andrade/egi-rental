@@ -435,7 +435,7 @@
 }
 
 .enviar:hover {
-  background: #178a45;
+  background: var(--whatsapp-forte);
 }
 
 .secundario {

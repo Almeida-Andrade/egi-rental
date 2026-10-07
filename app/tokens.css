@@ -19,7 +19,11 @@
   --texto-claro-2: rgba(255, 255, 255, 0.68);
   --linha: #dbe2ea;
   --linha-escura: rgba(255, 255, 255, 0.14);
-  --whatsapp: #1fa855;
+  /* Verde do WhatsApp escurecido: o oficial com texto branco fica em 3:1, abaixo do mínimo de leitura */
+  --whatsapp: #15803d;
+  --whatsapp-forte: #116b33;
+  /* Aço para texto pequeno: o --aco puro fica abaixo de 4,5:1 no branco */
+  --aco-texto: #4f6f8a;
 
   /* Espaço */
   --gap-1: 4px;
