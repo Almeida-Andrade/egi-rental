@@ -74,7 +74,7 @@ npm run build && npm run test:e2e   # Playwright contra o build, porta 3008
 - `.env.local` só com `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY` (chave pública). Nunca service role.
 
 ## Deploy
-- Repositório: `github.com/Almeida-Andrade/egi-rental` (privado). Autor do commit com o e-mail corporativo no `git config --local`.
-- **Vercel**: projeto `egi-rental` no time do OMNIS, funções em `gru1` (`vercel.json`). **Não está ligado ao git**: push na `main` não publica. Deploy: `npx --yes vercel@latest deploy --prod --yes --scope team_lnZ2DJVblrHx9HLbAY6ZQjYj` (sem `--scope` responde "Not authorized"). Deploy só com ordem do dono.
+- Repositório: `github.com/Almeida-Andrade/egi-rental` (**público**: segredo nunca em código nem em arquivo versionado; só nos envs da Vercel e no `.env.local`). Autor do commit com o e-mail corporativo no `git config --local`.
+- **Vercel**: projeto `egi-rental` no time do OMNIS, funções em `gru1` (`vercel.json`), **ligado ao GitHub: push na `main` publica**. Por isso merge e push na `main` só com ordem do dono, e trabalho grande vai em branch (a Vercel faz prévia dela). Deploy à mão, se precisar: `npx --yes vercel@latest deploy --prod --yes --scope team_lnZ2DJVblrHx9HLbAY6ZQjYj` (sem `--scope` responde "Not authorized").
 - Envs de produção: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` e `NEXT_PUBLIC_URL_SITE=https://egi.rental.grupoaandrade.com.br` (canonical, sitemap e Open Graph saem dela).
 - **Domínio `egi.rental.grupoaandrade.com.br`**: o DNS de `grupoaandrade.com.br` está no provedor (`ns1/ns2.bugatti.sevenjidc.com.br`), não no Cloudflare; o registro é `CNAME egi.rental → 6c04e65e8f56a1ff.vercel-dns-017.com` e o certificado é emitido pela Vercel.
