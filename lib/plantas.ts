@@ -135,7 +135,7 @@ function paredeDaAbertura(p: Peca): 'fora-norte' | 'fora-sul' | 'fundo' {
   return 'fundo'
 }
 
-const QUANTOS: Record<Modulos, string> = { 1: 'Um container', 2: 'Dois containers', 3: 'Três containers' }
+const QUANTOS: Record<Modulos, string> = { 1: 'Um container', 2: 'Dois containers' }
 
 // Lado a lado o exemplo se repete em cada container, com a parede do meio aberta: porta e janela
 // das paredes compridas só ficam nas que continuam do lado de fora.

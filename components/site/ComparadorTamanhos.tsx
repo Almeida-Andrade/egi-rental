@@ -32,7 +32,7 @@ type Eixo = 'comprimento' | 'largura'
 const INICIO: Record<Eixo, number> = { comprimento: INICIO_CAIXA_M, largura: INICIO_FRENTE_M }
 const LIMITES: Record<Eixo, [number, number]> = {
   comprimento: [2.4, MEDIDAS_METROS[20].externa.comprimento + 0.3],
-  largura: [LARGURA_MODULO * 0.8, LARGURA_MODULO * 3 + 0.1],
+  largura: [LARGURA_MODULO * 0.8, LARGURA_MODULO * 2 + 0.3],
 }
 
 function emVista(m: number): string {

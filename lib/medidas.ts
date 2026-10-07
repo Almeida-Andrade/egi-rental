@@ -2,9 +2,9 @@
 export type Tamanho = 10 | 20
 export const TAMANHOS: Tamanho[] = [10, 20]
 
-// Containers juntos pela lateral, formando um espaço mais largo.
-export type Modulos = 1 | 2 | 3
-export const MODULOS: Modulos[] = [1, 2, 3]
+// Containers juntos pela lateral, formando um espaço mais largo: no máximo dois (decisão do dono).
+export type Modulos = 1 | 2
+export const MODULOS: Modulos[] = [1, 2]
 
 export interface Dimensoes {
   comprimento: number

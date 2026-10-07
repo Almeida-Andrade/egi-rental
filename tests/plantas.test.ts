@@ -17,7 +17,6 @@ describe('medidas', () => {
     expect(dimensoesJuntas(20, 1).interna.largura).toBe(2.35)
     expect(dimensoesJuntas(20, 2).externa.largura).toBe(4.88)
     expect(dimensoesJuntas(20, 2).interna.largura).toBe(4.79)
-    expect(dimensoesJuntas(20, 3).interna.largura).toBe(7.23)
     expect(medidasJuntas(20, 2).areaM2).toBe(28.3)
     expect(medidasJuntas(20, 2).externa).toBe('6,06 × 4,88 × 2,59\u00a0m')
   })
@@ -67,15 +66,15 @@ describe('plantas', () => {
 
   it('lado a lado, porta e janela da parede comprida só ficam nas paredes de fora', () => {
     const uma = plantaDe('escritorio', 20)
-    const tres = plantaDe('escritorio', 20, 3)
+    const dois = plantaDe('escritorio', 20, 2)
     const conta = (p: typeof uma, tipo: string) => p.pecas.filter((x) => x.tipo === tipo).length
-    expect(conta(tres, 'porta')).toBe(conta(uma, 'porta'))
-    expect(conta(tres, 'janela')).toBe(conta(uma, 'janela'))
-    expect(conta(tres, 'mesa')).toBe(conta(uma, 'mesa') * 3)
-    expect(conta(tres, 'emenda')).toBe(2)
-    const porta = tres.pecas.find((x) => x.tipo === 'porta')!
-    expect(porta.y + porta.h).toBeCloseTo(tres.largura)
-    expect(tres.legenda).toMatch(/^Três containers lado a lado/)
+    expect(conta(dois, 'porta')).toBe(conta(uma, 'porta'))
+    expect(conta(dois, 'janela')).toBe(conta(uma, 'janela'))
+    expect(conta(dois, 'mesa')).toBe(conta(uma, 'mesa') * 2)
+    expect(conta(dois, 'emenda')).toBe(1)
+    const porta = dois.pecas.find((x) => x.tipo === 'porta')!
+    expect(porta.y + porta.h).toBeCloseTo(dois.largura)
+    expect(dois.legenda).toMatch(/^Dois containers lado a lado/)
   })
 
   it('modelo sem desenho cai num espaço livre com a porta', () => {

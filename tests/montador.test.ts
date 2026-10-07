@@ -110,7 +110,7 @@ describe('adicionar, duplicar e trocar tamanho', () => {
   })
 
   it('não passa do máximo de peças e continua rápido com o container cheio', () => {
-    let p: Projeto = { ...vazio, modulos: 3 }
+    let p: Projeto = { ...vazio, modulos: 2 }
     const inicio = performance.now()
     for (let i = 0; i < MAX_ITENS + 5; i++) p = adicionar(p, 'cadeira')
     expect(p.itens).toHaveLength(MAX_ITENS)

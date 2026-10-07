@@ -32,7 +32,6 @@ const USO_DO_TAMANHO: Record<number, string> = {
 
 const JUNTOS: { modulos: Modulos; uso: string }[] = [
   { modulos: 2, uso: 'Salão sem a parede do meio: loja, refeitório, sala de reunião ou escritório maior.' },
-  { modulos: 3, uso: 'Espaço amplo para equipe grande, showroom ou canteiro com vários setores.' },
 ]
 
 export default async function Containers() {
