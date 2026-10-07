@@ -76,6 +76,20 @@
   border-top: 1px solid var(--linha-escura);
 }
 
+/* No celular a logo e o texto ficam lado a lado, sem a coluna alta da logo vertical */
+@media (max-width: 719px) {
+  .marca {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-4);
+  }
+  .marca img {
+    flex-shrink: 0;
+    width: 72px;
+    margin-bottom: 0;
+  }
+}
+
 @media (min-width: 720px) {
   .interno {
     grid-template-columns: 1fr 1fr;
