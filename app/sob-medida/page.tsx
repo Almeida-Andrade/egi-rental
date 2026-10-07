@@ -6,7 +6,6 @@ import { CabecaPagina } from '@/components/site/CabecaPagina'
 import { FormularioPedido } from '@/components/site/FormularioPedido'
 import { TituloSecao } from '@/components/site/TituloSecao'
 import { ADAPTACOES, INSPIRACOES } from '@/lib/conteudo'
-import { linkWhatsApp, mensagemSobMedida } from '@/lib/whatsapp'
 import estilos from './page.module.css'
 
 const DESCRICAO =
@@ -37,11 +36,11 @@ export default function SobMedida() {
         foto={{ src: '/fotos/sob-medida-dois-andares.jpg', alt: '' }}
         trilha={[{ href: '/sob-medida', rotulo: 'Sob medida' }]}
       >
-        <BotaoLink href="#projeto" variante="claro" grande seta>
-          Descrever meu projeto
+        <BotaoLink href="/sob-medida/montar" variante="claro" grande seta>
+          Montar em 3D
         </BotaoLink>
-        <BotaoLink href={linkWhatsApp(mensagemSobMedida())} variante="contorno-claro" grande>
-          Falar no WhatsApp
+        <BotaoLink href="#projeto" variante="contorno-claro" grande>
+          Descrever meu projeto
         </BotaoLink>
       </CabecaPagina>
 

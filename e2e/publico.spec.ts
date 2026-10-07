@@ -54,3 +54,17 @@ test('o formulário abre o WhatsApp com o pedido montado', async ({ page, contex
   expect(url).toContain('*Container:* Sanitário 20 pés')
   expect(url).toContain('*Celular:* (98) 99999-0000')
 })
+
+test('o montador 3D guarda o projeto no link e reabre igual', async ({ page }) => {
+  await page.goto('/sob-medida/montar?partida=vazio')
+  await expect(page.locator('canvas')).toBeVisible({ timeout: 20_000 })
+  await expect(page).toHaveURL(/[?&]p=/)
+  const antes = page.url()
+  await page.locator('summary', { hasText: 'Descanso' }).click()
+  await page.getByRole('button', { name: /^Beliche/ }).click()
+  await expect(page.getByRole('toolbar', { name: /Beliche/ })).toBeVisible()
+  await expect.poll(() => page.url()).not.toBe(antes)
+  const link = page.url()
+  await page.goto(link)
+  await expect(page.getByText(/1 × beliche/)).toBeVisible({ timeout: 20_000 })
+})

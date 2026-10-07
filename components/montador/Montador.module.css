@@ -1,0 +1,454 @@
+.montador {
+  display: grid;
+  gap: var(--gap-4);
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: var(--gap-4) var(--margem) var(--gap-6);
+}
+
+/* ---------- Painel de opções ---------- */
+
+.painel {
+  display: grid;
+  gap: var(--gap-4);
+  align-content: start;
+}
+
+.bloco h2 {
+  margin-bottom: 10px;
+  font-size: 0.85rem;
+  font-weight: 650;
+  font-stretch: 100%;
+  letter-spacing: 0;
+  color: var(--texto-2);
+}
+
+.tamanhos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.tamanho {
+  min-height: 52px;
+  font-size: 1.9rem;
+  line-height: 1;
+  color: var(--texto);
+  background: var(--branco);
+  border: 1.5px solid var(--linha);
+  border-radius: var(--raio-marca-p);
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.tamanho:hover {
+  border-color: var(--texto);
+}
+
+.tamanho[aria-checked='true'] {
+  color: var(--branco);
+  background: var(--tinta);
+  border-color: var(--tinta);
+}
+
+.cores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.cor {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.18) 0 3px, rgba(0, 0, 0, 0.12) 3px 6px),
+    var(--amostra);
+  border: 2px solid var(--branco);
+  border-radius: 10px 3px 3px 3px;
+  box-shadow: 0 0 0 1.5px var(--linha);
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform calc(0.2s * var(--tempo)) var(--curva);
+}
+
+.cor:hover {
+  transform: translateY(calc(-2px * var(--deslocar)));
+}
+
+.cor[aria-checked='true'] {
+  box-shadow: 0 0 0 2.5px var(--tinta);
+}
+
+.partidas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.partida {
+  padding: 8px 14px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  background: var(--branco);
+  border: 1.5px solid var(--linha);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.partida:hover {
+  border-color: var(--texto);
+}
+
+.dica {
+  margin-bottom: 10px;
+  font-size: 0.88rem;
+  color: var(--texto-2);
+}
+
+.grupo {
+  border-top: 1px solid var(--linha);
+}
+
+.grupo summary {
+  padding: 12px 0;
+  font-weight: 650;
+  cursor: pointer;
+  list-style-position: inside;
+}
+
+.pecas {
+  display: grid;
+  gap: 4px;
+  padding-bottom: 12px;
+}
+
+.peca {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  text-align: left;
+  background: var(--branco);
+  border: 1px solid var(--linha);
+  border-radius: var(--raio);
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.peca:hover {
+  background: var(--azul-claro);
+  border-color: var(--azul);
+}
+
+.peca span {
+  font-size: 0.92rem;
+  font-weight: 550;
+}
+
+.peca small {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--texto-2);
+}
+
+.mais {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  font-size: 1.1rem;
+  color: var(--azul);
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+}
+
+.miniPlanta {
+  fill: var(--azul-claro);
+  stroke: var(--azul);
+  stroke-width: 1.5;
+}
+
+/* ---------- Palco 3D ---------- */
+
+.palco {
+  display: grid;
+  gap: var(--gap-3);
+  align-content: start;
+}
+
+.canvas {
+  position: relative;
+  height: min(72svh, 680px);
+  min-height: 380px;
+  overflow: hidden;
+  background: #eef2f6;
+  border: 1px solid var(--linha);
+  border-radius: var(--raio-marca);
+}
+
+.carregando {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: var(--gap-4);
+  text-align: center;
+  color: var(--texto-2);
+}
+
+.carregando a {
+  color: var(--azul);
+  text-decoration: underline;
+}
+
+.ferramentas {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ferramentas button,
+.selecao button {
+  min-height: 40px;
+  padding: 8px 14px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  background: var(--branco);
+  border: 1px solid var(--linha);
+  border-radius: 999px;
+  box-shadow: var(--sombra);
+  cursor: pointer;
+}
+
+.ferramentas button:hover,
+.selecao button:hover {
+  border-color: var(--texto);
+}
+
+.ferramentas button[aria-pressed='true'] {
+  color: var(--branco);
+  background: var(--tinta);
+  border-color: var(--tinta);
+}
+
+.ocupacao {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--linha);
+  border-radius: 999px;
+}
+
+.ocupacao span {
+  margin-right: 4px;
+  font-size: 1.2rem;
+}
+
+.selecao {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  max-width: calc(100% - 24px);
+  padding: 8px 8px 8px 16px;
+  background: var(--tinta);
+  color: var(--branco);
+  border-radius: 999px;
+  box-shadow: var(--sombra-forte);
+  transform: translateX(-50%);
+  animation: surgir calc(0.3s * var(--tempo)) var(--curva);
+}
+
+@keyframes surgir {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(10px * var(--deslocar)));
+  }
+}
+
+.selecao strong {
+  margin-right: 4px;
+  font-size: 0.95rem;
+}
+
+.selecao button {
+  min-height: 36px;
+  color: var(--texto);
+  box-shadow: none;
+}
+
+.selecao kbd {
+  margin-left: 4px;
+  padding: 0 5px;
+  font-family: inherit;
+  font-size: 0.72rem;
+  color: var(--texto-2);
+  border: 1px solid var(--linha);
+  border-radius: 3px;
+}
+
+.selecao .remover {
+  color: #b42318;
+}
+
+.alerta {
+  font-size: 0.8rem;
+  color: #ffb4a8;
+}
+
+.aviso {
+  position: absolute;
+  left: 50%;
+  top: 64px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  color: var(--branco);
+  background: rgba(10, 18, 34, 0.88);
+  border-radius: 999px;
+  transform: translateX(-50%);
+}
+
+/* ---------- Resumo e envio ---------- */
+
+.resumo {
+  display: grid;
+  gap: var(--gap-3);
+  padding: var(--gap-4);
+  background: var(--papel);
+  border: 1px solid var(--linha);
+  border-radius: var(--raio-marca);
+}
+
+.resumo h2 {
+  font-size: 1.35rem;
+}
+
+.listaItens {
+  margin-top: 6px;
+  color: var(--texto-2);
+}
+
+.alertaResumo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: #b42318;
+}
+
+.acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.enviar,
+.secundario {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 50px;
+  padding: 12px 20px;
+  font-weight: 650;
+  border: 1.5px solid transparent;
+  border-radius: var(--raio-marca-p);
+  cursor: pointer;
+}
+
+.enviar {
+  color: var(--branco);
+  background: var(--whatsapp);
+}
+
+.enviar:hover {
+  background: #178a45;
+}
+
+.secundario {
+  color: var(--texto);
+  background: var(--branco);
+  border-color: var(--linha);
+}
+
+.secundario:hover {
+  border-color: var(--texto);
+}
+
+.nota {
+  font-size: 0.82rem;
+  color: var(--texto-2);
+}
+
+@media (max-width: 520px) {
+  .acoes > * {
+    flex: 1 1 100%;
+  }
+}
+
+@media (min-width: 1000px) {
+  .montador {
+    grid-template-columns: 320px 1fr;
+    gap: var(--gap-5);
+  }
+  .painel {
+    position: sticky;
+    top: calc(var(--altura-cabecalho) + 16px);
+    max-height: calc(100svh - var(--altura-cabecalho) - 32px);
+    overflow-y: auto;
+    padding-right: 6px;
+  }
+  .resumo {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
+  .nota {
+    grid-column: 1 / -1;
+  }
+}
+
+/* No celular o 3D fica preso no topo e as opções rolam por baixo dele */
+@media (max-width: 999px) {
+  .palco {
+    display: contents;
+  }
+  .canvas {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    order: -1;
+    height: 46svh;
+    min-height: 300px;
+    margin: 0 calc(var(--margem) * -1);
+    border-radius: 0;
+    border-width: 0 0 1px;
+  }
+  .ocupacao {
+    top: auto;
+    right: auto;
+    bottom: 10px;
+    left: 10px;
+    font-size: 0.78rem;
+  }
+  .selecao {
+    bottom: 48px;
+  }
+  .ferramentas button {
+    min-height: 36px;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+}

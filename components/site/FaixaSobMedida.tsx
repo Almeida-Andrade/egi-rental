@@ -1,4 +1,3 @@
-import { linkWhatsApp, mensagemSobMedida } from '@/lib/whatsapp'
 import { BotaoLink } from './Botao'
 import estilos from './FaixaSobMedida.module.css'
 
@@ -27,11 +26,11 @@ export function FaixaSobMedida() {
             dois módulos lado a lado ou um em cima do outro. Você descreve o uso; nós adaptamos o container.
           </p>
           <div className={estilos.acoes}>
-            <BotaoLink href="/sob-medida" variante="claro" grande seta>
-              Começar meu projeto
+            <BotaoLink href="/sob-medida/montar" variante="claro" grande seta>
+              Montar o meu em 3D
             </BotaoLink>
-            <BotaoLink href={linkWhatsApp(mensagemSobMedida())} variante="contorno-claro" grande>
-              Conversar no WhatsApp
+            <BotaoLink href="/sob-medida" variante="contorno-claro" grande>
+              Começar meu projeto
             </BotaoLink>
           </div>
         </div>
