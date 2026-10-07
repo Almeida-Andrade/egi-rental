@@ -77,6 +77,8 @@ export function ContainerAbrindo({ capitulos, children }: Props) {
       // nas poucas peças que mudam. Variável CSS animada no palco recalculava o estilo da cena
       // inteira a cada quadro.
       const e = { giro: -30, incl: 9, avanco: -0.8, porta: 0, trava: 0, luz: 0 }
+      // Até onde a câmera entra vem do CSS: no celular ela chega mais perto do fundo
+      const avancoFinal = parseFloat(getComputedStyle(cena).getPropertyValue('--avanco-final')) || 0.98
       const escrito = new Map<HTMLElement, string>()
       const escrever = (el: HTMLElement | undefined, prop: 'transform' | 'opacity', valor: string) => {
         if (!el || escrito.get(el) === prop + valor) return
@@ -137,8 +139,8 @@ export function ContainerAbrindo({ capitulos, children }: Props) {
           // Encostadas nas laterais, as folhas saem de cena quando a câmera passa por elas
           .add($('folha'), { opacity: [1, 0], duration: 80 }, 370)
           // A câmera sai do pátio, com o container inteiro à vista, e termina lá dentro
-          .add(e, { avanco: [-0.8, 0.88], duration: 530, ease: 'inOutSine' }, 0)
-          .add(e, { avanco: [0.88, 0.98], duration: FIM - 530 }, 530)
+          .add(e, { avanco: [-0.8, avancoFinal - 0.1], duration: 530, ease: 'inOutSine' }, 0)
+          .add(e, { avanco: [avancoFinal - 0.1, avancoFinal], duration: FIM - 530 }, 530)
           .add($('barra'), { scaleX: [0, 1], duration: FIM }, 0)
 
         capitulos.forEach((_, i) => {

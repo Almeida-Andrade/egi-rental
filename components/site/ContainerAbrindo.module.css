@@ -16,6 +16,8 @@
   --alto: min(82svh, 54vw);
   --largo: calc(var(--alto) * 0.983);
   --fundo: calc(var(--alto) * 1.8);
+  --perspectiva: 1.15;
+  --avanco-final: 0.98;
   --cx: 66%;
   --cy: 55%;
   --giro: -30;
@@ -52,7 +54,7 @@
 .tunel {
   position: absolute;
   inset: 0;
-  perspective: calc(var(--alto) * 1.15);
+  perspective: calc(var(--alto) * var(--perspectiva));
   perspective-origin: var(--cx) var(--cy);
 }
 
@@ -468,8 +470,13 @@
   .trilho[data-viva] {
     height: 540svh;
   }
+  /* No celular a câmera entra mais e a perspectiva é mais suave: o fundo termina com cerca de 3/4
+     da largura da tela, em vez de um quadrinho no meio */
   .palco {
     --alto: min(42svh, 80vw);
+    --fundo: calc(var(--alto) * 1.4);
+    --perspectiva: 2;
+    --avanco-final: 1.7;
     --cx: 50%;
     --cy: 31%;
   }
