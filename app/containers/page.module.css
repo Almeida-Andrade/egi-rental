@@ -1,0 +1,78 @@
+.secao {
+  padding: var(--gap-7) 0;
+}
+
+.papel {
+  background: var(--papel);
+}
+
+.interno {
+  max-width: var(--largura-max);
+  margin: 0 auto;
+  padding: 0 var(--margem);
+}
+
+.grade {
+  display: grid;
+  gap: var(--gap-4);
+}
+
+@media (min-width: 640px) {
+  .grade {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1080px) {
+  .grade {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.tabelaRolagem {
+  margin-top: var(--gap-5);
+  overflow-x: auto;
+  background: var(--branco);
+  border: 1px solid var(--linha);
+  border-radius: var(--raio-marca);
+}
+
+.tabela {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.tabela th,
+.tabela td {
+  padding: 18px 20px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--linha);
+}
+
+.tabela thead th {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--texto-2);
+  background: var(--aco-fundo);
+}
+
+.tabela tbody th {
+  font-family: var(--fonte-titulo);
+  font-stretch: 112%;
+  font-size: 1.15rem;
+  white-space: nowrap;
+}
+
+.tabela tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+.tabela td:last-child {
+  color: var(--texto-2);
+}

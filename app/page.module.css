@@ -1,0 +1,477 @@
+.interno {
+  max-width: var(--largura-max);
+  margin: 0 auto;
+  padding: 0 var(--margem);
+}
+
+.secao {
+  padding: var(--gap-7) 0;
+}
+
+.secaoPapel {
+  background: var(--papel);
+}
+
+.secaoEscura {
+  background: var(--tinta);
+  color: var(--texto-claro);
+}
+
+/* ---------- Abertura ---------- */
+
+.hero {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: min(calc(100svh - var(--altura-cabecalho)), 860px);
+  overflow: hidden;
+  background: var(--tinta);
+  color: var(--branco);
+}
+
+.heroFoto {
+  z-index: -2;
+  object-fit: cover;
+  object-position: 30% 50%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .heroFoto {
+    animation: aproximar 18s var(--curva) both;
+  }
+}
+
+@keyframes aproximar {
+  from {
+    transform: scale(1.08);
+  }
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(0deg, rgba(10, 18, 34, 0.96) 0%, rgba(10, 18, 34, 0.55) 45%, rgba(10, 18, 34, 0.2) 100%),
+    linear-gradient(90deg, rgba(10, 18, 34, 0.75) 0%, rgba(10, 18, 34, 0) 70%);
+}
+
+.heroInterno {
+  width: 100%;
+  max-width: var(--largura-max);
+  margin: 0 auto;
+  padding: var(--gap-7) var(--margem) var(--gap-5);
+}
+
+.heroKicker {
+  margin-bottom: var(--gap-4);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: var(--trilha-larga);
+  text-transform: uppercase;
+  color: var(--aco-claro);
+}
+
+.heroTitulo {
+  max-width: 15ch;
+  font-size: var(--escala-display);
+  line-height: 1;
+}
+
+.heroTitulo em {
+  font-style: normal;
+  color: #9db4e8;
+}
+
+.heroTexto {
+  max-width: 58ch;
+  margin-top: var(--gap-4);
+  font-size: var(--escala-sub);
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.heroAcoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-3);
+  margin-top: var(--gap-5);
+}
+
+.heroFatos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 100%;
+  max-width: var(--largura-max);
+  margin: 0 auto;
+  padding: 0 var(--margem);
+  border-top: 1px solid var(--linha-escura);
+}
+
+.heroFatos li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: var(--gap-4) var(--gap-2) var(--gap-4) 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.heroFatos svg {
+  flex-shrink: 0;
+  color: #9db4e8;
+}
+
+@media (max-width: 520px) {
+  .heroAcoes > * {
+    width: 100%;
+  }
+}
+
+@media (min-width: 960px) {
+  .heroFatos {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ---------- Catálogo ---------- */
+
+.cabecaComAcao {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--gap-4);
+  margin-bottom: var(--gap-5);
+}
+
+.gradeModelos {
+  display: grid;
+  gap: var(--gap-4);
+}
+
+@media (min-width: 640px) {
+  .gradeModelos {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1080px) {
+  .gradeModelos {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ---------- Aplicações ---------- */
+
+.gradeAplicacoes {
+  display: grid;
+  gap: var(--gap-3);
+  margin-top: var(--gap-5);
+}
+
+.aplicacao {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: flex-end;
+  min-height: 300px;
+  overflow: hidden;
+  border-radius: var(--raio-marca);
+  color: var(--branco);
+}
+
+.aplicacao img {
+  z-index: -2;
+  object-fit: cover;
+  transition: transform 0.8s var(--curva);
+}
+
+.aplicacao:hover img {
+  transform: scale(1.05);
+}
+
+.aplicacao::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(0deg, rgba(10, 18, 34, 0.92) 0%, rgba(10, 18, 34, 0.35) 55%, rgba(10, 18, 34, 0.05) 100%);
+}
+
+.aplicacaoTexto {
+  padding: var(--gap-4);
+}
+
+.aplicacaoTexto h3 {
+  font-size: 1.4rem;
+}
+
+.aplicacaoTexto p {
+  margin-top: 8px;
+  max-width: 44ch;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+@media (min-width: 720px) {
+  .gradeAplicacoes {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .aplicacaoDestaque {
+    grid-column: 1 / -1;
+    min-height: 380px;
+  }
+}
+
+@media (min-width: 1080px) {
+  .gradeAplicacoes {
+    grid-template-columns: repeat(6, 1fr);
+    grid-auto-rows: 280px;
+  }
+  .aplicacao {
+    grid-column: span 2;
+    min-height: 0;
+  }
+  .aplicacaoDestaque {
+    grid-column: span 4;
+    grid-row: span 2;
+  }
+  .aplicacaoDestaque h3 {
+    font-size: 2rem;
+  }
+}
+
+/* ---------- Como funciona ---------- */
+
+.passos {
+  display: grid;
+  gap: var(--gap-4);
+  margin: var(--gap-6) 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: passo;
+}
+
+.passos li {
+  position: relative;
+  padding: var(--gap-4) 0 0;
+  border-top: 2px solid var(--linha);
+}
+
+.passos li::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: 0;
+  width: 48px;
+  height: 2px;
+  background: var(--azul);
+}
+
+.passoNumero {
+  display: block;
+  margin-bottom: var(--gap-3);
+  font-family: var(--fonte-titulo);
+  font-stretch: 125%;
+  font-size: 2.6rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--aco-claro);
+}
+
+.passos h3 {
+  font-size: 1.25rem;
+}
+
+.passos p {
+  margin-top: 8px;
+  color: var(--texto-2);
+}
+
+@media (min-width: 720px) {
+  .passos {
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: var(--gap-5);
+  }
+}
+
+@media (min-width: 1080px) {
+  .passos {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ---------- Quem somos ---------- */
+
+.quemSomos {
+  display: grid;
+  gap: var(--gap-6);
+  align-items: start;
+}
+
+.quemSomosFoto {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  max-height: 560px;
+  overflow: hidden;
+  border-radius: 64px 8px 8px 8px;
+}
+
+.quemSomosFoto img {
+  object-fit: cover;
+}
+
+/* O quadrado azul da logo, encaixado no canto */
+.quemSomosFoto::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 26%;
+  aspect-ratio: 1;
+  background: var(--azul);
+  border-top: 14px solid var(--tinta);
+  border-left: 14px solid var(--tinta);
+  border-radius: 22px 0 0 0;
+}
+
+.quemSomosTexto {
+  display: grid;
+  gap: var(--gap-3);
+  margin-top: var(--gap-4);
+  font-size: 1.05rem;
+  color: var(--texto-claro-2);
+}
+
+.quemSomosTexto a {
+  color: var(--branco);
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.35);
+  text-underline-offset: 3px;
+}
+
+.diferenciais {
+  display: grid;
+  gap: var(--gap-4);
+  margin-top: var(--gap-5);
+  padding-top: var(--gap-5);
+  border-top: 1px solid var(--linha-escura);
+}
+
+.diferenciais li {
+  display: flex;
+  gap: var(--gap-3);
+}
+
+.diferencialIcone {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: #9db4e8;
+  background: var(--tinta-3);
+  border-radius: 12px 4px 4px 4px;
+}
+
+.diferenciais h3 {
+  font-size: 1.05rem;
+  color: var(--branco);
+}
+
+.diferenciais p {
+  margin-top: 2px;
+  font-size: 0.93rem;
+  color: var(--texto-claro-2);
+}
+
+@media (min-width: 640px) {
+  .diferenciais {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 960px) {
+  .quemSomos {
+    grid-template-columns: 5fr 7fr;
+  }
+  .quemSomosFoto {
+    position: sticky;
+    top: calc(var(--altura-cabecalho) + 32px);
+  }
+}
+
+/* ---------- Fechamento ---------- */
+
+.fechamento {
+  display: grid;
+  gap: var(--gap-5);
+  align-items: center;
+}
+
+.canais {
+  display: grid;
+  gap: var(--gap-3);
+}
+
+.canal {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-3);
+  min-height: 76px;
+  padding: var(--gap-3) var(--gap-4);
+  font-weight: 600;
+  background: var(--papel);
+  border: 1px solid var(--linha);
+  border-radius: var(--raio-marca-p);
+  overflow-wrap: anywhere;
+  transition: border-color 0.2s, transform 0.25s var(--curva);
+}
+
+.canal:hover {
+  border-color: var(--texto);
+  transform: translateY(-2px);
+}
+
+.canal svg {
+  flex-shrink: 0;
+  color: var(--azul);
+}
+
+.canal small {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--texto-2);
+}
+
+.canalDestaque {
+  color: var(--branco);
+  background: var(--whatsapp);
+  border-color: var(--whatsapp);
+}
+
+.canalDestaque svg,
+.canalDestaque small {
+  color: var(--branco);
+}
+
+.canalDestaque:hover {
+  border-color: var(--whatsapp);
+}
+
+@media (min-width: 720px) {
+  .canais {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 1080px) {
+  .fechamento {
+    grid-template-columns: 5fr 7fr;
+    gap: var(--gap-6);
+  }
+}

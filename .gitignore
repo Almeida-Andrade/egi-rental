@@ -1,0 +1,29 @@
+# dependências
+node_modules/
+.pnp
+.pnp.js
+
+# build
+.next/
+out/
+build/
+dist/
+
+# ambiente — contém chaves
+.env
+.env.local
+.env*.local
+
+# ferramentas
+.superpowers/
+.vercel
+*.tsbuildinfo
+next-env.d.ts
+
+# sistema
+.DS_Store
+Thumbs.db
+test-results/
+playwright-report/
+
+!.env.example

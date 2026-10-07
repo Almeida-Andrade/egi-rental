@@ -1,0 +1,31 @@
+.cabecalho {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  height: var(--altura-cabecalho);
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: saturate(1.6) blur(14px);
+  -webkit-backdrop-filter: saturate(1.6) blur(14px);
+  border-bottom: 1px solid rgba(10, 18, 34, 0.08);
+}
+
+.interno {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap-4);
+  height: 100%;
+  max-width: var(--largura-max);
+  margin: 0 auto;
+  padding: 0 var(--margem);
+}
+
+.marca {
+  display: block;
+  flex-shrink: 0;
+}
+
+.marca img {
+  width: auto;
+  height: 42px;
+}

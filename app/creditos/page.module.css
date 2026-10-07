@@ -1,0 +1,27 @@
+.secao {
+  max-width: var(--largura-max);
+  margin: 0 auto;
+  padding: var(--gap-6) var(--margem) var(--gap-7);
+}
+
+.lista li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--gap-2) var(--gap-4);
+  padding: 14px 0;
+  border-bottom: 1px solid var(--linha);
+}
+
+.lista span {
+  font-family: ui-monospace, monospace;
+  font-size: 0.9rem;
+  color: var(--texto-2);
+}
+
+.lista a {
+  color: var(--azul);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

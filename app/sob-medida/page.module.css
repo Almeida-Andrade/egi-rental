@@ -1,0 +1,171 @@
+.secao {
+  padding: var(--gap-7) 0;
+}
+
+.escura {
+  background: var(--tinta);
+  color: var(--texto-claro);
+}
+
+.interno {
+  max-width: var(--largura-max);
+  margin: 0 auto;
+  padding: 0 var(--margem);
+}
+
+.adaptacoes {
+  display: grid;
+  gap: 1px;
+  margin-top: var(--gap-5);
+  background: var(--linha);
+  border: 1px solid var(--linha);
+  border-radius: var(--raio-marca);
+  overflow: hidden;
+}
+
+.adaptacoes li {
+  padding: var(--gap-4);
+  background: var(--branco);
+  transition: background-color 0.2s;
+}
+
+.adaptacoes li:hover {
+  background: var(--azul-claro);
+}
+
+.numero {
+  display: block;
+  margin-bottom: var(--gap-3);
+  font-family: var(--fonte-titulo);
+  font-stretch: 125%;
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: var(--azul);
+}
+
+.adaptacoes h3 {
+  font-size: 1.15rem;
+}
+
+.adaptacoes p {
+  margin-top: 6px;
+  font-size: 0.95rem;
+  color: var(--texto-2);
+}
+
+@media (min-width: 640px) {
+  .adaptacoes {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1080px) {
+  .adaptacoes {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.inspiracoes {
+  display: grid;
+  gap: var(--gap-3);
+  margin-top: var(--gap-5);
+}
+
+.inspiracoes li {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: var(--raio);
+}
+
+.inspiracoes li:first-child {
+  border-radius: var(--raio-marca);
+}
+
+.inspiracoes img {
+  object-fit: cover;
+}
+
+@media (min-width: 960px) {
+  .inspiracoes {
+    grid-template-columns: 1.4fr 1fr 1fr;
+  }
+  .inspiracoes li {
+    aspect-ratio: auto;
+    height: 360px;
+  }
+}
+
+.etapas {
+  display: grid;
+  gap: var(--gap-4);
+  margin: var(--gap-6) 0 0;
+  padding: var(--gap-5) 0 0;
+  list-style: none;
+  border-top: 1px solid var(--linha-escura);
+}
+
+.etapas li {
+  display: flex;
+  gap: var(--gap-3);
+}
+
+.etapas li > span {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  font-weight: 700;
+  color: var(--branco);
+  background: var(--azul);
+  border-radius: 12px 4px 4px 4px;
+}
+
+.etapas h3 {
+  font-size: 1.1rem;
+  color: var(--branco);
+}
+
+.etapas p {
+  margin-top: 4px;
+  color: var(--texto-claro-2);
+}
+
+@media (min-width: 720px) {
+  .etapas {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1080px) {
+  .etapas {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.formulario {
+  display: grid;
+  gap: var(--gap-5);
+}
+
+.cartaoForm {
+  padding: var(--gap-4);
+  background: var(--papel);
+  border: 1px solid var(--linha);
+  border-radius: var(--raio-marca);
+}
+
+@media (min-width: 640px) {
+  .cartaoForm {
+    padding: var(--gap-5);
+  }
+}
+
+@media (min-width: 1080px) {
+  .formulario {
+    grid-template-columns: 4fr 7fr;
+    gap: var(--gap-6);
+    align-items: start;
+  }
+}

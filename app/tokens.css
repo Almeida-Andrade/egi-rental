@@ -1,0 +1,50 @@
+:root {
+  /* Cores da logo (medidas no arquivo original) */
+  --tinta: #0a1222;
+  --tinta-2: #111c31;
+  --tinta-3: #1a2740;
+  --aco: #597b97;
+  --aco-claro: #c3d1dc;
+  --aco-fundo: #eef2f6;
+  --azul: #2b4ea2;
+  --azul-forte: #1f3b80;
+  --azul-claro: #e7edf9;
+  --branco: #ffffff;
+  --papel: #f6f8fa;
+
+  /* Texto */
+  --texto: var(--tinta);
+  --texto-2: #46536a;
+  --texto-claro: rgba(255, 255, 255, 0.92);
+  --texto-claro-2: rgba(255, 255, 255, 0.68);
+  --linha: #dbe2ea;
+  --linha-escura: rgba(255, 255, 255, 0.14);
+  --whatsapp: #1fa855;
+
+  /* Espaço */
+  --gap-1: 4px;
+  --gap-2: 8px;
+  --gap-3: 16px;
+  --gap-4: 24px;
+  --gap-5: 40px;
+  --gap-6: 64px;
+  --gap-7: 104px;
+  --largura-max: 1240px;
+  --margem: clamp(16px, 4vw, 40px);
+
+  /* A curva grande num canto só é a da logo */
+  --raio: 6px;
+  --raio-marca: 28px 6px 6px 6px;
+  --raio-marca-p: 16px 4px 4px 4px;
+
+  /* Tipo */
+  --escala-display: clamp(2.5rem, 1.4rem + 4.6vw, 5.2rem);
+  --escala-titulo: clamp(1.9rem, 1.3rem + 2.4vw, 3.1rem);
+  --escala-sub: clamp(1.05rem, 0.98rem + 0.35vw, 1.25rem);
+  --trilha-larga: 0.18em;
+
+  --sombra: 0 1px 2px rgba(10, 18, 34, 0.06), 0 12px 32px -12px rgba(10, 18, 34, 0.18);
+  --sombra-forte: 0 2px 4px rgba(10, 18, 34, 0.08), 0 24px 48px -16px rgba(10, 18, 34, 0.32);
+  --curva: cubic-bezier(0.22, 1, 0.36, 1);
+  --altura-cabecalho: 76px;
+}

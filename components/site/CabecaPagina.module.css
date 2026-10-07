@@ -1,0 +1,106 @@
+.cabeca {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--tinta);
+  color: var(--branco);
+}
+
+.foto {
+  z-index: -2;
+  object-fit: cover;
+}
+
+.comFoto::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(0deg, rgba(10, 18, 34, 0.95) 0%, rgba(10, 18, 34, 0.6) 55%, rgba(10, 18, 34, 0.35) 100%),
+    linear-gradient(90deg, rgba(10, 18, 34, 0.7) 0%, rgba(10, 18, 34, 0) 75%);
+}
+
+/* Sem foto, o canto azul da logo dá o acento */
+.cabeca:not(.comFoto)::after {
+  content: '';
+  position: absolute;
+  right: calc(var(--margem) * -1);
+  bottom: -40px;
+  z-index: -1;
+  width: clamp(120px, 22vw, 260px);
+  aspect-ratio: 1;
+  background: var(--azul);
+  border-radius: 40px 8px 8px 8px;
+  opacity: 0.9;
+}
+
+.interno {
+  max-width: var(--largura-max);
+  margin: 0 auto;
+  padding: var(--gap-6) var(--margem) var(--gap-6);
+}
+
+.comFoto .interno {
+  padding-top: var(--gap-7);
+}
+
+.trilha ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 var(--gap-4);
+  padding: 0;
+  list-style: none;
+  font-size: 0.88rem;
+  color: var(--texto-claro-2);
+}
+
+.trilha li + li::before {
+  content: '/';
+  margin-right: 6px;
+  opacity: 0.5;
+}
+
+.trilha a:hover {
+  color: var(--branco);
+}
+
+.trilha li:last-child a {
+  color: var(--branco);
+}
+
+.kicker {
+  margin-bottom: var(--gap-3);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: var(--trilha-larga);
+  text-transform: uppercase;
+  color: var(--aco-claro);
+}
+
+.titulo {
+  max-width: 18ch;
+  font-size: var(--escala-display);
+  line-height: 1.02;
+}
+
+.texto {
+  max-width: 60ch;
+  margin-top: var(--gap-4);
+  font-size: var(--escala-sub);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-3);
+  margin-top: var(--gap-5);
+}
+
+@media (max-width: 520px) {
+  .acoes > * {
+    width: 100%;
+  }
+}

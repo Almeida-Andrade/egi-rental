@@ -1,0 +1,36 @@
+.botao {
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  z-index: 30;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 56px;
+  padding: 0 14px;
+  color: var(--branco);
+  background: var(--whatsapp);
+  border-radius: 999px;
+  box-shadow: var(--sombra-forte);
+  transition: transform 0.25s var(--curva), box-shadow 0.25s;
+}
+
+.botao:hover {
+  transform: translateY(-2px);
+}
+
+.rotulo {
+  display: none;
+  padding-right: 6px;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+@media (min-width: 720px) {
+  .botao {
+    padding: 0 18px 0 16px;
+  }
+  .rotulo {
+    display: inline;
+  }
+}

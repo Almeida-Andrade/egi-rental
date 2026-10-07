@@ -1,0 +1,60 @@
+.cabeca {
+  max-width: 760px;
+}
+
+.centro {
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* O quadrado azul é o da logo */
+.kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: var(--gap-3);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: var(--trilha-larga);
+  text-transform: uppercase;
+  color: var(--aco);
+}
+
+.kicker::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  background: var(--azul);
+  border-radius: 2px;
+}
+
+.titulo {
+  font-size: var(--escala-titulo);
+}
+
+.tituloPagina {
+  font-size: var(--escala-display);
+}
+
+.texto {
+  margin-top: var(--gap-3);
+  font-size: var(--escala-sub);
+  color: var(--texto-2);
+}
+
+.claro .kicker {
+  color: var(--aco-claro);
+}
+
+.claro .kicker::before {
+  background: var(--branco);
+}
+
+.claro .titulo,
+.claro .tituloPagina {
+  color: var(--branco);
+}
+
+.claro .texto {
+  color: var(--texto-claro-2);
+}

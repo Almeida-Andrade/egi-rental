@@ -1,0 +1,75 @@
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 12px 22px;
+  font-weight: 600;
+  font-size: 0.98rem;
+  line-height: 1.2;
+  border: 1.5px solid transparent;
+  border-radius: var(--raio-marca-p);
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s, transform 0.25s var(--curva);
+}
+
+.botao svg:last-child:not(:first-child) {
+  transition: transform 0.25s var(--curva);
+}
+
+.botao:hover svg:last-child:not(:first-child) {
+  transform: translateX(3px);
+}
+
+.botao:active {
+  transform: scale(0.98);
+}
+
+.grande {
+  min-height: 56px;
+  padding: 16px 28px;
+  font-size: 1.05rem;
+}
+
+.primario {
+  color: var(--branco);
+  background: var(--azul);
+}
+.primario:hover {
+  background: var(--azul-forte);
+}
+
+.secundario {
+  color: var(--texto);
+  border-color: var(--linha);
+  background: var(--branco);
+}
+.secundario:hover {
+  border-color: var(--texto);
+}
+
+.claro {
+  color: var(--tinta);
+  background: var(--branco);
+}
+.claro:hover {
+  background: var(--azul-claro);
+}
+
+.contorno-claro {
+  color: var(--branco);
+  border-color: rgba(255, 255, 255, 0.45);
+}
+.contorno-claro:hover {
+  border-color: var(--branco);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.whatsapp {
+  color: var(--branco);
+  background: var(--whatsapp);
+}
+.whatsapp:hover {
+  background: #178a45;
+}

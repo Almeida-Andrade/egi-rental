@@ -1,0 +1,130 @@
+.desktop {
+  display: none;
+  align-items: center;
+  gap: var(--gap-4);
+}
+
+.desktop ul {
+  display: flex;
+  gap: var(--gap-1);
+}
+
+.link {
+  position: relative;
+  display: block;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--texto-2);
+  border-radius: var(--raio);
+  transition: color 0.2s, background-color 0.2s;
+}
+
+.link:hover {
+  color: var(--texto);
+  background: var(--aco-fundo);
+}
+
+.link[aria-current='page'] {
+  color: var(--azul);
+}
+
+.link[aria-current='page']::after {
+  content: '';
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 2px;
+  height: 2px;
+  background: var(--azul);
+  border-radius: 2px;
+}
+
+.cta,
+.ctaCelular {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--branco);
+  background: var(--azul);
+  border-radius: var(--raio-marca-p);
+  transition: background-color 0.2s, transform 0.2s var(--curva);
+}
+
+.cta:hover,
+.ctaCelular:hover {
+  background: var(--azul-forte);
+}
+
+.cta:active {
+  transform: scale(0.97);
+}
+
+.botaoMenu {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin-right: -8px;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: var(--raio);
+  cursor: pointer;
+}
+
+.painel {
+  position: fixed;
+  inset: var(--altura-cabecalho) 0 0 0;
+  z-index: 39;
+  padding: var(--gap-4) var(--margem) var(--gap-6);
+  background: var(--branco);
+  overflow-y: auto;
+}
+
+.painel[data-aberto='true'] {
+  animation: entrar 0.28s var(--curva);
+}
+
+@keyframes entrar {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+.linkCelular {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 0;
+  font-family: var(--fonte-titulo);
+  font-stretch: 112%;
+  font-size: 1.5rem;
+  font-weight: 600;
+  border-bottom: 1px solid var(--linha);
+}
+
+.linkCelular[aria-current='page'] {
+  color: var(--azul);
+}
+
+.ctaCelular {
+  width: 100%;
+  margin-top: var(--gap-5);
+  padding: 16px 20px;
+  font-size: 1.05rem;
+}
+
+@media (min-width: 960px) {
+  .desktop {
+    display: flex;
+  }
+  .botaoMenu,
+  .painel {
+    display: none;
+  }
+}
