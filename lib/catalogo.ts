@@ -103,3 +103,22 @@ export function outrosModelos(catalogo: Modelo[], atual: Modelo, quantos = 3): M
 export function tamanhosDoCatalogo(catalogo: Modelo[]): Tamanho[] {
   return [...new Set(catalogo.map((m) => m.tamanho))].sort((a, b) => a - b)
 }
+
+// Vitrine da home: o primeiro modelo em destaque e uma fileira com um de cada uso antes de repetir
+// (dois almoxarifados lado a lado parecem o mesmo cartão). Falta de usos completa com os que sobram.
+export function vitrineDaHome(catalogo: Modelo[], quantos = 3): { destaque?: Modelo; fileira: Modelo[] } {
+  const [destaque, ...resto] = catalogo
+  const usados = new Set(destaque ? [destaque.uso] : [])
+  const fileira: Modelo[] = []
+  for (const m of resto) {
+    if (fileira.length === quantos) break
+    if (usados.has(m.uso)) continue
+    usados.add(m.uso)
+    fileira.push(m)
+  }
+  for (const m of resto) {
+    if (fileira.length === quantos) break
+    if (!fileira.includes(m)) fileira.push(m)
+  }
+  return { destaque, fileira }
+}

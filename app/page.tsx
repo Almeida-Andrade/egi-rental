@@ -10,7 +10,7 @@ import { Icone, IconeWhatsApp } from '@/components/site/Icone'
 import { ListaAplicacoes } from '@/components/site/ListaAplicacoes'
 import { NumerosModular } from '@/components/site/NumerosModular'
 import { Rota } from '@/components/site/Rota'
-import { tamanhosDoCatalogo } from '@/lib/catalogo'
+import { tamanhosDoCatalogo, vitrineDaHome } from '@/lib/catalogo'
 import { APLICACOES, capitulosDaAbertura, INCLUSO, PASSOS } from '@/lib/conteudo'
 import { buscarCatalogo } from '@/lib/dados/catalogo'
 import { CONTATO, EMPRESA, URL_SITE } from '@/lib/site'
@@ -29,8 +29,7 @@ export default async function Inicio() {
   const usos = [...new Set(catalogo.filter((m) => m.uso !== 'hibrido').map((m) => m.nome.toLowerCase()))]
   // Na home, o destaque e uma fileira de três: linha com um cartão sozinho quebra a grade.
   // O catálogo inteiro fica em /containers.
-  const [destaque, ...outros] = catalogo
-  const demais = outros.slice(0, 3)
+  const { destaque, fileira: demais } = vitrineDaHome(catalogo)
 
   return (
     <>

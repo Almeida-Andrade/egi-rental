@@ -6,6 +6,7 @@ import {
   outrosModelos,
   slugDoModelo,
   tamanhosDoCatalogo,
+  vitrineDaHome,
 } from '@/lib/catalogo'
 
 describe('montarCatalogo', () => {
@@ -73,6 +74,23 @@ describe('montarCatalogo', () => {
     const slugs = catalogo.map((m) => m.slug)
     expect(new Set(slugs).size).toBe(slugs.length)
     expect(catalogo.every((m) => m.capa.src.startsWith('/fotos/'))).toBe(true)
+  })
+})
+
+describe('vitrine da home', () => {
+  it('um de cada uso antes de repetir: sem dois almoxarifados na fileira', () => {
+    const { destaque, fileira } = vitrineDaHome(montarCatalogo(FROTA_RESERVA))
+    expect(destaque?.uso).toBe('escritorio')
+    expect(fileira.map((m) => m.uso)).toEqual(['almoxarifado', 'wc', 'cozinha'])
+  })
+
+  it('com poucos usos, completa com os modelos que sobram', () => {
+    const catalogo = montarCatalogo([
+      { uso: 'escritorio', tamanho_pes: 20, fabricacao: null },
+      { uso: 'almoxarifado', tamanho_pes: 10, fabricacao: null },
+      { uso: 'almoxarifado', tamanho_pes: 20, fabricacao: null },
+    ])
+    expect(vitrineDaHome(catalogo).fileira.map((m) => m.slug)).toEqual(['almoxarifado-10-pes', 'almoxarifado-20-pes'])
   })
 })
 

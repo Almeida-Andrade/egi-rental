@@ -48,7 +48,7 @@ export function ListaAplicacoes({ aplicacoes }: { aplicacoes: Aplicacao[] }) {
               <div>
                 <p>{a.texto}</p>
                 <div className={estilos.fotoCelular}>
-                  <Image src={a.foto.src} alt={a.foto.alt} fill sizes="100vw" />
+                  <Image src={a.foto.src} alt={a.foto.alt} fill sizes="(min-width: 960px) 1px, 92vw" />
                 </div>
               </div>
             </div>
