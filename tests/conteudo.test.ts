@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { APLICACOES, INSPIRACOES } from '@/lib/conteudo'
+import { APLICACOES, capitulosDaAbertura, INSPIRACOES } from '@/lib/conteudo'
 import { CONTEUDO_USO, ORDEM_USOS } from '@/lib/modelos'
 
 const publico = (src: string) => path.join(import.meta.dirname, '..', 'public', src)
@@ -12,6 +12,7 @@ describe('conteúdo', () => {
       ...Object.values(CONTEUDO_USO).flatMap((c) => [c.capa, ...Object.values(c.capaPorTamanho ?? {}), ...c.galeria]),
       ...APLICACOES.map((a) => a.foto),
       ...INSPIRACOES,
+      ...capitulosDaAbertura(['escritório']).map((c) => c.foto),
     ]
     for (const foto of fotos) {
       expect(existsSync(publico(foto.src)), foto.src).toBe(true)
@@ -26,6 +27,17 @@ describe('conteúdo', () => {
   it('o slug de cada uso é único', () => {
     const slugs = Object.values(CONTEUDO_USO).map((c) => c.slug)
     expect(new Set(slugs).size).toBe(slugs.length)
+  })
+})
+
+describe('capítulos da abertura', () => {
+  it('a frase da frota junta os usos com vírgula e "e", começando em maiúscula', () => {
+    const [frota] = capitulosDaAbertura(['escritório', 'almoxarifado', 'sanitário'])
+    expect(frota.texto).toBe('Escritório, almoxarifado e sanitário: cada modelo existe hoje na nossa frota.')
+  })
+
+  it('cada capítulo leva a uma seção da home ou a uma página', () => {
+    for (const c of capitulosDaAbertura(['escritório'])) expect(c.href).toMatch(/^(#[a-z-]+|\/[a-z/-]+)$/)
   })
 })
 

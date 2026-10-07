@@ -103,13 +103,14 @@ export function ComparadorTamanhos({ modelos }: { modelos: ModeloComparavel[] })
   // Ao soltar, encaixa na opção mais perto, com mola.
   const [esticado, setEsticado] = useState<{ eixo: Eixo; m: number } | null>(null)
   const [arrastando, setArrastando] = useState<Eixo | null>(null)
-  const vistas = { comprimento: useRef<HTMLDivElement>(null), largura: useRef<HTMLDivElement>(null) }
+  const vistaLado = useRef<HTMLDivElement>(null)
+  const vistaFrente = useRef<HTMLDivElement>(null)
   const planta3 = useRef<SVGSVGElement>(null)
   const comprimento = esticado?.eixo === 'comprimento' ? esticado.m : comprimentoAnimado
   const largura = esticado?.eixo === 'largura' ? esticado.m : larguraAnimada
 
   const metrosDoPonteiro = (eixo: Eixo, clienteX: number) => {
-    const caixa = vistas[eixo].current?.getBoundingClientRect()
+    const caixa = (eixo === 'comprimento' ? vistaLado : vistaFrente).current?.getBoundingClientRect()
     if (!caixa) return null
     const m = ((clienteX - caixa.left) / caixa.width) * VISTA_M - INICIO[eixo]
     const [min, max] = LIMITES[eixo]
@@ -271,7 +272,7 @@ export function ComparadorTamanhos({ modelos }: { modelos: ModeloComparavel[] })
           Em escala, de lado e de frente · arraste as alças para mudar o tamanho e juntar containers
         </p>
         <div className={estilos.vistas} aria-hidden="true">
-          <div ref={vistas.comprimento} className={estilos.vista}>
+          <div ref={vistaLado} className={estilos.vista}>
             <div className={estilos.elevacao}>
               <div className={estilos.nomeVista} style={{ left: emVista(INICIO_CAIXA_M) }}>
                 de lado
@@ -299,7 +300,7 @@ export function ComparadorTamanhos({ modelos }: { modelos: ModeloComparavel[] })
             </div>
           </div>
 
-          <div ref={vistas.largura} className={estilos.vista}>
+          <div ref={vistaFrente} className={estilos.vista}>
             <div className={estilos.elevacao}>
               <div className={estilos.nomeVista} style={{ left: emVista(INICIO_FRENTE_M) }}>
                 de frente · {metros(externa.altura)} m de altura

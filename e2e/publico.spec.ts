@@ -4,8 +4,25 @@ import { expect, test } from '@playwright/test'
 test('a home mostra a abertura, o catálogo e o caminho para o sob medida', async ({ page }) => {
   await page.goto('/')
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
-  await expect(page.locator('article').first()).toBeVisible()
+  await expect(page.locator('#frota article').first()).toBeVisible()
   await expect(page.getByRole('link', { name: /começar meu projeto/i })).toHaveAttribute('href', '/sob-medida')
+})
+
+test('rolando a abertura, o container abre e os capítulos passam um a um', async ({ page }) => {
+  await page.goto('/')
+  const trilho = page.locator('section[data-viva]')
+  await expect(trilho).toBeAttached({ timeout: 10_000 })
+  const rolar = (f: number) =>
+    page.evaluate((f) => {
+      const s = document.querySelector<HTMLElement>('section[data-viva]')!
+      window.scrollTo(0, s.offsetTop + (s.offsetHeight - innerHeight) * f)
+    }, f)
+  await rolar(0.62)
+  await expect(page.getByRole('heading', { level: 2, name: /Pronto para trabalhar|10 ou 20 pés/ })).toBeVisible()
+  await rolar(0.98)
+  await expect(page.getByRole('heading', { level: 2, name: 'A gente leva, posiciona e busca' })).toBeVisible()
+  await page.getByRole('button', { name: /01/ }).click()
+  await expect(page.getByRole('heading', { level: 2, name: 'Pronto para trabalhar' })).toBeVisible()
 })
 
 test('do catálogo à ficha, com o pedido de orçamento já escrito', async ({ page }) => {

@@ -64,3 +64,51 @@ export const INSPIRACOES: Foto[] = [
   { src: '/fotos/sob-medida-janelas.jpg', alt: 'Container com grandes janelas de vidro' },
   { src: '/fotos/sob-medida-casa.jpg', alt: 'Módulo de container pintado de amarelo num gramado' },
 ]
+
+// Os capítulos da abertura da home: o fundo do container mostra cada um, e o link leva à seção.
+export interface Capitulo {
+  rotulo: string
+  titulo: string
+  texto: string
+  foto: Foto
+  href: string
+  acao: string
+}
+
+export function capitulosDaAbertura(usos: string[]): Capitulo[] {
+  const lista = usos.length < 2 ? usos.join('') : `${usos.slice(0, -1).join(', ')} e ${usos.at(-1)}`
+  return [
+    {
+      rotulo: 'A frota',
+      titulo: 'Pronto para trabalhar',
+      texto: `${lista.charAt(0).toUpperCase()}${lista.slice(1)}: cada modelo existe hoje na nossa frota.`,
+      foto: { src: '/fotos/escritorio-capa.jpg', alt: 'Containers azuis com janelões' },
+      href: '#frota',
+      acao: 'Ver a frota',
+    },
+    {
+      rotulo: 'O tamanho',
+      titulo: '10 ou 20 pés. Ou dois juntos.',
+      texto: 'Compare em escala, ao lado de uma pessoa, e junte dois lado a lado quando o espaço pedir.',
+      foto: { src: '/fotos/aplicacao-modulos.jpg', alt: 'Módulos empilhados formando um prédio temporário' },
+      href: '#tamanhos',
+      acao: 'Comparar os tamanhos',
+    },
+    {
+      rotulo: 'Sob medida',
+      titulo: 'Monte o seu em 3D',
+      texto: 'Escolha o tamanho, os móveis, as portas e as janelas, e mande o projeto pelo WhatsApp.',
+      foto: { src: '/montador/previa.jpg', alt: 'Container montado no montador 3D do site' },
+      href: '/sob-medida/montar',
+      acao: 'Abrir o montador',
+    },
+    {
+      rotulo: 'Na sua obra',
+      titulo: 'A gente leva, posiciona e busca',
+      texto: 'Do pedido à retirada no fim do contrato, você fala direto com quem decide.',
+      foto: { src: '/fotos/aplicacao-canteiro.jpg', alt: 'Módulos azuis de apoio montados num canteiro de obras' },
+      href: '#passos',
+      acao: 'Ver como funciona',
+    },
+  ]
+}

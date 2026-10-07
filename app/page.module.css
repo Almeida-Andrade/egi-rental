@@ -54,95 +54,10 @@
   gap: 14px;
 }
 
-/* ---------- Abertura ---------- */
-
-.hero {
-  position: relative;
-  isolation: isolate;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  min-height: min(calc(100svh - var(--altura-cabecalho)), 900px);
-  overflow: hidden;
-  background: var(--tinta);
-  color: var(--branco);
-}
-
-.heroFoto {
-  z-index: -2;
-  object-fit: cover;
-  object-position: 30% 50%;
-  animation: aproximar calc(2.6s * var(--tempo)) var(--curva) both;
-}
-
-@keyframes aproximar {
-  from {
-    transform: scale(calc(1 + 0.12 * var(--deslocar)));
-    filter: brightness(0.6);
-  }
-}
-
-.hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background:
-    linear-gradient(0deg, rgba(10, 18, 34, 0.97) 0%, rgba(10, 18, 34, 0.5) 50%, rgba(10, 18, 34, 0.15) 100%),
-    linear-gradient(90deg, rgba(10, 18, 34, 0.7) 0%, rgba(10, 18, 34, 0) 65%);
-}
-
-.heroInterno {
-  width: 100%;
-  max-width: var(--largura-max);
-  margin: 0 auto;
-  padding: var(--gap-7) var(--margem) var(--gap-5);
-}
-
-.heroTitulo {
-  font-size: clamp(3rem, 1.4rem + 6.4vw, 7rem);
-  font-stretch: 125%;
-  font-weight: 800;
-  line-height: 0.92;
-  letter-spacing: -0.035em;
-}
-
-/* As linhas sobem quando as portas terminam de abrir */
-.heroTitulo span {
-  display: inline-block;
-  animation: subir calc(0.9s * var(--tempo)) var(--curva) both;
-  animation-delay: calc(1.05s * var(--tempo));
-}
-
-.heroTitulo span + span {
-  animation-delay: calc(1.18s * var(--tempo));
-}
-
-.heroTexto,
-.heroAcoes {
-  animation: subir calc(0.9s * var(--tempo)) var(--curva) both;
-  animation-delay: calc(1.3s * var(--tempo));
-}
-
-.heroAcoes {
-  animation-delay: calc(1.4s * var(--tempo));
-}
-
-:global(html[data-portas='vistas']) .heroTitulo span,
-:global(html[data-portas='vistas']) .heroTexto,
-:global(html[data-portas='vistas']) .heroAcoes {
-  animation-delay: calc(0.1s * var(--tempo));
-}
-
-@keyframes subir {
-  from {
-    opacity: 0;
-    transform: translateY(calc(0.45em * var(--deslocar)));
-  }
-}
+/* ---------- Abertura (o container que abre ao rolar mora em ContainerAbrindo) ---------- */
 
 .heroTexto {
-  max-width: 54ch;
+  max-width: 46ch;
   margin-top: var(--gap-4);
   font-size: var(--escala-sub);
   color: rgba(255, 255, 255, 0.84);
@@ -155,27 +70,19 @@
   margin-top: var(--gap-5);
 }
 
-/* O código pintado na base, como na porta de um container */
-.heroMarcacao {
-  width: 100%;
-  max-width: var(--largura-max);
-  margin: 0 auto;
-  padding: var(--gap-3) var(--margem) var(--gap-4);
-  font-size: clamp(1rem, 0.7rem + 1.2vw, 1.6rem);
-  letter-spacing: 0.08em;
-  white-space: pre;
-  color: rgba(255, 255, 255, 0.55);
-  border-top: 1px solid var(--linha-escura);
-  overflow: hidden;
-}
-
-.heroMarcacao span {
-  color: #9db4e8;
+@media (max-width: 760px) {
+  .heroTexto {
+    margin-top: var(--gap-3);
+    font-size: 1rem;
+  }
+  .heroAcoes {
+    margin-top: var(--gap-4);
+  }
 }
 
 @media (max-width: 520px) {
   .heroAcoes > * {
-    width: 100%;
+    flex: 1 1 100%;
   }
 }
 

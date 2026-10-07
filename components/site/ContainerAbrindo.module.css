@@ -1,0 +1,494 @@
+/* O trilho dá o percurso da rolagem; o palco fica preso na tela enquanto ele passa. */
+.trilho {
+  position: relative;
+  height: 100svh;
+  color: var(--branco);
+  background: var(--tinta);
+}
+
+.trilho[data-viva] {
+  height: 620svh;
+}
+
+.palco {
+  /* Geometria do container em CSS 3D: --alto é a altura da boca na tela; o resto sai dela.
+     As variáveis de movimento (--giro, --porta…) são animadas pelo anime.js. */
+  --alto: min(82svh, 54vw);
+  --largo: calc(var(--alto) * 0.983);
+  --fundo: calc(var(--alto) * 1.8);
+  --cx: 66%;
+  --cy: 55%;
+  --giro: -30;
+  --incl: 9;
+  --trava: 0;
+  --porta: 0;
+  --luz: 0;
+  --avanco: -0.8;
+  --nervura: repeating-linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.07) 0 calc(var(--alto) * 0.02),
+    rgba(0, 0, 0, 0.26) calc(var(--alto) * 0.02) calc(var(--alto) * 0.026),
+    rgba(255, 255, 255, 0.02) calc(var(--alto) * 0.026) calc(var(--alto) * 0.046),
+    rgba(255, 255, 255, 0.13) calc(var(--alto) * 0.046) calc(var(--alto) * 0.052)
+  );
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 60% 50% at var(--cx) 78%, rgba(43, 78, 162, 0.35), transparent 70%),
+    var(--tinta);
+}
+
+/* Pátio: o chão onde o container está apoiado */
+.chao {
+  position: absolute;
+  inset: auto 0 0;
+  height: 30%;
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.04) 30%, rgba(0, 0, 0, 0.35));
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.tunel {
+  position: absolute;
+  inset: 0;
+  perspective: calc(var(--alto) * 1.15);
+  perspective-origin: var(--cx) var(--cy);
+}
+
+.caixa {
+  position: absolute;
+  left: var(--cx);
+  top: var(--cy);
+  transform-style: preserve-3d;
+  transform: translateZ(calc(var(--avanco) * var(--alto))) rotateX(calc(var(--incl) * -1deg))
+    rotateY(calc(var(--giro) * 1deg));
+}
+
+.plano {
+  position: absolute;
+}
+
+.parede {
+  background:
+    var(--nervura),
+    linear-gradient(180deg, #3359b3, var(--azul) 55%, var(--azul-forte));
+}
+
+.piso,
+.teto {
+  left: calc(var(--largo) / -2);
+  top: calc(var(--fundo) / -2);
+  width: var(--largo);
+  height: var(--fundo);
+}
+
+.piso {
+  background:
+    linear-gradient(0deg, rgba(0, 0, 0, 0.55), transparent 70%),
+    repeating-linear-gradient(90deg, #9a7048 0 calc(var(--alto) * 0.1), #6f4d2f calc(var(--alto) * 0.1) calc(var(--alto) * 0.104)),
+    #8a6440;
+  transform: translateY(calc(var(--alto) / 2)) translateZ(calc(var(--fundo) / -2)) rotateX(90deg);
+}
+
+.teto {
+  background:
+    linear-gradient(0deg, transparent, rgba(0, 0, 0, 0.5)),
+    var(--nervura),
+    var(--azul-forte);
+  transform: translateY(calc(var(--alto) / -2)) translateZ(calc(var(--fundo) / -2)) rotateX(90deg);
+}
+
+.paredeEsquerda,
+.paredeDireita {
+  left: calc(var(--fundo) / -2);
+  top: calc(var(--alto) / -2);
+  width: var(--fundo);
+  height: var(--alto);
+}
+
+.paredeEsquerda {
+  transform: translateX(calc(var(--largo) / -2)) translateZ(calc(var(--fundo) / -2)) rotateY(90deg);
+}
+
+.paredeDireita {
+  transform: translateX(calc(var(--largo) / 2)) translateZ(calc(var(--fundo) / -2)) rotateY(90deg);
+}
+
+/* A sombra do container no pátio, logo abaixo do piso */
+.sombra {
+  left: calc(var(--largo) * -0.9);
+  top: calc(var(--fundo) * -0.7);
+  width: calc(var(--largo) * 1.8);
+  height: calc(var(--fundo) * 1.4);
+  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.6), transparent);
+  transform: translateY(calc(var(--alto) * 0.515)) translateZ(calc(var(--fundo) / -2)) rotateX(90deg);
+}
+
+/* Do lado de dentro as paredes escurecem para o fundo */
+.paredeEsquerda::after,
+.paredeDireita::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.05));
+}
+
+.paredeDireita::after {
+  background: linear-gradient(270deg, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.05));
+}
+
+.fundo {
+  left: calc(var(--largo) / -2);
+  top: calc(var(--alto) / -2);
+  width: var(--largo);
+  height: var(--alto);
+  transform: translateZ(calc(var(--fundo) * -1));
+}
+
+/* O fundo do container é a tela dos capítulos */
+.tela {
+  position: absolute;
+  inset: 7%;
+  overflow: hidden;
+  background: var(--tinta);
+  border: calc(var(--alto) * 0.012) solid #13285a;
+  border-radius: calc(var(--alto) * 0.02) 3px 3px 3px;
+  box-shadow: 0 0 calc(var(--alto) * 0.08) rgba(173, 199, 255, 0.35);
+}
+
+.foto {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+.foto img {
+  object-fit: cover;
+}
+
+/* Escuro do lado de dentro até as portas abrirem e a luz acender */
+.breu {
+  left: calc(var(--largo) / -2);
+  top: calc(var(--alto) / -2);
+  width: var(--largo);
+  height: var(--alto);
+  background: #04070d;
+  opacity: calc(1 - var(--luz));
+  transform: translateZ(-2px);
+  pointer-events: none;
+}
+
+/* Os quatro montantes da boca, com as quinas de aço */
+.moldura {
+  --borda: calc(var(--alto) * 0.045);
+  left: calc(var(--largo) / -2 - var(--borda));
+  top: calc(var(--alto) / -2 - var(--borda));
+  width: calc(var(--largo) + var(--borda) * 2);
+  height: calc(var(--alto) + var(--borda) * 2);
+  border: var(--borda) solid #142a5e;
+  border-radius: 2px;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 calc(var(--alto) * 0.06) calc(var(--alto) * 0.08) rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+}
+
+/* ---------- Portas ---------- */
+
+.folha {
+  top: calc(var(--alto) / -2);
+  width: calc(var(--largo) / 2);
+  height: var(--alto);
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.3), transparent 9%, transparent 91%, rgba(0, 0, 0, 0.3)),
+    var(--nervura),
+    linear-gradient(180deg, #3259b4, #22438f 60%, #1b3876);
+  border: calc(var(--alto) * 0.006) solid #13285a;
+  box-shadow: inset 0 0 0 calc(var(--alto) * 0.012) rgba(0, 0, 0, 0.12);
+}
+
+.folhaEsquerda {
+  left: calc(var(--largo) / -2);
+  transform-origin: left center;
+  transform: translateZ(1px) rotateY(calc(var(--porta) * -1deg));
+}
+
+.folhaDireita {
+  left: 0;
+  transform-origin: right center;
+  transform: translateZ(1px) rotateY(calc(var(--porta) * 1deg));
+}
+
+/* Pintura e travas só do lado de fora: com a câmera de lado, o avesso aparece antes dos 90° */
+.codigo,
+.haste {
+  opacity: clamp(0, calc((80 - var(--porta)) / 20), 1);
+}
+
+.codigo {
+  position: absolute;
+  top: 8%;
+  font-size: calc(var(--alto) * 0.085);
+  line-height: 1;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.folhaEsquerda .codigo {
+  right: 9%;
+}
+
+.folhaDireita .codigo {
+  left: 9%;
+}
+
+/* Duas barras de trava por folha; a manopla gira para destravar e a barra sobe um pouco */
+.haste {
+  position: absolute;
+  top: 3%;
+  bottom: 3%;
+  width: calc(var(--alto) * 0.016);
+  background: linear-gradient(90deg, #7e94b8, #e2e9f4 45%, #7b91b5);
+  border-radius: 99px;
+  transform: translateY(calc(var(--trava) * var(--alto) * -0.012));
+}
+
+.haste:nth-of-type(1) {
+  left: 30%;
+}
+
+.haste:nth-of-type(2) {
+  left: 68%;
+}
+
+.manopla {
+  position: absolute;
+  top: 56%;
+  left: 50%;
+  width: calc(var(--alto) * 0.018);
+  height: calc(var(--alto) * 0.17);
+  background: linear-gradient(90deg, #8ba0c2, #d6e0ee);
+  border-radius: 99px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  transform-origin: 50% 6%;
+  transform: translateX(-50%) rotate(calc(var(--trava) * -78deg));
+}
+
+/* ---------- Texto ---------- */
+
+/* Abertura e capítulos ocupam a mesma célula: um sai, o outro entra */
+.coluna {
+  position: absolute;
+  top: var(--altura-cabecalho);
+  bottom: 96px;
+  left: var(--margem);
+  z-index: 2;
+  display: grid;
+  align-items: center;
+  width: min(40vw, 560px);
+}
+
+.coluna > * {
+  grid-area: 1 / 1;
+}
+
+.hero :global(h1) {
+  font-size: clamp(2.6rem, 1rem + 4.4vw, 5.6rem);
+  font-stretch: 125%;
+  font-weight: 800;
+  line-height: 0.92;
+  letter-spacing: -0.035em;
+}
+
+.capitulo {
+  opacity: 0;
+}
+
+.rotulo {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-weight: 650;
+  color: #9db4e8;
+}
+
+.rotulo span {
+  font-size: 1.6rem;
+  color: var(--branco);
+}
+
+.titulo {
+  margin-top: var(--gap-3);
+  font-size: clamp(2.2rem, 1rem + 3.4vw, 4.4rem);
+  font-stretch: 118%;
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+}
+
+.texto {
+  max-width: 40ch;
+  margin-top: var(--gap-3);
+  font-size: var(--escala-sub);
+  color: var(--texto-claro-2);
+}
+
+.acao {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: var(--gap-4);
+  padding-bottom: 3px;
+  font-weight: 650;
+  border-bottom: 2px solid currentColor;
+  transition: gap calc(0.25s * var(--tempo)) var(--curva);
+}
+
+.acao:hover {
+  gap: 14px;
+}
+
+/* ---------- Dica e régua ---------- */
+
+.dica {
+  position: absolute;
+  bottom: 104px;
+  left: 50%;
+  z-index: 3;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--texto-claro-2);
+  transform: translateX(-50%);
+}
+
+.dica span {
+  width: 2px;
+  height: 28px;
+  background: linear-gradient(180deg, var(--branco), transparent);
+  animation: descer calc(1.6s * var(--tempo)) var(--curva) infinite;
+}
+
+@keyframes descer {
+  from {
+    transform: translateY(-6px) scaleY(0.4);
+    transform-origin: top;
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.regua {
+  position: absolute;
+  left: 50%;
+  bottom: 24px;
+  translate: -50% 0;
+  z-index: 3;
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(10, 18, 34, 0.6);
+  border: 1px solid var(--linha-escura);
+  border-radius: var(--raio-marca-p);
+  backdrop-filter: blur(8px);
+}
+
+.regua ol {
+  display: flex;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.regua button {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  color: var(--texto-claro-2);
+  background: none;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 0.2s, background-color 0.2s;
+}
+
+.regua button span {
+  font-size: 1.05rem;
+}
+
+.regua button:hover,
+.regua button[aria-current] {
+  color: var(--branco);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.reguaTrilha {
+  display: block;
+  height: 3px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 99px;
+}
+
+.reguaBarra {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #9db4e8, var(--branco));
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.trilho:not([data-viva]) :is(.dica, .regua) {
+  display: none;
+}
+
+/* ---------- Celular: o container em cima, o texto embaixo ---------- */
+
+@media (max-width: 760px) {
+  .trilho[data-viva] {
+    height: 540svh;
+  }
+  .palco {
+    --alto: min(42svh, 80vw);
+    --cx: 50%;
+    --cy: 31%;
+  }
+  /* O texto fica sobre o piso do container: um degradê garante a leitura */
+  .palco::after {
+    content: '';
+    position: absolute;
+    inset: 42% 0 0;
+    z-index: 1;
+    background: linear-gradient(180deg, transparent, rgba(10, 18, 34, 0.88) 45%);
+    pointer-events: none;
+  }
+  .coluna {
+    top: auto;
+    right: var(--margem);
+    bottom: 92px;
+    width: auto;
+    align-items: end;
+  }
+  .hero :global(h1) {
+    font-size: clamp(2.2rem, 1.2rem + 5vw, 3rem);
+  }
+  .titulo {
+    font-size: clamp(1.9rem, 1.2rem + 4vw, 2.6rem);
+  }
+  .regua {
+    bottom: 16px;
+  }
+  .regua small {
+    display: none;
+  }
+  .dica {
+    display: none;
+  }
+}

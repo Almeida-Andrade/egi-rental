@@ -1,9 +1,9 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { Abertura } from '@/components/site/Abertura'
 import { BotaoLink } from '@/components/site/Botao'
 import { CartaoModelo } from '@/components/site/CartaoModelo'
 import { ComparadorTamanhos } from '@/components/site/ComparadorTamanhos'
+import { ContainerAbrindo } from '@/components/site/ContainerAbrindo'
 import { DadosEstruturados } from '@/components/site/DadosEstruturados'
 import { FaixaSobMedida } from '@/components/site/FaixaSobMedida'
 import { Icone, IconeWhatsApp } from '@/components/site/Icone'
@@ -11,7 +11,7 @@ import { ListaAplicacoes } from '@/components/site/ListaAplicacoes'
 import { NumerosModular } from '@/components/site/NumerosModular'
 import { Rota } from '@/components/site/Rota'
 import { tamanhosDoCatalogo } from '@/lib/catalogo'
-import { APLICACOES, INCLUSO, PASSOS } from '@/lib/conteudo'
+import { APLICACOES, capitulosDaAbertura, INCLUSO, PASSOS } from '@/lib/conteudo'
 import { buscarCatalogo } from '@/lib/dados/catalogo'
 import { CONTATO, EMPRESA, URL_SITE } from '@/lib/site'
 import { linkWhatsApp, mensagemGeral } from '@/lib/whatsapp'
@@ -59,39 +59,23 @@ export default async function Inicio() {
         }}
       />
 
-      <section className={estilos.hero} aria-labelledby="hero-titulo">
-        <Image
-          className={estilos.heroFoto}
-          src="/fotos/capa-container-escuro.jpg"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-        />
-        <Abertura />
-        <div className={estilos.heroInterno}>
-          <h1 id="hero-titulo" className={estilos.heroTitulo}>
-            <span>Containers para alugar</span> <span>em São Luís.</span>
-          </h1>
-          <p className={estilos.heroTexto}>
-            {juntar(usos).replace(/^./, (l) => l.toUpperCase())}, de {tamanhos[0]} a {tamanhos.at(-1)} pés.
-            A gente leva até a sua obra, posiciona e busca no fim do contrato.
-          </p>
-          <div className={estilos.heroAcoes}>
-            <BotaoLink href={linkWhatsApp(mensagemGeral())} variante="whatsapp" grande>
-              Pedir orçamento
-            </BotaoLink>
-            <BotaoLink href="#tamanhos" variante="contorno-claro" grande>
-              Comparar os tamanhos
-            </BotaoLink>
-          </div>
-        </div>
-        <p className={`${estilos.heroMarcacao} marcacao`} aria-hidden="true">
-          EGI RENTAL <span>·</span> SÃO LUÍS — MA <span>·</span> {tamanhos.map((t) => `${t}'`).join('  ')}
+      <ContainerAbrindo capitulos={capitulosDaAbertura(usos)}>
+        <h1 id="hero-titulo">Containers para alugar em São Luís.</h1>
+        <p className={estilos.heroTexto}>
+          {juntar(usos).replace(/^./, (l) => l.toUpperCase())}, de {tamanhos[0]} a {tamanhos.at(-1)} pés.
+          A gente leva até a sua obra, posiciona e busca no fim do contrato.
         </p>
-      </section>
+        <div className={estilos.heroAcoes}>
+          <BotaoLink href={linkWhatsApp(mensagemGeral())} variante="whatsapp" grande>
+            Pedir orçamento
+          </BotaoLink>
+          <BotaoLink href="#tamanhos" variante="contorno-claro" grande>
+            Comparar os tamanhos
+          </BotaoLink>
+        </div>
+      </ContainerAbrindo>
 
-      <section className={estilos.secao} aria-labelledby="catalogo-titulo">
+      <section id="frota" className={estilos.secao} aria-labelledby="catalogo-titulo">
         <div className={estilos.interno}>
           <div className={estilos.cabeca}>
             <h2 id="catalogo-titulo" className={estilos.titulo}>
@@ -166,7 +150,7 @@ export default async function Inicio() {
         </div>
       </section>
 
-      <section className={`${estilos.secao} ${estilos.secaoPapel}`} aria-labelledby="passos-titulo">
+      <section id="passos" className={`${estilos.secao} ${estilos.secaoPapel}`} aria-labelledby="passos-titulo">
         <div className={estilos.interno}>
           <div className={estilos.cabeca}>
             <h2 id="passos-titulo" className={estilos.titulo}>

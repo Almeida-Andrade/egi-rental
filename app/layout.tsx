@@ -59,8 +59,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    // O script da abertura marca data-portas no <html> antes da hidratação, de propósito.
-    <html lang="pt-BR" className={`${archivo.variable} ${stencil.variable}`} suppressHydrationWarning>
+    <html lang="pt-BR" className={`${archivo.variable} ${stencil.variable}`}>
       <body>
         <a className="pular-conteudo" href="#conteudo">
           Pular para o conteúdo
