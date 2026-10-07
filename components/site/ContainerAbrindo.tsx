@@ -23,11 +23,9 @@ function Folha({ lado, codigo }: { lado: 'esquerda' | 'direita'; codigo: string 
       data-a="folha"
     >
       <span className={`${estilos.codigo} marcacao`}>{codigo}</span>
-      {[0, 1].map((i) => (
-        <span key={i} className={estilos.haste}>
-          <i className={estilos.manopla} />
-        </span>
-      ))}
+      <span className={estilos.haste}>
+        <i className={estilos.manopla} />
+      </span>
     </div>
   )
 }

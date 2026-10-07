@@ -39,7 +39,8 @@ export function ListaAplicacoes({ aplicacoes }: { aplicacoes: Aplicacao[] }) {
       <div className={estilos.palco} aria-hidden="true">
         {aplicacoes.map((a, i) => (
           <div key={a.foto.src} className={estilos.foto} data-ativa={i === ativa}>
-            <Image src={a.foto.src} alt="" fill sizes="(min-width: 960px) 55vw, 1px" />
+            {/* Carregadas de cara: preguiçosa, a foto escondida só baixava quando a cortina já abria sobre o vazio */}
+            <Image src={a.foto.src} alt="" fill sizes="(min-width: 960px) 55vw, 1px" loading="eager" />
           </div>
         ))}
       </div>

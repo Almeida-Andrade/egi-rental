@@ -236,14 +236,14 @@
 }
 
 .folhaEsquerda .codigo {
-  right: 9%;
+  left: 10%;
 }
 
 .folhaDireita .codigo {
-  left: 9%;
+  right: 8%;
 }
 
-/* Duas barras de trava por folha; a manopla gira para destravar e a barra sobe um pouco */
+/* Uma barra de trava por folha, perto da emenda; a manopla gira para destravar e a barra sobe um pouco */
 .haste {
   position: absolute;
   top: 3%;
@@ -254,12 +254,12 @@
   transform: translateY(calc(var(--trava) * var(--alto) * -0.012));
 }
 
-.haste:nth-of-type(1) {
-  left: 30%;
+.folhaEsquerda .haste {
+  left: 74%;
 }
 
-.haste:nth-of-type(2) {
-  left: 68%;
+.folhaDireita .haste {
+  left: 24%;
 }
 
 .manopla {
