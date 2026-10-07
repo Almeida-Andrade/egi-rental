@@ -75,5 +75,6 @@ npm run build && npm run test:e2e   # Playwright contra o build, porta 3008
 
 ## Deploy
 - Repositório: `github.com/Almeida-Andrade/egi-rental` (privado). Autor do commit com o e-mail corporativo no `git config --local`.
-- Domínio: **`egi.rental.grupoaandrade.com.br`** (DNS no Cloudflare). É subdomínio de dois níveis: o certificado gratuito do Cloudflare só cobre `*.grupoaandrade.com.br`, então o registro fica **DNS only (nuvem cinza)** e o certificado é o da Vercel.
-- Vercel: projeto no mesmo time do OMNIS, região `gru1`, envs `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` e `NEXT_PUBLIC_URL_SITE=https://egi.rental.grupoaandrade.com.br`. Deploy só com ordem do dono.
+- **Vercel**: projeto `egi-rental` no time do OMNIS, funções em `gru1` (`vercel.json`). **Não está ligado ao git**: push na `main` não publica. Deploy: `npx --yes vercel@latest deploy --prod --yes --scope team_lnZ2DJVblrHx9HLbAY6ZQjYj` (sem `--scope` responde "Not authorized"). Deploy só com ordem do dono.
+- Envs de produção: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` e `NEXT_PUBLIC_URL_SITE=https://egi.rental.grupoaandrade.com.br` (canonical, sitemap e Open Graph saem dela).
+- **Domínio `egi.rental.grupoaandrade.com.br`**: o DNS de `grupoaandrade.com.br` está no provedor (`ns1/ns2.bugatti.sevenjidc.com.br`), não no Cloudflare; o registro é `CNAME egi.rental → 6c04e65e8f56a1ff.vercel-dns-017.com` e o certificado é emitido pela Vercel.
