@@ -164,10 +164,36 @@
   margin-top: var(--gap-4);
 }
 
-/* Um metro é 1/13,6 da largura do palco; a altura segue a mesma escala */
+/* --vista-m é o VISTA_M do componente: um metro vale 1/--vista-m da largura de cada vista.
+   Lado a lado as duas dividem o palco; no palco estreito, uma embaixo da outra, maiores. */
+.vistas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.vista {
+  --vista-m: 7.75;
+  position: relative;
+  container-type: inline-size;
+}
+
+.vistaPlanta {
+  width: 50%;
+}
+
+@container (max-width: 620px) {
+  .vistas {
+    grid-template-columns: 1fr;
+    gap: var(--gap-3);
+  }
+  .vistaPlanta {
+    width: 100%;
+  }
+}
+
 .elevacao {
   position: relative;
-  height: calc(3.6 / 13.6 * 100cqi);
+  height: calc(4 / var(--vista-m) * 100cqi);
   min-height: 90px;
 }
 
@@ -175,16 +201,16 @@
   position: absolute;
   left: 0;
   right: 0;
-  bottom: calc(0.55 / 13.6 * 100cqi);
+  bottom: calc(0.55 / var(--vista-m) * 100cqi);
   height: 2px;
   background: var(--tinta);
 }
 
 .pessoaLugar {
   position: absolute;
-  bottom: calc(0.55 / 13.6 * 100cqi + 2px);
-  width: calc(0.5 / 13.6 * 100cqi);
-  height: calc(1.75 / 13.6 * 100cqi);
+  bottom: calc(0.55 / var(--vista-m) * 100cqi + 2px);
+  width: calc(0.5 / var(--vista-m) * 100cqi);
+  height: calc(1.75 / var(--vista-m) * 100cqi);
 }
 
 .pessoa {
@@ -206,17 +232,17 @@
 
 .caixa {
   position: absolute;
-  bottom: calc(0.55 / 13.6 * 100cqi + 2px);
+  bottom: calc(0.55 / var(--vista-m) * 100cqi + 2px);
   width: var(--comprimento);
-  height: calc(2.59 / 13.6 * 100cqi);
+  height: calc(2.59 / var(--vista-m) * 100cqi);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0 6%, transparent 6% 94%, rgba(0, 0, 0, 0.22) 94%),
     repeating-linear-gradient(
       90deg,
-      rgba(255, 255, 255, 0.08) 0 calc(0.12 / 13.6 * 100cqi),
-      rgba(0, 0, 0, 0.18) calc(0.12 / 13.6 * 100cqi) calc(0.15 / 13.6 * 100cqi),
-      transparent calc(0.15 / 13.6 * 100cqi) calc(0.27 / 13.6 * 100cqi),
-      rgba(255, 255, 255, 0.12) calc(0.27 / 13.6 * 100cqi) calc(0.3 / 13.6 * 100cqi)
+      rgba(255, 255, 255, 0.08) 0 calc(0.12 / var(--vista-m) * 100cqi),
+      rgba(0, 0, 0, 0.18) calc(0.12 / var(--vista-m) * 100cqi) calc(0.15 / var(--vista-m) * 100cqi),
+      transparent calc(0.15 / var(--vista-m) * 100cqi) calc(0.27 / var(--vista-m) * 100cqi),
+      rgba(255, 255, 255, 0.12) calc(0.27 / var(--vista-m) * 100cqi) calc(0.3 / var(--vista-m) * 100cqi)
     ),
     var(--azul);
   border: 2px solid var(--azul-forte);
@@ -225,7 +251,7 @@
 }
 
 /* Durante o arrasto e a mola, a largura segue o dedo, sem transição atrasando */
-.palco[data-esticando='true'] :is(.caixa, .cota, .plantaLugar) {
+.palco[data-esticando='true'] :is(.caixa, .frente, .cota, .plantaLugar) {
   transition: none;
 }
 
@@ -236,7 +262,7 @@
 
 .alca {
   position: absolute;
-  bottom: calc(0.55 / 13.6 * 100cqi + 2px + 2.59 / 13.6 * 100cqi / 2 - 22px);
+  bottom: calc(0.55 / var(--vista-m) * 100cqi + 2px + 2.59 / var(--vista-m) * 100cqi / 2 - 22px);
   z-index: 2;
   display: grid;
   place-items: center;
@@ -272,7 +298,7 @@
   top: 8%;
   right: 3%;
   bottom: 8%;
-  width: calc(0.42 / 13.6 * 100cqi);
+  width: calc(0.42 / var(--vista-m) * 100cqi);
   border-left: 2px solid rgba(255, 255, 255, 0.5);
   border-right: 2px solid rgba(255, 255, 255, 0.5);
 }
@@ -281,7 +307,7 @@
   position: absolute;
   left: 6%;
   top: 50%;
-  font-size: clamp(0.7rem, 2.6cqi, 2rem);
+  font-size: clamp(0.7rem, 5cqi, 2rem);
   line-height: 1;
   white-space: nowrap;
   color: rgba(255, 255, 255, 0.9);
@@ -294,22 +320,48 @@
   color: #c9d7f5;
 }
 
-.altura {
+/* Vista de frente: cada container é uma faixa de 2,44 m com as duas folhas da porta; juntos, a
+   coluna de um encosta na do outro. A faixa se repete, então esticar mostra o próximo chegando. */
+.frente {
   position: absolute;
-  left: calc(100% + 26px);
-  top: 50%;
+  bottom: calc(0.55 / var(--vista-m) * 100cqi + 2px);
+  width: var(--largura);
+  height: calc(2.59 / var(--vista-m) * 100cqi);
+  --m: calc(1 / var(--vista-m) * 100cqi);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0 6%, transparent 6% 94%, rgba(0, 0, 0, 0.22) 94%),
+    repeating-linear-gradient(
+      90deg,
+      var(--azul-forte) 0 calc(0.1 * var(--m)),
+      transparent calc(0.1 * var(--m)) calc(0.5 * var(--m)),
+      rgba(255, 255, 255, 0.45) calc(0.5 * var(--m)) calc(0.53 * var(--m)),
+      transparent calc(0.53 * var(--m)) calc(1.2 * var(--m)),
+      rgba(255, 255, 255, 0.6) calc(1.2 * var(--m)) calc(1.24 * var(--m)),
+      transparent calc(1.24 * var(--m)) calc(1.91 * var(--m)),
+      rgba(255, 255, 255, 0.45) calc(1.91 * var(--m)) calc(1.94 * var(--m)),
+      transparent calc(1.94 * var(--m)) calc(2.34 * var(--m)),
+      var(--azul-forte) calc(2.34 * var(--m)) calc(2.44 * var(--m))
+    ),
+    var(--azul);
+  border: 2px solid var(--azul-forte);
+  border-radius: 2px;
+  transition: width calc(0.7s * var(--tempo)) var(--curva-porta);
+}
+
+.nomeVista {
+  position: absolute;
+  bottom: calc(3.14 / var(--vista-m) * 100cqi + 8px);
   font-size: 0.72rem;
   font-weight: 600;
   white-space: nowrap;
   color: var(--texto-2);
-  transform: translateY(-50%);
 }
 
 .cota {
   position: absolute;
   bottom: 0;
   width: var(--comprimento);
-  height: calc(0.4 / 13.6 * 100cqi);
+  height: calc(0.4 / var(--vista-m) * 100cqi);
   min-height: 18px;
   border-left: 1.5px solid var(--tinta);
   border-right: 1.5px solid var(--tinta);
@@ -326,8 +378,13 @@
   background: var(--tinta);
 }
 
+.cotaLargura {
+  width: var(--largura);
+}
+
 .cota span {
   position: absolute;
+  white-space: nowrap;
   left: 50%;
   top: 50%;
   padding: 0 8px;
@@ -426,8 +483,5 @@
   }
   .numeros {
     grid-template-columns: 1fr 1fr;
-  }
-  .altura {
-    display: none;
   }
 }

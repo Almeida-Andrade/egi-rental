@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import type { AnimationParams } from 'animejs'
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
-import { MEDIDAS_METROS, metros, type Tamanho } from '@/lib/medidas'
+import { dimensoesJuntas, MEDIDAS_METROS, metros, MODULOS, type Modulos, type Tamanho } from '@/lib/medidas'
 import type { Uso } from '@/lib/modelos'
 import { plantaDe } from '@/lib/plantas'
 import { linkWhatsApp, mensagemDoModelo } from '@/lib/whatsapp'
@@ -20,12 +20,23 @@ export interface ModeloComparavel {
   tamanho: Tamanho
 }
 
-// Largura total do palco em metros: cabe a pessoa e o container de 40 pés na mesma escala.
-const PALCO_M = 13.6
+// Cada vista (de lado, de frente) cobre VISTA_M metros, o mesmo `--vista-m` do CSS: lado a lado no
+// computador e uma embaixo da outra no celular, sempre na mesma escala entre si.
+const VISTA_M = 7.75
 const INICIO_CAIXA_M = 1.05
+const INICIO_FRENTE_M = 0.2
+const LARGURA_MODULO = MEDIDAS_METROS[20].externa.largura
 
-function emPalco(m: number): string {
-  return `${(m / PALCO_M) * 100}%`
+type Eixo = 'comprimento' | 'largura'
+
+const INICIO: Record<Eixo, number> = { comprimento: INICIO_CAIXA_M, largura: INICIO_FRENTE_M }
+const LIMITES: Record<Eixo, [number, number]> = {
+  comprimento: [2.4, MEDIDAS_METROS[20].externa.comprimento + 0.3],
+  largura: [LARGURA_MODULO * 0.8, LARGURA_MODULO * 3 + 0.1],
+}
+
+function emVista(m: number): string {
+  return `${(m / VISTA_M) * 100}%`
 }
 
 function Pessoa() {
@@ -37,10 +48,41 @@ function Pessoa() {
   )
 }
 
+interface PropsAlca {
+  eixo: Eixo
+  arrastando: boolean
+  posicao: string
+  rotulo: string
+  aoComecar: (eixo: Eixo, clienteX: number) => void
+  aoMover: (eixo: Eixo, clienteX: number) => void
+  aoSoltar: (eixo: Eixo, clienteX: number | null) => void
+}
+
+function Alca({ eixo, arrastando, posicao, rotulo, aoComecar, aoMover, aoSoltar }: PropsAlca) {
+  return (
+    <div
+      className={estilos.alca}
+      style={{ left: posicao }}
+      data-arrastando={arrastando}
+      title={rotulo}
+      onPointerDown={(e) => {
+        e.currentTarget.setPointerCapture(e.pointerId)
+        aoComecar(eixo, e.clientX)
+      }}
+      onPointerMove={(e) => arrastando && aoMover(eixo, e.clientX)}
+      onPointerUp={(e) => arrastando && aoSoltar(eixo, e.clientX)}
+      onPointerCancel={() => aoSoltar(eixo, null)}
+    >
+      <span />
+    </div>
+  )
+}
+
 export function ComparadorTamanhos({ modelos }: { modelos: ModeloComparavel[] }) {
   const id = useId()
   const tamanhos = useMemo(() => [...new Set(modelos.map((m) => m.tamanho))].sort((a, b) => a - b), [modelos])
   const [tamanho, setTamanho] = useState<Tamanho>(tamanhos.includes(20) ? 20 : tamanhos[0])
+  const [modulos, setModulos] = useState<Modulos>(1)
   const doTamanho = modelos.filter((m) => m.tamanho === tamanho)
   const [slug, setSlug] = useState(doTamanho[0]?.slug ?? '')
   const modelo = doTamanho.find((m) => m.slug === slug) ?? doTamanho[0]
@@ -51,34 +93,59 @@ export function ComparadorTamanhos({ modelos }: { modelos: ModeloComparavel[] })
     setSlug((mesmoUso ?? modelos.find((m) => m.tamanho === t))?.slug ?? '')
   }
 
-  const { externa, interna } = MEDIDAS_METROS[tamanho]
-  const planta = modelo ? plantaDe(modelo.uso, tamanho) : null
+  const { externa, interna } = dimensoesJuntas(tamanho, modulos)
+  const planta = modelo ? plantaDe(modelo.uso, tamanho, modulos) : null
   const comprimentoAnimado = useNumeroAnimado(externa.comprimento)
+  const larguraAnimada = useNumeroAnimado(externa.largura)
   const area = useNumeroAnimado(interna.comprimento * interna.largura)
 
-  // Régua: a alça na ponta estica o container; ao soltar ele encaixa no tamanho mais perto, com mola.
-  const [esticado, setEsticado] = useState<number | null>(null)
-  const [arrastando, setArrastando] = useState(false)
-  const elevacao = useRef<HTMLDivElement>(null)
+  // Réguas: a alça da vista lateral estica o container e a da vista de frente junta mais um ao lado.
+  // Ao soltar, encaixa na opção mais perto, com mola.
+  const [esticado, setEsticado] = useState<{ eixo: Eixo; m: number } | null>(null)
+  const [arrastando, setArrastando] = useState<Eixo | null>(null)
+  const vistas = { comprimento: useRef<HTMLDivElement>(null), largura: useRef<HTMLDivElement>(null) }
   const planta3 = useRef<SVGSVGElement>(null)
-  const comprimento = esticado ?? comprimentoAnimado
+  const comprimento = esticado?.eixo === 'comprimento' ? esticado.m : comprimentoAnimado
+  const largura = esticado?.eixo === 'largura' ? esticado.m : larguraAnimada
 
-  const metrosDoPonteiro = (clienteX: number) => {
-    const caixa = elevacao.current?.getBoundingClientRect()
+  const metrosDoPonteiro = (eixo: Eixo, clienteX: number) => {
+    const caixa = vistas[eixo].current?.getBoundingClientRect()
     if (!caixa) return null
-    const m = ((clienteX - caixa.left) / caixa.width) * PALCO_M - INICIO_CAIXA_M
-    return Math.min(MEDIDAS_METROS[40].externa.comprimento + 0.3, Math.max(2.4, m))
+    const m = ((clienteX - caixa.left) / caixa.width) * VISTA_M - INICIO[eixo]
+    const [min, max] = LIMITES[eixo]
+    return Math.min(max, Math.max(min, m))
   }
 
-  const soltar = async (m: number) => {
-    setArrastando(false)
-    const maisPerto = tamanhos.reduce((melhor, t) =>
-      Math.abs(MEDIDAS_METROS[t].externa.comprimento - m) < Math.abs(MEDIDAS_METROS[melhor].externa.comprimento - m)
-        ? t
-        : melhor,
-    )
-    escolherTamanho(maisPerto)
-    const alvo = MEDIDAS_METROS[maisPerto].externa.comprimento
+  const comecar = (eixo: Eixo, clienteX: number) => {
+    setArrastando(eixo)
+    const m = metrosDoPonteiro(eixo, clienteX)
+    if (m !== null) setEsticado({ eixo, m })
+  }
+
+  const mover = (eixo: Eixo, clienteX: number) => {
+    const m = metrosDoPonteiro(eixo, clienteX)
+    if (m !== null) setEsticado({ eixo, m })
+  }
+
+  const soltar = async (eixo: Eixo, clienteX: number | null) => {
+    setArrastando(null)
+    const m = (clienteX !== null ? metrosDoPonteiro(eixo, clienteX) : null) ?? (eixo === 'comprimento' ? comprimento : largura)
+    let alvo: number
+    if (eixo === 'comprimento') {
+      const maisPerto = tamanhos.reduce((melhor, t) =>
+        Math.abs(MEDIDAS_METROS[t].externa.comprimento - m) < Math.abs(MEDIDAS_METROS[melhor].externa.comprimento - m)
+          ? t
+          : melhor,
+      )
+      escolherTamanho(maisPerto)
+      alvo = MEDIDAS_METROS[maisPerto].externa.comprimento
+    } else {
+      const maisPerto = MODULOS.reduce((melhor, n) =>
+        Math.abs(n * LARGURA_MODULO - m) < Math.abs(melhor * LARGURA_MODULO - m) ? n : melhor,
+      )
+      setModulos(maisPerto)
+      alvo = maisPerto * LARGURA_MODULO
+    }
     const { animate, spring } = await import('animejs')
     const reduzido = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const estado = { m }
@@ -88,7 +155,7 @@ export function ComparadorTamanhos({ modelos }: { modelos: ModeloComparavel[] })
     animate(estado, {
       m: alvo,
       ...movimento,
-      onUpdate: () => setEsticado(estado.m),
+      onUpdate: () => setEsticado({ eixo, m: estado.m }),
       onComplete: () => setEsticado(null),
     })
   }
@@ -114,9 +181,17 @@ export function ComparadorTamanhos({ modelos }: { modelos: ModeloComparavel[] })
       }
     })
     return () => cancelar()
-  }, [slug, tamanho])
+  }, [slug, tamanho, modulos])
 
   if (!modelo || !planta) return null
+
+  const nome = modulos === 1 ? modelo.nomeCompleto : `${modelo.nomeCompleto} · ${modulos} lado a lado`
+  const pedido = modulos === 1 ? modelo.nomeCompleto : `${modelo.nomeCompleto} (${modulos} unidades lado a lado)`
+  const alcas = {
+    aoComecar: comecar,
+    aoMover: mover,
+    aoSoltar: soltar,
+  }
 
   return (
     <div className={estilos.comparador}>
@@ -144,6 +219,26 @@ export function ComparadorTamanhos({ modelos }: { modelos: ModeloComparavel[] })
         </fieldset>
 
         <fieldset className={estilos.grupo}>
+          <legend>Lado a lado</legend>
+          <div className={estilos.tamanhos} style={{ '--n': MODULOS.length, '--pos': modulos - 1 } as React.CSSProperties}>
+            {MODULOS.map((n) => (
+              <label key={n} className={estilos.tamanho}>
+                <input
+                  type="radio"
+                  name={`${id}-modulos`}
+                  value={n}
+                  checked={n === modulos}
+                  onChange={() => setModulos(n)}
+                  aria-label={n === 1 ? 'Um container só' : `${n} containers lado a lado`}
+                />
+                <span className="marcacao">{n}×</span>
+                <small>{n === 1 ? 'só' : 'juntos'}</small>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset className={estilos.grupo}>
           <legend>Uso</legend>
           <div className={estilos.usos}>
             {doTamanho.map((m) => (
@@ -164,83 +259,102 @@ export function ComparadorTamanhos({ modelos }: { modelos: ModeloComparavel[] })
 
       <div
         className={estilos.palco}
-        data-esticando={esticado !== null || arrastando}
-        style={{ '--comprimento': emPalco(esticado ?? externa.comprimento) } as React.CSSProperties}
+        data-esticando={esticado !== null || arrastando !== null}
+        style={
+          {
+            '--comprimento': emVista(esticado?.eixo === 'comprimento' ? esticado.m : externa.comprimento),
+            '--largura': emVista(esticado?.eixo === 'largura' ? esticado.m : externa.largura),
+          } as React.CSSProperties
+        }
       >
-        <p className={estilos.rotuloVista}>Vista lateral, em escala · arraste a ponta para mudar o tamanho</p>
-        <div ref={elevacao} className={estilos.elevacao} aria-hidden="true">
-          <div className={estilos.pessoaLugar} style={{ left: emPalco(0.25) }}>
-            <Pessoa />
-            <span>1,75 m</span>
+        <p className={estilos.rotuloVista}>
+          Em escala, de lado e de frente · arraste as alças para mudar o tamanho e juntar containers
+        </p>
+        <div className={estilos.vistas} aria-hidden="true">
+          <div ref={vistas.comprimento} className={estilos.vista}>
+            <div className={estilos.elevacao}>
+              <div className={estilos.nomeVista} style={{ left: emVista(INICIO_CAIXA_M) }}>
+                de lado
+              </div>
+              <div className={estilos.pessoaLugar} style={{ left: emVista(0.25) }}>
+                <Pessoa />
+                <span>1,75 m</span>
+              </div>
+              <div className={estilos.caixa} style={{ left: emVista(INICIO_CAIXA_M) }}>
+                <span className={`${estilos.pintura} marcacao`}>
+                  EGI RENTAL <em>{tamanho}&apos;</em>
+                </span>
+              </div>
+              <Alca
+                eixo="comprimento"
+                arrastando={arrastando === 'comprimento'}
+                posicao={`calc(${emVista(INICIO_CAIXA_M)} + var(--comprimento))`}
+                rotulo="Arraste para mudar o tamanho"
+                {...alcas}
+              />
+              <div className={estilos.chao} />
+              <div className={estilos.cota} style={{ left: emVista(INICIO_CAIXA_M) }}>
+                <span className="marcacao">{metros(comprimento)} m</span>
+              </div>
+            </div>
           </div>
-          <div className={estilos.caixa} style={{ left: emPalco(INICIO_CAIXA_M) }}>
-            <span className={`${estilos.pintura} marcacao`}>
-              EGI RENTAL <em>{tamanho}&apos;</em>
-            </span>
-            <span className={estilos.altura}>{metros(externa.altura)} m</span>
-          </div>
-          <div
-            className={estilos.alca}
-            style={{ left: `calc(${emPalco(INICIO_CAIXA_M)} + var(--comprimento))` }}
-            data-arrastando={arrastando}
-            onPointerDown={(e) => {
-              e.currentTarget.setPointerCapture(e.pointerId)
-              setArrastando(true)
-              const m = metrosDoPonteiro(e.clientX)
-              if (m !== null) setEsticado(m)
-            }}
-            onPointerMove={(e) => {
-              if (!arrastando) return
-              const m = metrosDoPonteiro(e.clientX)
-              if (m !== null) setEsticado(m)
-            }}
-            onPointerUp={(e) => {
-              if (!arrastando) return
-              soltar(metrosDoPonteiro(e.clientX) ?? comprimento)
-            }}
-            onPointerCancel={() => soltar(comprimento)}
-          >
-            <span />
-          </div>
-          <div className={estilos.chao} />
-          <div className={estilos.cota} style={{ left: emPalco(INICIO_CAIXA_M) }}>
-            <span className="marcacao">{metros(comprimento)} m</span>
+
+          <div ref={vistas.largura} className={estilos.vista}>
+            <div className={estilos.elevacao}>
+              <div className={estilos.nomeVista} style={{ left: emVista(INICIO_FRENTE_M) }}>
+                de frente · {metros(externa.altura)} m de altura
+              </div>
+              <div className={estilos.frente} style={{ left: emVista(INICIO_FRENTE_M) }} />
+              <Alca
+                eixo="largura"
+                arrastando={arrastando === 'largura'}
+                posicao={`calc(${emVista(INICIO_FRENTE_M)} + var(--largura))`}
+                rotulo="Arraste para juntar containers lado a lado"
+                {...alcas}
+              />
+              <div className={estilos.chao} />
+              <div className={`${estilos.cota} ${estilos.cotaLargura}`} style={{ left: emVista(INICIO_FRENTE_M) }}>
+                <span className="marcacao">{metros(largura)} m</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <p className={estilos.rotuloVista}>Planta vista de cima · exemplo de uso</p>
-        <div className={estilos.plantaLugar} style={{ marginLeft: emPalco(INICIO_CAIXA_M) }}>
-          <PlantaDoContainer
-            key={modelo.slug}
-            ref={planta3}
-            planta={planta}
-            rotulo={`Planta de exemplo do ${modelo.nomeCompleto}: ${planta.legenda}`}
-          />
+        <p className={estilos.rotuloVista}>
+          Planta vista de cima · exemplo de uso{modulos > 1 ? ' · a linha tracejada é onde a parede do meio saiu' : ''}
+        </p>
+        <div className={`${estilos.vista} ${estilos.vistaPlanta}`}>
+          <div className={estilos.plantaLugar} style={{ marginLeft: emVista(INICIO_CAIXA_M) }}>
+            <PlantaDoContainer
+              key={`${modelo.slug}-${modulos}`}
+              ref={planta3}
+              planta={planta}
+              rotulo={`Planta de exemplo do ${nome}: ${planta.legenda}`}
+            />
+          </div>
         </div>
       </div>
 
       <div className={estilos.resumo} aria-live="polite">
-        <p className={estilos.resumoNome}>{modelo.nomeCompleto}</p>
+        <p className={estilos.resumoNome}>{nome}</p>
         <dl className={estilos.numeros}>
           <div>
             <dt>Comprimento</dt>
             <dd className="marcacao">{metros(comprimento)} m</dd>
           </div>
           <div>
-            <dt>Área interna</dt>
-            <dd className="marcacao">{area.toLocaleString('pt-BR', { maximumFractionDigits: 1, minimumFractionDigits: 1 })} m²</dd>
+            <dt>Largura</dt>
+            <dd className="marcacao">{metros(largura)} m</dd>
           </div>
           <div>
-            <dt>Largura × altura</dt>
-            <dd className="marcacao">
-              {metros(externa.largura)} × {metros(externa.altura)}
-            </dd>
+            <dt>Área interna</dt>
+            <dd className="marcacao">{area.toLocaleString('pt-BR', { maximumFractionDigits: 1, minimumFractionDigits: 1 })} m²</dd>
           </div>
         </dl>
         <p className={estilos.legenda}>{planta.legenda}. O layout final é combinado no orçamento.</p>
         <div className={estilos.acoes}>
-          <a className={estilos.pedir} href={linkWhatsApp(mensagemDoModelo(modelo.nomeCompleto))} target="_blank" rel="noopener">
-            <IconeWhatsApp /> Pedir este
+          <a className={estilos.pedir} href={linkWhatsApp(mensagemDoModelo(pedido))} target="_blank" rel="noopener">
+            <IconeWhatsApp /> Pedir {modulos === 1 ? 'este' : 'estes'}
           </a>
           <Link className={estilos.ficha} href={`/containers/${modelo.slug}`}>
             Ver a ficha

@@ -18,12 +18,15 @@ test('do catálogo à ficha, com o pedido de orçamento já escrito', async ({ p
   await expect(pedido).toHaveAttribute('href', new RegExp(`^https://wa\\.me/\\d+\\?text=.*${encodeURIComponent(nome)}`))
 })
 
-test('o comparador troca o tamanho e a planta acompanha', async ({ page }) => {
+test('o comparador troca o tamanho, junta lado a lado e a planta acompanha', async ({ page }) => {
   await page.goto('/#tamanhos')
-  const grupo = page.getByRole('group', { name: 'Tamanho' })
-  await grupo.getByRole('radio', { name: /40/ }).check()
-  await expect(page.getByRole('img', { name: /Planta de exemplo do .* 40 pés/ })).toBeVisible()
-  await expect(page.locator('dd').filter({ hasText: '12,19 m' }).first()).toBeVisible()
+  await page.getByRole('group', { name: 'Tamanho' }).getByRole('radio', { name: /10/ }).check()
+  await expect(page.getByRole('img', { name: /Planta de exemplo do .* 10 pés/ })).toBeVisible()
+  await expect(page.locator('dd').filter({ hasText: '2,99 m' }).first()).toBeVisible()
+  await page.getByRole('group', { name: 'Tamanho' }).getByRole('radio', { name: /20/ }).check()
+  await page.getByRole('group', { name: 'Lado a lado' }).getByRole('radio', { name: /2 containers/ }).check()
+  await expect(page.getByRole('img', { name: /Planta de exemplo do .* 2 lado a lado/ })).toBeVisible()
+  await expect(page.locator('dd').filter({ hasText: '4,88 m' }).first()).toBeVisible()
 })
 
 test('modelo que não existe responde 404', async ({ page }) => {
@@ -67,4 +70,16 @@ test('o montador 3D guarda o projeto no link e reabre igual', async ({ page }) =
   const link = page.url()
   await page.goto(link)
   await expect(page.getByText(/1 × beliche/)).toBeVisible({ timeout: 20_000 })
+})
+
+test('o montador junta containers lado a lado e o link guarda', async ({ page }) => {
+  await page.goto('/sob-medida/montar?partida=vazio')
+  await expect(page.locator('canvas')).toBeVisible({ timeout: 20_000 })
+  await expect(page).toHaveURL(/[?&]p=/)
+  const antes = page.url()
+  await page.getByRole('radiogroup', { name: /lado a lado/ }).getByRole('radio', { name: /3 juntos/ }).click()
+  await expect(page.getByText(/5,90 × 7,23 m/)).toBeVisible()
+  await expect.poll(() => page.url()).not.toBe(antes)
+  await page.goto(page.url())
+  await expect(page.getByRole('heading', { name: /3 × 20' lado a lado/ })).toBeVisible({ timeout: 20_000 })
 })

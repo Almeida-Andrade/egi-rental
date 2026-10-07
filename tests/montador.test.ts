@@ -16,13 +16,15 @@ import {
   PONTOS_DE_PARTIDA,
   projetoInicial,
   resumoDoProjeto,
-  trocarTamanho,
+  trocarForma,
+  descreverForma,
   type ItemPiso,
   type PontoDePartida,
   type Projeto,
 } from '@/lib/montador'
 
-const vazio: Projeto = { tamanho: 20, cor: 'azul', itens: [] }
+const vazio: Projeto = { tamanho: 20, modulos: 1, cor: 'azul', itens: [] }
+const vinte = { tamanho: 20, modulos: 1 } as const
 
 describe('pontos de partida', () => {
   it('nenhum nasce com peça em conflito ou fora do container', () => {
@@ -41,21 +43,21 @@ describe('limites e encaixe', () => {
   })
 
   it('a peça de piso nunca sai do piso interno, nem girada', () => {
-    const { c, l } = interno(20)
-    const mesa = limitarPiso({ id: '1', tipo: 'mesa', x: 99, z: -5, giro: 90 }, 20)
+    const { c, l } = interno(vinte)
+    const mesa = limitarPiso({ id: '1', tipo: 'mesa', x: 99, z: -5, giro: 90 }, vinte)
     expect(mesa.x).toBeLessThanOrEqual(c - 0.3 + 1e-9)
     expect(mesa.z).toBeGreaterThanOrEqual(0.6 - 1e-9)
     expect(mesa.z).toBeLessThanOrEqual(l)
   })
 
   it('a peça de parede fica dentro da parede', () => {
-    const porta = limitarParede({ id: '1', tipo: 'porta', parede: 'o', t: 10 }, 20)
-    expect(porta.t).toBeCloseTo(interno(20).l - 0.45)
+    const porta = limitarParede({ id: '1', tipo: 'porta', parede: 'o', t: 10 }, vinte)
+    expect(porta.t).toBeCloseTo(interno(vinte).l - 0.45)
   })
 
   it('girar troca largura por profundidade e continua dentro', () => {
     const cama: ItemPiso = { id: '1', tipo: 'cama', x: 0.45, z: 0.95, giro: 0 }
-    const girada = girar(cama, 20)
+    const girada = girar(cama, vinte)
     expect(girada.giro).toBe(90)
     expect(girada.x).toBeGreaterThanOrEqual(0.95 - 1e-9)
   })
@@ -108,7 +110,7 @@ describe('adicionar, duplicar e trocar tamanho', () => {
   })
 
   it('não passa do máximo de peças e continua rápido com o container cheio', () => {
-    let p: Projeto = { ...vazio, tamanho: 40 }
+    let p: Projeto = { ...vazio, modulos: 3 }
     const inicio = performance.now()
     for (let i = 0; i < MAX_ITENS + 5; i++) p = adicionar(p, 'cadeira')
     expect(p.itens).toHaveLength(MAX_ITENS)
@@ -130,10 +132,25 @@ describe('adicionar, duplicar e trocar tamanho', () => {
   })
 
   it('encolher para 10 pés traz tudo para dentro e descarta o que não cabe', () => {
-    const p = trocarTamanho(projetoInicial('loja'), 10)
-    const { c } = interno(10)
+    const p = trocarForma(projetoInicial('loja'), { tamanho: 10, modulos: 2 })
+    const { c } = interno(p)
     for (const i of p.itens) if ('x' in i) expect(i.x).toBeLessThanOrEqual(c)
     expect(p.tamanho).toBe(10)
+  })
+
+  it('juntar lado a lado alarga o piso; separar de novo traz as peças para o container que sobra', () => {
+    expect(interno({ tamanho: 20, modulos: 2 }).l).toBe(4.79)
+    let p = adicionar({ ...vazio, modulos: 2 }, 'cama')
+    p = { ...p, itens: p.itens.map((i) => ('z' in i ? { ...i, z: 4 } : i)) }
+    const separado = trocarForma(p, { tamanho: 20, modulos: 1 })
+    const cama = separado.itens[0] as ItemPiso
+    expect(cama.z).toBeLessThanOrEqual(interno(separado).l)
+    expect(conflitos(separado).size).toBe(0)
+  })
+
+  it('porta na parede de fora de dois juntos usa a largura toda', () => {
+    const p = limitarParede({ id: '1', tipo: 'porta', parede: 'o', t: 10 }, { tamanho: 20, modulos: 2 })
+    expect(p.t).toBeCloseTo(4.79 - 0.45)
   })
 })
 
@@ -150,6 +167,13 @@ describe('resumo', () => {
     expect(texto).toContain('*Container:* 20 pés, cor azul egi')
     expect(texto).toContain('2 × vaso sanitário')
     expect(texto.endsWith('*Ver o projeto:* https://exemplo/x')).toBe(true)
+  })
+
+  it('containers juntos aparecem como lado a lado na mensagem', () => {
+    expect(descreverForma({ tamanho: 20, modulos: 2 })).toBe('2 × 20 pés lado a lado')
+    const texto = resumoDoProjeto(projetoInicial('loja'), 'https://exemplo/x')
+    expect(texto).toContain('*Containers:* 2 × 20 pés lado a lado, cor azul egi')
+    expect(texto).toContain('*Área interna:* 5,90 × 4,79 m')
   })
 })
 
@@ -172,6 +196,9 @@ describe('link do projeto', () => {
     expect(decodificar(null)).toBeNull()
     expect(decodificar(btoa(JSON.stringify([2, 20, 0, []])))).toBeNull()
     expect(decodificar(btoa(JSON.stringify([1, 30, 0, []])))).toBeNull()
+    expect(decodificar(btoa(JSON.stringify([1, 40, 0, []])))).toBeNull()
+    expect(decodificar(btoa(JSON.stringify([1, 20, 0, [], 9])))?.modulos).toBe(1)
+    expect(decodificar(btoa(JSON.stringify([1, 20, 0, []])))?.modulos).toBe(1)
     const fora = decodificar(btoa(JSON.stringify([1, 10, 99, [[0, 999999, -50, 7], [999, 1, 1, 0], ['x', 1, 1, 0]]])))
     expect(fora?.cor).toBe('azul')
     expect(fora?.itens).toHaveLength(1)

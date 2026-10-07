@@ -7,6 +7,7 @@ import { TituloSecao } from '@/components/site/TituloSecao'
 import { tamanhosDoCatalogo } from '@/lib/catalogo'
 import { buscarCatalogo } from '@/lib/dados/catalogo'
 import { MEDIDAS } from '@/lib/modelos'
+import { medidasJuntas, type Modulos } from '@/lib/medidas'
 import { linkWhatsApp, mensagemGeral } from '@/lib/whatsapp'
 import { BotaoLink } from '@/components/site/Botao'
 import estilos from './page.module.css'
@@ -15,7 +16,7 @@ export const revalidate = 3600
 
 const DESCRICAO =
   'Catálogo de containers para locação em São Luís: escritório, almoxarifado, sanitário, cozinha e stand, ' +
-  'em 10, 20 e 40 pés, com entrega e retirada no local.'
+  'em 10 e 20 pés, sozinhos ou lado a lado, com entrega e retirada no local.'
 
 export const metadata: Metadata = {
   title: 'Containers para locação',
@@ -27,8 +28,12 @@ export const metadata: Metadata = {
 const USO_DO_TAMANHO: Record<number, string> = {
   10: 'Compacto: cabe em terreno apertado e resolve a armazenagem pequena.',
   20: 'O mais versátil: escritório, almoxarifado, sanitário ou copa para a equipe.',
-  40: 'Espaço dobrado: stands, conjuntos de escritório e depósito no mesmo módulo.',
 }
+
+const JUNTOS: { modulos: Modulos; uso: string }[] = [
+  { modulos: 2, uso: 'Salão sem a parede do meio: loja, refeitório, sala de reunião ou escritório maior.' },
+  { modulos: 3, uso: 'Espaço amplo para equipe grande, showroom ou canteiro com vários setores.' },
+]
 
 export default async function Containers() {
   const catalogo = await buscarCatalogo()
@@ -65,7 +70,7 @@ export default async function Containers() {
             id="tamanhos-titulo"
             kicker="Tamanhos"
             titulo="Qual tamanho escolher?"
-            texto="Arraste a ponta do container ou escolha o tamanho: o desenho está em escala, ao lado de uma pessoa de 1,75 m."
+            texto="Arraste as alças ou escolha o tamanho e quantos containers vão lado a lado: o desenho está em escala, ao lado de uma pessoa de 1,75 m."
           />
           <div className={estilos.comparador}>
             <ComparadorTamanhos
@@ -81,8 +86,8 @@ export default async function Containers() {
           <details className={estilos.tabelaDetalhe}>
             <summary>Ver a tabela de medidas</summary>
             <p className={estilos.tabelaNota}>
-              Medidas de referência do padrão marítimo. Container fabricado pode variar um pouco: confirmamos a medida
-              exata no orçamento.
+              Medidas de referência do padrão marítimo. Lado a lado, as paredes do meio saem e o espaço vira um só.
+              Container fabricado pode variar um pouco: confirmamos a medida exata no orçamento.
             </p>
             <div className={estilos.tabelaRolagem}>
               <table className={estilos.tabela}>
@@ -105,6 +110,19 @@ export default async function Containers() {
                       <td>{USO_DO_TAMANHO[t]}</td>
                     </tr>
                   ))}
+                  {tamanhos.includes(20) &&
+                    JUNTOS.map(({ modulos, uso }) => {
+                      const m = medidasJuntas(20, modulos)
+                      return (
+                        <tr key={modulos}>
+                          <th scope="row">{modulos} × 20 pés lado a lado</th>
+                          <td>≈ {m.areaM2.toLocaleString('pt-BR')} m²</td>
+                          <td>{m.externa}</td>
+                          <td>{m.interna}</td>
+                          <td>{uso}</td>
+                        </tr>
+                      )
+                    })}
                 </tbody>
               </table>
             </div>

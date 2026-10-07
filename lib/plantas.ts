@@ -1,4 +1,4 @@
-import { MEDIDAS_METROS, type Tamanho } from './medidas'
+import { dimensoesJuntas, MEDIDAS_METROS, type Modulos, type Tamanho } from './medidas'
 import type { Uso } from './modelos'
 
 // Planta de EXEMPLO, vista de cima, em metros: x ao longo do comprimento interno, y na largura.
@@ -20,6 +20,7 @@ export type TipoPeca =
   | 'porta'
   | 'portas-fundo'
   | 'janela'
+  | 'emenda'
 
 export interface Peca {
   tipo: TipoPeca
@@ -126,42 +127,45 @@ const PLANTAS: Partial<Record<`${Uso}-${Tamanho}`, Montador>> = {
       janela(1.2, 1.2),
     ],
   }),
-  'stand-40': (c) => ({
-    legenda: 'Balcão na abertura frontal, vitrine ao fundo e depósito',
-    pecas: [
-      { tipo: 'prateleira', x: 0.5, y: 0.08, w: 8.8, h: 0.45 },
-      { tipo: 'balcao', x: 1.2, y: LARGURA - 0.75, w: 7.4, h: 0.6 },
-      { tipo: 'janela', x: 1.2, y: LARGURA - 0.06, w: 7.4, h: 0.06 },
-      { tipo: 'divisoria', x: 9.7, y: 0, w: 0.07, h: LARGURA },
-      { tipo: 'prateleira', x: 9.95, y: 0.08, w: 1.7, h: 0.5 },
-      portasDoFundo(c),
-    ],
-  }),
-  'hibrido-40': (c) => ({
-    legenda: 'Escritório de um lado, depósito do outro, separados por divisória',
-    pecas: [
-      ...mesaComCadeira(0.3),
-      ...mesaComCadeira(1.9),
-      { tipo: 'armario', x: 3.6, y: 0.1, w: 1.3, h: 0.45 },
-      { tipo: 'mesa', x: 3.5, y: 1.05, w: 1.5, h: 0.75 },
-      portaLateral(1.4),
-      janela(0.5),
-      janela(2.4),
-      { tipo: 'divisoria', x: 5.4, y: 0, w: 0.07, h: LARGURA },
-      ...prateleiras(5.7, 4.6),
-      { tipo: 'palete', x: 10.45, y: 0.6, w: 1.2, h: 1.0 },
-      portasDoFundo(c),
-    ],
-  }),
 }
 
-export function plantaDe(uso: Uso, tamanho: Tamanho): Planta {
+function paredeDaAbertura(p: Peca): 'fora-norte' | 'fora-sul' | 'fundo' {
+  if (p.y <= 0.01) return 'fora-norte'
+  if (p.y + p.h >= LARGURA - 0.01) return 'fora-sul'
+  return 'fundo'
+}
+
+const QUANTOS: Record<Modulos, string> = { 1: 'Um container', 2: 'Dois containers', 3: 'Três containers' }
+
+// Lado a lado o exemplo se repete em cada container, com a parede do meio aberta: porta e janela
+// das paredes compridas só ficam nas que continuam do lado de fora.
+export function plantaDe(uso: Uso, tamanho: Tamanho, modulos: Modulos = 1): Planta {
   const comprimento = MEDIDAS_METROS[tamanho].interna.comprimento
   const montar = PLANTAS[`${uso}-${tamanho}`]
   const { pecas, legenda } = montar
     ? montar(comprimento)
     : { pecas: [portasDoFundo(comprimento)], legenda: 'Espaço livre para a configuração que o seu projeto pedir' }
-  return { comprimento, largura: LARGURA, pecas, legenda }
+  if (modulos === 1) return { comprimento, largura: LARGURA, pecas, legenda }
+
+  const passo = MEDIDAS_METROS[tamanho].externa.largura
+  const juntas: Peca[] = []
+  for (let k = 0; k < modulos; k++) {
+    const dy = k * passo
+    if (k > 0) juntas.push({ tipo: 'emenda', x: 0, y: dy - (passo - LARGURA), w: comprimento, h: passo - LARGURA })
+    for (const peca of pecas) {
+      if (peca.tipo === 'porta' || peca.tipo === 'janela') {
+        const lado = paredeDaAbertura(peca)
+        if ((lado === 'fora-norte' && k > 0) || (lado === 'fora-sul' && k < modulos - 1)) continue
+      }
+      juntas.push({ ...peca, y: peca.y + dy })
+    }
+  }
+  return {
+    comprimento,
+    largura: dimensoesJuntas(tamanho, modulos).interna.largura,
+    pecas: juntas,
+    legenda: `${QUANTOS[modulos]} lado a lado, sem a parede do meio. Em cada um: ${legenda.charAt(0).toLowerCase()}${legenda.slice(1)}`,
+  }
 }
 
 export function temPlanta(uso: Uso, tamanho: Tamanho): boolean {

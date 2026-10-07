@@ -25,7 +25,7 @@
 
 .tamanhos {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 6px;
 }
 
@@ -49,6 +49,42 @@
   color: var(--branco);
   background: var(--tinta);
   border-color: var(--tinta);
+}
+
+.juntos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.junto {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 8px 4px 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--texto);
+  background: var(--branco);
+  border: 1.5px solid var(--linha);
+  border-radius: var(--raio-marca-p);
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.junto:hover {
+  border-color: var(--texto);
+}
+
+.junto[aria-checked='true'] {
+  color: var(--branco);
+  background: var(--tinta);
+  border-color: var(--tinta);
+}
+
+.junto[aria-checked='true'] rect {
+  fill: var(--aco-claro);
+  stroke: var(--branco);
 }
 
 .cores {
@@ -181,6 +217,7 @@
 
 .canvas {
   position: relative;
+  container-type: inline-size;
   height: min(72svh, 680px);
   min-height: 380px;
   overflow: hidden;
@@ -236,12 +273,13 @@
   border-color: var(--tinta);
 }
 
+/* Embaixo à esquerda enquanto o 3D é estreito; no alto à direita só quando cabe ao lado dos botões */
 .ocupacao {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  bottom: 10px;
+  left: 10px;
   padding: 6px 14px;
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   background: rgba(255, 255, 255, 0.92);
   border: 1px solid var(--linha);
   border-radius: 999px;
@@ -255,7 +293,7 @@
 .selecao {
   position: absolute;
   left: 50%;
-  bottom: 14px;
+  bottom: 52px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -303,6 +341,19 @@
   color: #b42318;
 }
 
+@container (min-width: 780px) {
+  .ocupacao {
+    top: 12px;
+    right: 12px;
+    bottom: auto;
+    left: auto;
+    font-size: 0.85rem;
+  }
+  .selecao {
+    bottom: 14px;
+  }
+}
+
 .alerta {
   font-size: 0.8rem;
   color: #ffb4a8;
@@ -322,13 +373,21 @@
 
 /* ---------- Resumo e envio ---------- */
 
+/* O texto pede pelo menos 320px; sem isso os botões descem em vez de espremer o texto */
 .resumo {
-  display: grid;
-  gap: var(--gap-3);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--gap-3) var(--gap-4);
   padding: var(--gap-4);
   background: var(--papel);
   border: 1px solid var(--linha);
   border-radius: var(--raio-marca);
+}
+
+.resumo > div:first-child {
+  flex: 1 1 320px;
+  min-width: 0;
 }
 
 .resumo h2 {
@@ -350,6 +409,7 @@
 }
 
 .acoes {
+  flex: 0 1 auto;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -389,6 +449,7 @@
 }
 
 .nota {
+  flex-basis: 100%;
   font-size: 0.82rem;
   color: var(--texto-2);
 }
@@ -409,14 +470,9 @@
     top: calc(var(--altura-cabecalho) + 16px);
     max-height: calc(100svh - var(--altura-cabecalho) - 32px);
     overflow-y: auto;
-    padding-right: 6px;
-  }
-  .resumo {
-    grid-template-columns: 1fr auto;
-    align-items: center;
-  }
-  .nota {
-    grid-column: 1 / -1;
+    /* A rolagem corta o que passa da borda: folga para o anel da cor escolhida e o foco */
+    margin: -6px 0 0 -6px;
+    padding: 6px;
   }
 }
 
@@ -435,16 +491,6 @@
     margin: 0 calc(var(--margem) * -1);
     border-radius: 0;
     border-width: 0 0 1px;
-  }
-  .ocupacao {
-    top: auto;
-    right: auto;
-    bottom: 10px;
-    left: 10px;
-    font-size: 0.78rem;
-  }
-  .selecao {
-    bottom: 48px;
   }
   .ferramentas button {
     min-height: 36px;

@@ -19,7 +19,7 @@ function PecaDaPlanta({ peca, i }: { peca: Peca; i: number }) {
         </g>
       )
     case 'portas-fundo': {
-      // Portas de abrir para fora, desenhadas curtas para não sair do palco no 40 pés
+      // Portas de abrir para fora, desenhadas curtas para não sair do palco
       const r = 35
       return (
         <g className={estilos.abertura} style={estilo} data-peca>
@@ -30,6 +30,14 @@ function PecaDaPlanta({ peca, i }: { peca: Peca; i: number }) {
         </g>
       )
     }
+    case 'emenda':
+      // Onde a parede do meio saiu: fica a junta no piso, sem entrar na cascata das peças
+      return (
+        <g>
+          <rect x={x} y={y} width={w} height={h} className={estilos.emenda} />
+          <line x1={x} y1={y + h / 2} x2={x + w} y2={y + h / 2} className={estilos.giro} />
+        </g>
+      )
     case 'janela':
       return (
         <g className={estilos.abertura} style={estilo} data-peca>

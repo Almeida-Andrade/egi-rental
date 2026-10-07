@@ -1,8 +1,8 @@
-import { MEDIDAS_METROS, metros, type Tamanho } from './medidas'
+import { dimensoesJuntas, MODULOS, metros, type Modulos, type Tamanho } from './medidas'
 
 // O montador 3D do sob medida: tudo aqui é conta pura (limites, colisão, encaixe, link e resumo);
 // a cena só desenha o projeto. Medidas em metros no piso INTERNO, origem num canto:
-// x ao longo do comprimento, z na largura.
+// x ao longo do comprimento, z na largura. Containers lado a lado (`modulos`) viram um piso só, mais largo.
 export type Giro = 0 | 90 | 180 | 270
 export type Parede = 'n' | 's' | 'o' | 'l'
 
@@ -81,9 +81,12 @@ export type CorChapa = keyof typeof CORES_CHAPA
 
 export interface Projeto {
   tamanho: Tamanho
+  modulos: Modulos
   cor: CorChapa
   itens: Item[]
 }
+
+export type Forma = Pick<Projeto, 'tamanho' | 'modulos'>
 
 export const PASSO = 0.05
 export const MAX_ITENS = 60
@@ -104,8 +107,8 @@ export function ehTipoParede(tipo: string): tipo is TipoParede {
   return tipo in PECAS_PAREDE
 }
 
-export function interno(tamanho: Tamanho) {
-  const { comprimento, largura, altura } = MEDIDAS_METROS[tamanho].interna
+export function interno(forma: Forma) {
+  const { comprimento, largura, altura } = dimensoesJuntas(forma.tamanho, forma.modulos).interna
   return { c: comprimento, l: largura, a: altura }
 }
 
@@ -118,34 +121,36 @@ export function pegada(item: ItemPiso): { w: number; d: number } {
   return item.giro === 90 || item.giro === 270 ? { w: p.d, d: p.w } : { w: p.w, d: p.d }
 }
 
-export function comprimentoDaParede(parede: Parede, tamanho: Tamanho): number {
-  const { c, l } = interno(tamanho)
+export function comprimentoDaParede(parede: Parede, forma: Forma): number {
+  const { c, l } = interno(forma)
   return parede === 'n' || parede === 's' ? c : l
 }
 
+// Encaixa na grade de 5 cm e só então limita: com largura que não é múltipla de 5 cm (lado a lado),
+// encaixar depois empurraria a peça para fora da parede.
 function limitar(v: number, min: number, max: number): number {
-  return Math.min(max, Math.max(min, v))
+  return Math.round(Math.min(max, Math.max(min, encaixar(v))) * 1000) / 1000
 }
 
-export function limitarPiso(item: ItemPiso, tamanho: Tamanho): ItemPiso {
-  const { c, l } = interno(tamanho)
+export function limitarPiso(item: ItemPiso, forma: Forma): ItemPiso {
+  const { c, l } = interno(forma)
   const { w, d } = pegada(item)
   return {
     ...item,
-    x: encaixar(limitar(item.x, w / 2, Math.max(w / 2, c - w / 2))),
-    z: encaixar(limitar(item.z, d / 2, Math.max(d / 2, l - d / 2))),
+    x: limitar(item.x, w / 2, Math.max(w / 2, c - w / 2)),
+    z: limitar(item.z, d / 2, Math.max(d / 2, l - d / 2)),
   }
 }
 
-export function limitarParede(item: ItemParede, tamanho: Tamanho): ItemParede {
-  const comp = comprimentoDaParede(item.parede, tamanho)
+export function limitarParede(item: ItemParede, forma: Forma): ItemParede {
+  const comp = comprimentoDaParede(item.parede, forma)
   const w = PECAS_PAREDE[item.tipo].w
-  return { ...item, t: encaixar(limitar(item.t, w / 2, Math.max(w / 2, comp - w / 2))) }
+  return { ...item, t: limitar(item.t, w / 2, Math.max(w / 2, comp - w / 2)) }
 }
 
-export function cabe(item: Item, tamanho: Tamanho): boolean {
-  if (ehParede(item)) return PECAS_PAREDE[item.tipo].w <= comprimentoDaParede(item.parede, tamanho)
-  const { c, l } = interno(tamanho)
+export function cabe(item: Item, forma: Forma): boolean {
+  if (ehParede(item)) return PECAS_PAREDE[item.tipo].w <= comprimentoDaParede(item.parede, forma)
+  const { c, l } = interno(forma)
   const { w, d } = pegada(item)
   return w <= c && d <= l
 }
@@ -163,9 +168,9 @@ export function retanguloDoPiso(item: ItemPiso): Retangulo {
 }
 
 // A faixa de piso que a porta precisa livre para abrir, do lado de dentro.
-export function areaDaPorta(item: ItemParede, tamanho: Tamanho): Retangulo | null {
+export function areaDaPorta(item: ItemParede, forma: Forma): Retangulo | null {
   if (item.tipo !== 'porta') return null
-  const { c, l } = interno(tamanho)
+  const { c, l } = interno(forma)
   const meio = PECAS_PAREDE.porta.w / 2
   switch (item.parede) {
     case 'n':
@@ -211,7 +216,7 @@ export function conflitos(projeto: Projeto): Set<string> {
     }
 
   for (const porta of parede) {
-    const area = areaDaPorta(porta, projeto.tamanho)
+    const area = areaDaPorta(porta, projeto)
     if (!area) continue
     for (const m of piso)
       if (cruzam(area, retanguloDoPiso(m))) {
@@ -220,13 +225,13 @@ export function conflitos(projeto: Projeto): Set<string> {
       }
   }
 
-  for (const item of projeto.itens) if (!cabe(item, projeto.tamanho)) ruins.add(item.id)
+  for (const item of projeto.itens) if (!cabe(item, projeto)) ruins.add(item.id)
   return ruins
 }
 
 // Só a peça nova contra as outras: é o que roda milhares de vezes ao procurar um lugar livre.
 function conflitaCom(projeto: Projeto, novo: Item): boolean {
-  if (!cabe(novo, projeto.tamanho)) return true
+  if (!cabe(novo, projeto)) return true
   for (const outro of projeto.itens) {
     if (ehParede(novo) && ehParede(outro)) {
       if (outro.parede === novo.parede && Math.abs(outro.t - novo.t) < (PECAS_PAREDE[outro.tipo].w + PECAS_PAREDE[novo.tipo].w) / 2 - FOLGA)
@@ -236,7 +241,7 @@ function conflitaCom(projeto: Projeto, novo: Item): boolean {
     } else {
       const porta = ehParede(novo) ? novo : (outro as ItemParede)
       const movel = ehParede(novo) ? (outro as ItemPiso) : novo
-      const area = areaDaPorta(porta, projeto.tamanho)
+      const area = areaDaPorta(porta, projeto)
       if (area && cruzam(area, retanguloDoPiso(movel))) return true
     }
   }
@@ -252,32 +257,32 @@ export function proximoId(projeto: Projeto): string {
 export function adicionar(projeto: Projeto, tipo: TipoPeca, giros: Giro[] = [0, 90]): Projeto {
   if (projeto.itens.length >= MAX_ITENS) return projeto
   const id = proximoId(projeto)
-  const { c, l } = interno(projeto.tamanho)
+  const { c, l } = interno(projeto)
 
   if (ehTipoParede(tipo)) {
     const paredes: Parede[] = ['n', 's', 'o', 'l']
     for (const parede of paredes) {
-      const comp = comprimentoDaParede(parede, projeto.tamanho)
+      const comp = comprimentoDaParede(parede, projeto)
       for (let t = PECAS_PAREDE[tipo].w / 2; t <= comp - PECAS_PAREDE[tipo].w / 2 + FOLGA; t += 0.1) {
-        const novo = limitarParede({ id, tipo, parede, t }, projeto.tamanho)
+        const novo = limitarParede({ id, tipo, parede, t }, projeto)
         if (!conflitaCom(projeto, novo)) return { ...projeto, itens: [...projeto.itens, novo] }
       }
     }
-    return { ...projeto, itens: [...projeto.itens, limitarParede({ id, tipo, parede: 'n', t: c / 2 }, projeto.tamanho)] }
+    return { ...projeto, itens: [...projeto.itens, limitarParede({ id, tipo, parede: 'n', t: c / 2 }, projeto)] }
   }
 
   for (const giro of giros)
     for (let x = 0; x <= c; x += 0.1)
       for (let z = 0; z <= l; z += 0.1) {
-        const novo = limitarPiso({ id, tipo, x, z, giro }, projeto.tamanho)
+        const novo = limitarPiso({ id, tipo, x, z, giro }, projeto)
         if (!conflitaCom(projeto, novo)) return { ...projeto, itens: [...projeto.itens, novo] }
       }
-  const centro = limitarPiso({ id, tipo, x: c / 2, z: l / 2, giro: 0 }, projeto.tamanho)
+  const centro = limitarPiso({ id, tipo, x: c / 2, z: l / 2, giro: 0 }, projeto)
   return { ...projeto, itens: [...projeto.itens, centro] }
 }
 
-export function girar(item: ItemPiso, tamanho: Tamanho): ItemPiso {
-  return limitarPiso({ ...item, giro: ((item.giro + 90) % 360) as Giro }, tamanho)
+export function girar(item: ItemPiso, forma: Forma): ItemPiso {
+  return limitarPiso({ ...item, giro: ((item.giro + 90) % 360) as Giro }, forma)
 }
 
 export function duplicar(projeto: Projeto, id: string): Projeto {
@@ -286,15 +291,20 @@ export function duplicar(projeto: Projeto, id: string): Projeto {
   return ehParede(original) ? adicionar(projeto, original.tipo) : adicionar(projeto, original.tipo, [original.giro])
 }
 
-export function trocarTamanho(projeto: Projeto, tamanho: Tamanho): Projeto {
+// Trocar o tamanho ou quantos vão lado a lado traz as peças para dentro e descarta o que não cabe.
+export function trocarForma(projeto: Projeto, forma: Forma): Projeto {
   const itens = projeto.itens
-    .map((i) => (ehParede(i) ? limitarParede(i, tamanho) : limitarPiso(i, tamanho)))
-    .filter((i) => cabe(i, tamanho))
-  return { ...projeto, tamanho, itens }
+    .map((i) => (ehParede(i) ? limitarParede(i, forma) : limitarPiso(i, forma)))
+    .filter((i) => cabe(i, forma))
+  return { ...projeto, ...forma, itens }
+}
+
+export function descreverForma(forma: Forma): string {
+  return forma.modulos === 1 ? `${forma.tamanho} pés` : `${forma.modulos} × ${forma.tamanho} pés lado a lado`
 }
 
 export function areaOcupada(projeto: Projeto): number {
-  const { c, l } = interno(projeto.tamanho)
+  const { c, l } = interno(projeto)
   const soma = projeto.itens
     .filter((i): i is ItemPiso => !ehParede(i))
     .reduce((s, i) => {
@@ -315,12 +325,12 @@ export function contagem(projeto: Projeto): { tipo: TipoPeca; nome: string; quan
 }
 
 export function resumoDoProjeto(projeto: Projeto, link: string): string {
-  const { c, l } = interno(projeto.tamanho)
+  const { c, l } = interno(projeto)
   const linhas = contagem(projeto).map((item) => `• ${item.quantidade} × ${item.nome.toLowerCase()}`)
   return [
     'Olá! Montei um container no site e quero conversar sobre o projeto.',
     '',
-    `*Container:* ${projeto.tamanho} pés, cor ${CORES_CHAPA[projeto.cor].nome.toLowerCase()}`,
+    `*${projeto.modulos === 1 ? 'Container' : 'Containers'}:* ${descreverForma(projeto)}, cor ${CORES_CHAPA[projeto.cor].nome.toLowerCase()}`,
     `*Área interna:* ${metros(c)} × ${metros(l)} m`,
     ...(linhas.length ? ['*Itens:*', ...linhas] : ['*Itens:* nenhum ainda']),
     '',
@@ -329,7 +339,7 @@ export function resumoDoProjeto(projeto: Projeto, link: string): string {
 }
 
 // ---------- Link do projeto ----------
-// Formato compacto e versionado: [1, tamanho, cor, [[tipo, xcm, zcm, giro] | [tipo, parede, tcm]]].
+// Formato compacto e versionado: [1, tamanho, cor, [[tipo, xcm, zcm, giro] | [tipo, parede, tcm]], modulos].
 
 const TIPOS: TipoPeca[] = [...(Object.keys(PECAS_PISO) as TipoPiso[]), ...(Object.keys(PECAS_PAREDE) as TipoParede[])]
 const PAREDES: Parede[] = ['n', 's', 'o', 'l']
@@ -353,7 +363,7 @@ export function codificar(projeto: Projeto): string {
       ? [TIPOS.indexOf(i.tipo), PAREDES.indexOf(i.parede), Math.round(i.t * 100)]
       : [TIPOS.indexOf(i.tipo), Math.round(i.x * 100), Math.round(i.z * 100), i.giro / 90],
   )
-  return paraBase64Url(JSON.stringify([1, projeto.tamanho, CORES.indexOf(projeto.cor), itens]))
+  return paraBase64Url(JSON.stringify([1, projeto.tamanho, CORES.indexOf(projeto.cor), itens, projeto.modulos]))
 }
 
 // Link de fora é entrada não confiável: tudo é conferido e limitado, e o que não serve é descartado.
@@ -362,8 +372,10 @@ export function decodificar(texto: string | null | undefined): Projeto | null {
   try {
     const dado: unknown = JSON.parse(deBase64Url(texto))
     if (!Array.isArray(dado) || dado[0] !== 1) return null
-    const [, tamanho, corIdx, brutos] = dado
-    if (tamanho !== 10 && tamanho !== 20 && tamanho !== 40) return null
+    const [, tamanho, corIdx, brutos, modulosBrutos] = dado
+    if (tamanho !== 10 && tamanho !== 20) return null
+    const modulos = MODULOS.find((m) => m === modulosBrutos) ?? 1
+    const forma: Forma = { tamanho, modulos }
     const cor = CORES[Number(corIdx)] ?? 'azul'
     if (!Array.isArray(brutos)) return null
 
@@ -376,13 +388,13 @@ export function decodificar(texto: string | null | undefined): Projeto | null {
       if (ehTipoParede(tipo) && bruto.length === 3) {
         const parede = PAREDES[bruto[1]]
         if (!parede) continue
-        itens.push(limitarParede({ id, tipo, parede, t: bruto[2] / 100 }, tamanho))
+        itens.push(limitarParede({ id, tipo, parede, t: bruto[2] / 100 }, forma))
       } else if (ehTipoPiso(tipo) && bruto.length === 4) {
         const giro = ((Math.abs(Math.trunc(bruto[3])) % 4) * 90) as Giro
-        itens.push(limitarPiso({ id, tipo, x: bruto[1] / 100, z: bruto[2] / 100, giro }, tamanho))
+        itens.push(limitarPiso({ id, tipo, x: bruto[1] / 100, z: bruto[2] / 100, giro }, forma))
       }
     }
-    return { tamanho, cor, itens: itens.filter((i) => cabe(i, tamanho)) }
+    return { tamanho, modulos, cor, itens: itens.filter((i) => cabe(i, forma)) }
   } catch {
     return null
   }
@@ -391,22 +403,23 @@ export function decodificar(texto: string | null | undefined): Projeto | null {
 // ---------- Pontos de partida ----------
 
 export const PONTOS_DE_PARTIDA = {
-  vazio: { nome: 'Vazio', tamanho: 20 },
-  escritorio: { nome: 'Escritório', tamanho: 20 },
-  banheiro: { nome: 'Banheiro', tamanho: 20 },
-  loja: { nome: 'Loja / stand', tamanho: 40 },
-} as const satisfies Record<string, { nome: string; tamanho: Tamanho }>
+  vazio: { nome: 'Vazio', tamanho: 20, modulos: 1 },
+  escritorio: { nome: 'Escritório', tamanho: 20, modulos: 1 },
+  banheiro: { nome: 'Banheiro', tamanho: 20, modulos: 1 },
+  loja: { nome: 'Loja (2 lado a lado)', tamanho: 20, modulos: 2 },
+} as const satisfies Record<string, Forma & { nome: string }>
 
 export type PontoDePartida = keyof typeof PONTOS_DE_PARTIDA
 
 export function projetoInicial(ponto: PontoDePartida = 'escritorio'): Projeto {
-  const tamanho = PONTOS_DE_PARTIDA[ponto].tamanho
+  const { tamanho, modulos } = PONTOS_DE_PARTIDA[ponto]
+  const forma: Forma = { tamanho, modulos }
   const montar = (pisos: Omit<ItemPiso, 'id'>[], aberturas: Omit<ItemParede, 'id'>[]): Projeto => ({
-    tamanho,
+    ...forma,
     cor: 'azul',
     itens: [
-      ...pisos.map((i, k) => limitarPiso({ ...i, id: String(k + 1) }, tamanho)),
-      ...aberturas.map((a, k) => limitarParede({ ...a, id: String(pisos.length + k + 1) }, tamanho)),
+      ...pisos.map((i, k) => limitarPiso({ ...i, id: String(k + 1) }, forma)),
+      ...aberturas.map((a, k) => limitarParede({ ...a, id: String(pisos.length + k + 1) }, forma)),
     ],
   })
 
@@ -449,20 +462,22 @@ export function projetoInicial(ponto: PontoDePartida = 'escritorio'): Projeto {
         ],
       )
     case 'loja':
+      // Dois de 20 pés juntos: 5,90 × 4,79 m de salão, vitrines ao fundo e balcão perto da entrada
       return montar(
         [
-          { tipo: 'vitrine', x: 1.0, z: 0.25, giro: 0 },
-          { tipo: 'vitrine', x: 2.2, z: 0.25, giro: 0 },
-          { tipo: 'vitrine', x: 3.4, z: 0.25, giro: 0 },
-          { tipo: 'balcao', x: 6.0, z: 1.3, giro: 0 },
-          { tipo: 'divisoria', x: 9.5, z: 0.6, giro: 90 },
-          { tipo: 'prateleira', x: 10.6, z: 0.25, giro: 0 },
+          { tipo: 'vitrine', x: 0.7, z: 0.25, giro: 0 },
+          { tipo: 'vitrine', x: 1.9, z: 0.25, giro: 0 },
+          { tipo: 'vitrine', x: 3.1, z: 0.25, giro: 0 },
+          { tipo: 'prateleira', x: 0.25, z: 1.8, giro: 90 },
+          { tipo: 'prateleira', x: 0.25, z: 2.9, giro: 90 },
+          { tipo: 'armario', x: 5.65, z: 0.8, giro: 270 },
+          { tipo: 'balcao', x: 4.6, z: 2.6, giro: 90 },
         ],
         [
-          { tipo: 'janela', parede: 's', t: 3 },
-          { tipo: 'janela', parede: 's', t: 4.2 },
-          { tipo: 'porta', parede: 's', t: 7.8 },
-          { tipo: 'porta', parede: 'l', t: 1.2 },
+          { tipo: 'janela', parede: 's', t: 1.2 },
+          { tipo: 'porta', parede: 's', t: 2.9 },
+          { tipo: 'janela', parede: 's', t: 4.6 },
+          { tipo: 'ar', parede: 'o', t: 2.4 },
         ],
       )
   }

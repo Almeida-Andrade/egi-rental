@@ -40,6 +40,10 @@
   fill: var(--tinta);
 }
 
+.emenda {
+  fill: var(--aco-fundo);
+}
+
 .vao {
   fill: var(--branco);
 }

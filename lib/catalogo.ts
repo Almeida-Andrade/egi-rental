@@ -31,10 +31,8 @@ export const FROTA_RESERVA: LinhaFrota[] = [
   { uso: 'escritorio', tamanho_pes: 20, fabricacao: 'fabricado' },
   { uso: 'almoxarifado', tamanho_pes: 10, fabricacao: null },
   { uso: 'almoxarifado', tamanho_pes: 20, fabricacao: 'maritimo' },
-  { uso: 'hibrido', tamanho_pes: 40, fabricacao: 'maritimo' },
   { uso: 'wc', tamanho_pes: 20, fabricacao: 'maritimo' },
   { uso: 'cozinha', tamanho_pes: 20, fabricacao: null },
-  { uso: 'stand', tamanho_pes: 40, fabricacao: 'maritimo' },
 ]
 
 function ehUso(valor: string): valor is Uso {
@@ -42,7 +40,7 @@ function ehUso(valor: string): valor is Uso {
 }
 
 function ehTamanho(valor: number | null): valor is Tamanho {
-  return valor === 10 || valor === 20 || valor === 40
+  return valor === 10 || valor === 20
 }
 
 function ehFabricacao(valor: string | null): valor is Fabricacao {

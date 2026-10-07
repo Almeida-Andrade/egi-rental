@@ -61,7 +61,7 @@ export default function SobMedida() {
               id="montador-titulo"
               kicker="Montador 3D"
               titulo="Monte o seu container e mande para a gente"
-              texto="Escolha 10, 20 ou 40 pés, a cor da chapa e arraste mesas, banheiro, cozinha, porta e janela até ficar do seu jeito. O projeto vai pelo WhatsApp e a equipe abre o mesmo container que você montou."
+              texto="Escolha 10 ou 20 pés, junte até três lado a lado, escolha a cor da chapa e arraste mesas, banheiro, cozinha, porta e janela até ficar do seu jeito. O projeto vai pelo WhatsApp e a equipe abre o mesmo container que você montou."
             />
             <div className={estilos.vitrineAcoes}>
               <BotaoLink href="/sob-medida/montar" variante="primario" grande seta>

@@ -164,8 +164,13 @@ function ParedeDoCasco({ tamanho, posicao, apagada, textura, repeticao, children
 }
 
 function Casco({ projeto, porDentro, apagadas }: { projeto: Projeto; porDentro: boolean; apagadas: string }) {
-  const { c, l, a } = interno(projeto.tamanho)
+  const { c, l, a } = interno(projeto)
   const cor = CORES_CHAPA[projeto.cor].hex
+  const modulo = MEDIDAS_METROS[projeto.tamanho].externa
+  // Centro de cada container na largura e as emendas entre eles, no eixo z da cena.
+  const centros = Array.from({ length: projeto.modulos }, (_, k) => (k + 0.5 - projeto.modulos / 2) * modulo.largura)
+  const emendas = centros.slice(1).map((z) => z - modulo.largura / 2)
+  const folha = MEDIDAS_METROS[projeto.tamanho].interna.largura
   const textura = useChapa(cor)
   const piso = usePiso()
   const pisoMap = useMemo(() => {
@@ -176,7 +181,7 @@ function Casco({ projeto, porDentro, apagadas }: { projeto: Projeto; porDentro: 
   }, [piso, c, l])
   const e = ESPESSURA
   const estrutura = escurecer(cor, 0.55)
-  const altoExterno = MEDIDAS_METROS[projeto.tamanho].externa.altura
+  const altoExterno = modulo.altura
 
   return (
     <group>
@@ -213,19 +218,23 @@ function Casco({ projeto, porDentro, apagadas }: { projeto: Projeto; porDentro: 
         textura={textura}
         repeticao={l / 0.3}
       >
-        {/* Portas do fundo, com as barras de trava, como num container marítimo */}
-        {[-l / 4, l / 4].map((z) => (
-          <mesh key={z} position={[c / 2 + e + 0.01, a / 2, z]}>
-            <boxGeometry args={[0.02, a - 0.1, l / 2 - 0.06]} />
-            <meshStandardMaterial color={escurecer(cor, 0.9)} transparent />
-          </mesh>
-        ))}
-        {[-0.75, -0.3, 0.3, 0.75].map((z) => (
-          <mesh key={z} position={[c / 2 + e + 0.04, a / 2, (z * l) / 2]}>
-            <cylinderGeometry args={[0.02, 0.02, a - 0.2, 8]} />
-            <meshStandardMaterial color="#c3ccd8" metalness={0.6} transparent />
-          </mesh>
-        ))}
+        {/* Portas do fundo de cada container, com as barras de trava, como num marítimo */}
+        {centros.flatMap((zc) =>
+          [-folha / 4, folha / 4].map((dz) => (
+            <mesh key={`${zc}${dz}`} position={[c / 2 + e + 0.01, a / 2, zc + dz]}>
+              <boxGeometry args={[0.02, a - 0.1, folha / 2 - 0.06]} />
+              <meshStandardMaterial color={escurecer(cor, 0.9)} transparent />
+            </mesh>
+          )),
+        )}
+        {centros.flatMap((zc) =>
+          [-0.75, -0.3, 0.3, 0.75].map((f) => (
+            <mesh key={`${zc}${f}`} position={[c / 2 + e + 0.04, a / 2, zc + (f * folha) / 2]}>
+              <cylinderGeometry args={[0.02, 0.02, a - 0.2, 8]} />
+              <meshStandardMaterial color="#c3ccd8" metalness={0.6} transparent />
+            </mesh>
+          )),
+        )}
       </ParedeDoCasco>
 
       {!porDentro && (
@@ -235,23 +244,33 @@ function Casco({ projeto, porDentro, apagadas }: { projeto: Projeto; porDentro: 
         </mesh>
       )}
 
-      {/* Colunas de canto e longarinas */}
-      {[
-        [-1, -1],
-        [1, -1],
-        [-1, 1],
-        [1, 1],
-      ].map(([sx, sz]) => (
-        <mesh key={`${sx}${sz}`} position={[(sx * (c + e * 2)) / 2, altoExterno / 2 - 0.1, (sz * (l + e * 2)) / 2]} castShadow>
-          <boxGeometry args={[0.12, altoExterno, 0.12]} />
-          <meshStandardMaterial color={estrutura} roughness={0.5} />
-        </mesh>
-      ))}
-      {[-1, 1].map((sz) => (
-        <mesh key={sz} position={[0, -0.1, (sz * (l + e * 2)) / 2]} castShadow>
+      {/* Colunas de canto e longarinas, também nas emendas entre os containers */}
+      {[-1, 1].flatMap((sx) =>
+        [-(l / 2 + e), ...emendas, l / 2 + e].map((z) => (
+          <mesh key={`${sx}${z}`} position={[(sx * (c + e * 2)) / 2, altoExterno / 2 - 0.1, z]} castShadow>
+            <boxGeometry args={[0.12, altoExterno, 0.12]} />
+            <meshStandardMaterial color={estrutura} roughness={0.5} />
+          </mesh>
+        )),
+      )}
+      {[-(l / 2 + e), ...emendas, l / 2 + e].map((z) => (
+        <mesh key={z} position={[0, -0.1, z]} castShadow>
           <boxGeometry args={[c + 0.24, 0.16, 0.12]} />
           <meshStandardMaterial color={estrutura} />
         </mesh>
+      ))}
+      {/* Onde a parede do meio saiu: viga no alto e a junta no piso */}
+      {emendas.map((z) => (
+        <group key={z}>
+          <mesh position={[0, a - 0.07, z]} castShadow>
+            <boxGeometry args={[c, 0.14, 0.12]} />
+            <meshStandardMaterial color={estrutura} roughness={0.5} />
+          </mesh>
+          <mesh position={[0, 0.002, z]} rotation={[-Math.PI / 2, 0, 0]}>
+            <planeGeometry args={[c, 0.05]} />
+            <meshStandardMaterial color="#7d5a39" roughness={0.9} />
+          </mesh>
+        </group>
       ))}
     </group>
   )
@@ -349,23 +368,22 @@ function PecaNaCena({ item, c, l, selecionada, alerta, apagada, onAgarrar }: Pro
   )
 }
 
-function Camera({ tamanho, vista }: { tamanho: Projeto['tamanho']; vista: Vista }) {
+function Camera({ c, l, vista }: { c: number; l: number; vista: Vista }) {
   const { camera, invalidate, size } = useThree()
   // O drei registra o OrbitControls como controle padrão (makeDefault); o tipo do estado é genérico.
   const controles = useThree((s) => s.controls) as ControlesDeOrbita | null
   const alvo = useRef<{ pos: THREE.Vector3; olhar: THREE.Vector3 } | null>(null)
-  const { c } = interno(tamanho)
 
   useEffect(() => {
     // Tela em pé (celular) pede a câmera mais longe para o container caber de ponta a ponta.
     const aspecto = size.width / Math.max(1, size.height)
-    const dist = (Math.max(c, 4.5) * 0.95 + 2.2) * Math.max(1, 1.5 / aspecto)
+    const dist = (Math.max(c, l, 4.5) * 0.95 + 2.2) * Math.max(1, 1.5 / aspecto)
     alvo.current =
       vista.modo === 'cima'
         ? { pos: new THREE.Vector3(0, dist * 1.25, 0.01), olhar: new THREE.Vector3(0, 0, 0) }
         : { pos: new THREE.Vector3(-c * 0.18, dist * 0.72, dist * 0.92), olhar: new THREE.Vector3(0, 0.7, 0) }
     invalidate()
-  }, [c, vista.modo, vista.versao, invalidate, size.width, size.height])
+  }, [c, l, vista.modo, vista.versao, invalidate, size.width, size.height])
 
   useFrame((_, delta) => {
     const a = alvo.current
@@ -401,7 +419,7 @@ interface Arrasto {
 
 function Conteudo(props: PropsCena) {
   const { projeto, selecionado, emConflito, porDentro, vista, onSelecionar, onMover } = props
-  const { c, l } = interno(projeto.tamanho)
+  const { c, l } = interno(projeto)
   const [arrasto, setArrasto] = useState<Arrasto | null>(null)
   const [apagadas, setApagadas] = useState('')
   const ponto = useMemo(() => new THREE.Vector3(), [])
@@ -437,10 +455,10 @@ function Conteudo(props: PropsCena) {
     if (!item || !p) return
     if (ehParede(item)) {
       const { parede, t } = paredeMaisPerto(p.x, p.z, c, l)
-      const novo = limitarParede({ ...item, parede, t }, projeto.tamanho)
+      const novo = limitarParede({ ...item, parede, t }, projeto)
       if (novo.parede !== item.parede || novo.t !== item.t) onMover(novo)
     } else {
-      const novo: ItemPiso = limitarPiso({ ...item, x: encaixar(p.x + arrasto.dx), z: encaixar(p.z + arrasto.dz) }, projeto.tamanho)
+      const novo: ItemPiso = limitarPiso({ ...item, x: encaixar(p.x + arrasto.dx), z: encaixar(p.z + arrasto.dz) }, projeto)
       if (novo.x !== item.x || novo.z !== item.z) onMover(novo)
     }
   }
@@ -503,7 +521,7 @@ function Conteudo(props: PropsCena) {
         maxDistance={34}
         maxPolarAngle={Math.PI / 2 - 0.06}
       />
-      <Camera tamanho={projeto.tamanho} vista={vista} />
+      <Camera c={c} l={l} vista={vista} />
       <Capturador onCapturador={props.onCapturador} />
     </>
   )

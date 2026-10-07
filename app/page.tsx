@@ -123,7 +123,7 @@ export default async function Inicio() {
               Qual tamanho cabe no seu terreno?
             </h2>
             <p className={estilos.lead}>
-              Troque o tamanho e o uso: o desenho está em escala, ao lado de uma pessoa de 1,75 m.
+              Troque o tamanho, o uso e quantos containers vão lado a lado: o desenho está em escala, ao lado de uma pessoa de 1,75 m.
             </p>
           </div>
           <ComparadorTamanhos

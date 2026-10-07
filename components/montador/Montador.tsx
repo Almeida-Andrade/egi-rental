@@ -11,6 +11,7 @@ import {
   contagem,
   CORES_CHAPA,
   decodificar,
+  descreverForma,
   duplicar,
   ehParede,
   ehTipoParede,
@@ -23,15 +24,16 @@ import {
   PONTOS_DE_PARTIDA,
   projetoInicial,
   resumoDoProjeto,
-  trocarTamanho,
+  trocarForma,
   type CorChapa,
+  type Forma,
   type GrupoPeca,
   type Item,
   type PontoDePartida,
   type Projeto,
   type TipoPeca,
 } from '@/lib/montador'
-import { metros, type Tamanho } from '@/lib/medidas'
+import { metros, MODULOS, TAMANHOS, type Modulos } from '@/lib/medidas'
 import { linkWhatsApp } from '@/lib/whatsapp'
 import { Icone, IconeWhatsApp } from '@/components/site/Icone'
 import type { Vista } from './Cena'
@@ -77,6 +79,19 @@ class LimiteDeErro extends Component<{ children: React.ReactNode; reserva: React
   render() {
     return this.state.erro ? this.props.reserva : this.props.children
   }
+}
+
+// Os containers lado a lado vistos de cima.
+function IconeJuntos({ n }: { n: Modulos }) {
+  const alto = 6
+  const topo = 14 - (n * alto + (n - 1) * 2) / 2
+  return (
+    <svg width="30" height="28" viewBox="0 0 30 28" aria-hidden="true">
+      {Array.from({ length: n }, (_, k) => (
+        <rect key={k} x="2" y={topo + k * (alto + 2)} width="26" height={alto} rx="1" className={estilos.miniPlanta} />
+      ))}
+    </svg>
+  )
 }
 
 // Planta da peça vista de cima, em escala, para o catálogo.
@@ -133,6 +148,13 @@ export function Montador() {
 
   const trocar = (novo: Projeto) => despachar({ tipo: 'trocar', projeto: novo })
 
+  const mudarForma = (forma: Forma) => {
+    const antes = projeto.itens.length
+    const novo = trocarForma(projeto, forma)
+    trocar(novo)
+    if (novo.itens.length < antes) setAviso(`${antes - novo.itens.length} peça(s) não couberam em ${descreverForma(forma)}.`)
+  }
+
   const acrescentar = (tipo: TipoPeca) => {
     const novo = adicionar(projeto, tipo)
     if (novo === projeto) {
@@ -145,8 +167,8 @@ export function Montador() {
 
   const girarSelecionado = useCallback(() => {
     if (!itemSelecionado || ehParede(itemSelecionado)) return
-    despachar({ tipo: 'mover', item: girar(itemSelecionado, projeto.tamanho) })
-  }, [itemSelecionado, projeto.tamanho])
+    despachar({ tipo: 'mover', item: girar(itemSelecionado, projeto) })
+  }, [itemSelecionado, projeto])
 
   const removerSelecionado = useCallback(() => {
     if (!itemSelecionado) return
@@ -180,13 +202,13 @@ export function Montador() {
         const dz = e.key === 'ArrowDown' ? passo : e.key === 'ArrowUp' ? -passo : 0
         despachar({
           tipo: 'mover',
-          item: limitarPiso({ ...itemSelecionado, x: itemSelecionado.x + dx, z: itemSelecionado.z + dz }, projeto.tamanho),
+          item: limitarPiso({ ...itemSelecionado, x: itemSelecionado.x + dx, z: itemSelecionado.z + dz }, projeto),
         })
       }
     }
     window.addEventListener('keydown', aoTeclar)
     return () => window.removeEventListener('keydown', aoTeclar)
-  }, [itemSelecionado, girarSelecionado, duplicarSelecionado, removerSelecionado, projeto.tamanho])
+  }, [itemSelecionado, girarSelecionado, duplicarSelecionado, removerSelecionado, projeto])
 
   const linkDoProjeto = () => {
     const url = new URL(window.location.href)
@@ -209,7 +231,7 @@ export function Montador() {
     if (!dado) return
     const a = document.createElement('a')
     a.href = dado
-    a.download = `container-${projeto.tamanho}-pes.png`
+    a.download = `container-${projeto.modulos > 1 ? `${projeto.modulos}x` : ''}${projeto.tamanho}-pes.png`
     a.click()
   }
 
@@ -222,24 +244,39 @@ export function Montador() {
         <section className={estilos.bloco}>
           <h2>Tamanho</h2>
           <div className={estilos.tamanhos} role="radiogroup" aria-label="Tamanho do container">
-            {([10, 20, 40] as Tamanho[]).map((t) => (
+            {TAMANHOS.map((t) => (
               <button
                 key={t}
                 type="button"
                 role="radio"
                 aria-checked={projeto.tamanho === t}
                 className={estilos.tamanho}
-                onClick={() => {
-                  const antes = projeto.itens.length
-                  const novo = trocarTamanho(projeto, t)
-                  trocar(novo)
-                  if (novo.itens.length < antes) setAviso(`${antes - novo.itens.length} peça(s) não couberam no ${t} pés.`)
-                }}
+                onClick={() => mudarForma({ tamanho: t, modulos: projeto.modulos })}
               >
                 <span className="marcacao">{t}&apos;</span>
               </button>
             ))}
           </div>
+        </section>
+
+        <section className={estilos.bloco}>
+          <h2>Lado a lado</h2>
+          <div className={estilos.juntos} role="radiogroup" aria-label="Quantos containers lado a lado">
+            {MODULOS.map((m) => (
+              <button
+                key={m}
+                type="button"
+                role="radio"
+                aria-checked={projeto.modulos === m}
+                className={estilos.junto}
+                onClick={() => mudarForma({ tamanho: projeto.tamanho, modulos: m })}
+              >
+                <IconeJuntos n={m} />
+                {m === 1 ? 'Um só' : `${m} juntos`}
+              </button>
+            ))}
+          </div>
+          <p className={estilos.dica}>Unidos pela lateral, sem a parede do meio: o espaço cresce na largura.</p>
         </section>
 
         <section className={estilos.bloco}>
@@ -350,8 +387,8 @@ export function Montador() {
           </div>
 
           <p className={estilos.ocupacao} aria-live="polite">
-            <span className="marcacao">{ocupada}%</span> do piso ocupado · {metros(interno(projeto.tamanho).c)} ×{' '}
-            {metros(interno(projeto.tamanho).l)} m
+            <span className="marcacao">{ocupada}%</span> do piso ocupado · {metros(interno(projeto).c)} ×{' '}
+            {metros(interno(projeto).l)} m
           </p>
 
           {itemSelecionado && (
@@ -382,7 +419,12 @@ export function Montador() {
         <section className={estilos.resumo} aria-labelledby="resumo-titulo">
           <div>
             <h2 id="resumo-titulo">
-              Seu container: <span className="marcacao">{projeto.tamanho}&apos;</span>, {CORES_CHAPA[projeto.cor].nome.toLowerCase()}
+              {projeto.modulos === 1 ? 'Seu container' : 'Seus containers'}:{' '}
+              <span className="marcacao">
+                {projeto.modulos > 1 && `${projeto.modulos} × `}
+                {projeto.tamanho}&apos;
+              </span>
+              {projeto.modulos > 1 && ' lado a lado'}, {CORES_CHAPA[projeto.cor].nome.toLowerCase()}
             </h2>
             <p className={estilos.listaItens}>
               {lista.length

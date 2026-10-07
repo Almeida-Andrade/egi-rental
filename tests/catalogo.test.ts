@@ -39,7 +39,7 @@ describe('montarCatalogo', () => {
 
   it('ordena pelo uso mais pedido e depois pelo tamanho', () => {
     const catalogo = montarCatalogo([
-      { uso: 'stand', tamanho_pes: 40, fabricacao: null },
+      { uso: 'stand', tamanho_pes: 20, fabricacao: null },
       { uso: 'wc', tamanho_pes: 20, fabricacao: null },
       { uso: 'escritorio', tamanho_pes: 20, fabricacao: null },
     ])
@@ -56,8 +56,16 @@ describe('montarCatalogo', () => {
   })
 
   it('usa as medidas do padrão marítimo pelo tamanho', () => {
-    const [modelo] = montarCatalogo([{ uso: 'stand', tamanho_pes: 40, fabricacao: null }])
-    expect(modelo.medidas.areaM2).toBe(28.3)
+    const [modelo] = montarCatalogo([{ uso: 'stand', tamanho_pes: 20, fabricacao: null }])
+    expect(modelo.medidas.areaM2).toBe(13.9)
+  })
+
+  it('a frota não tem 40 pés: linha de 40 que venha do banco fica fora do site', () => {
+    const catalogo = montarCatalogo([
+      { uso: 'stand', tamanho_pes: 40, fabricacao: 'maritimo' },
+      { uso: 'escritorio', tamanho_pes: 20, fabricacao: null },
+    ])
+    expect(catalogo.map((m) => m.slug)).toEqual(['escritorio-20-pes'])
   })
 
   it('a frota de reserva gera slugs únicos e todo modelo tem capa', () => {
@@ -85,6 +93,6 @@ describe('buscas no catálogo', () => {
   })
 
   it('lista os tamanhos existentes em ordem', () => {
-    expect(tamanhosDoCatalogo(catalogo)).toEqual([10, 20, 40])
+    expect(tamanhosDoCatalogo(catalogo)).toEqual([10, 20])
   })
 })
