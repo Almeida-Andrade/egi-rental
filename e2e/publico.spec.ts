@@ -75,6 +75,14 @@ test('o formulário abre o WhatsApp com o pedido montado', async ({ page, contex
   expect(url).toContain('*Celular:* (98) 99999-0000')
 })
 
+test('o montador abre com a capa e só carrega o 3D ao começar', async ({ page }) => {
+  await page.goto('/sob-medida/montar')
+  await expect(page.locator('canvas')).toHaveCount(0)
+  await page.getByRole('button', { name: 'Começar a montar' }).click()
+  await expect(page.locator('canvas')).toBeVisible({ timeout: 20_000 })
+  await expect(page.getByRole('button', { name: 'Ver por dentro' })).toBeVisible()
+})
+
 test('o montador 3D guarda o projeto no link e reabre igual', async ({ page }) => {
   await page.goto('/sob-medida/montar?partida=vazio')
   await expect(page.locator('canvas')).toBeVisible({ timeout: 20_000 })

@@ -1,6 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
+import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
 import { Component, useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import {
@@ -39,8 +40,10 @@ import { Icone, IconeWhatsApp } from '@/components/site/Icone'
 import type { Vista } from './Cena'
 import estilos from './Montador.module.css'
 
-// O three.js só baixa nesta página e só no navegador.
-const Cena = dynamic(() => import('./Cena'), {
+// O three.js só baixa nesta página, só no navegador e só quando a pessoa pede o 3D: abrir com ele
+// custava cerca de 1,2 s de processamento no celular antes de qualquer toque.
+const importarCena = () => import('./Cena')
+const Cena = dynamic(importarCena, {
   ssr: false,
   loading: () => <div className={estilos.carregando}>Montando o container…</div>,
 })
@@ -124,6 +127,8 @@ export function Montador() {
   const [vista, setVista] = useState<Vista>({ modo: 'perspectiva', versao: 0 })
   const [aviso, setAviso] = useState('')
   const capturar = useRef<(() => string) | null>(null)
+  // Link de projeto ou ponto de partida vindo de outra página já é um pedido de 3D: abre direto
+  const [iniciado, setIniciado] = useState(() => parametros.has('p') || parametros.has('partida'))
 
   const emConflito = useMemo(() => conflitos(projeto), [projeto])
   const itemSelecionado = projeto.itens.find((i) => i.id === selecionado) ?? null
@@ -163,6 +168,7 @@ export function Montador() {
     }
     trocar(novo)
     setSelecionado(novo.itens.at(-1)?.id ?? null)
+    setIniciado(true)
   }
 
   const girarSelecionado = useCallback(() => {
@@ -349,29 +355,48 @@ export function Montador() {
 
       <div className={estilos.palco}>
         <div className={estilos.canvas}>
-          <LimiteDeErro
-            reserva={
-              <div className={estilos.carregando}>
-                Este navegador não conseguiu abrir o 3D. Conte o seu projeto pelo formulário em{' '}
-                <a href="/sob-medida#projeto">Sob medida</a>.
+          {iniciado ? (
+            <LimiteDeErro
+              reserva={
+                <div className={estilos.carregando}>
+                  Este navegador não conseguiu abrir o 3D. Conte o seu projeto pelo formulário em{' '}
+                  <a href="/sob-medida#projeto">Sob medida</a>.
+                </div>
+              }
+            >
+              <Cena
+                projeto={projeto}
+                selecionado={selecionado}
+                emConflito={emConflito}
+                porDentro={porDentro}
+                vista={vista}
+                onSelecionar={setSelecionado}
+                onMover={(item) => despachar({ tipo: 'mover', item })}
+                onCapturador={(fn) => {
+                  capturar.current = fn
+                }}
+              />
+            </LimiteDeErro>
+          ) : (
+            <div className={estilos.capa}>
+              <Image src="/montador/previa.jpg" alt="" fill priority sizes="(min-width: 1000px) 70vw, 100vw" />
+              <div className={estilos.capaChamada}>
+                {/* Passar o mouse ou encostar o dedo já começa a baixar o 3D */}
+                <button
+                  type="button"
+                  className={estilos.comecar}
+                  onPointerEnter={() => void importarCena()}
+                  onFocus={() => void importarCena()}
+                  onClick={() => setIniciado(true)}
+                >
+                  Começar a montar <Icone nome="seta" tamanho={20} />
+                </button>
+                <p>Gire, arraste os móveis e mande o projeto pelo WhatsApp.</p>
               </div>
-            }
-          >
-            <Cena
-              projeto={projeto}
-              selecionado={selecionado}
-              emConflito={emConflito}
-              porDentro={porDentro}
-              vista={vista}
-              onSelecionar={setSelecionado}
-              onMover={(item) => despachar({ tipo: 'mover', item })}
-              onCapturador={(fn) => {
-                capturar.current = fn
-              }}
-            />
-          </LimiteDeErro>
+            </div>
+          )}
 
-          <div className={estilos.ferramentas}>
+          <div className={estilos.ferramentas} hidden={!iniciado}>
             <button type="button" aria-pressed={porDentro} onClick={() => setPorDentro((v) => !v)}>
               Ver por dentro
             </button>
@@ -386,7 +411,7 @@ export function Montador() {
             </button>
           </div>
 
-          <p className={estilos.ocupacao} aria-live="polite">
+          <p className={estilos.ocupacao} aria-live="polite" hidden={!iniciado}>
             <span className="marcacao">{ocupada}%</span> do piso ocupado · {metros(interno(projeto).c)} ×{' '}
             {metros(interno(projeto).l)} m
           </p>
