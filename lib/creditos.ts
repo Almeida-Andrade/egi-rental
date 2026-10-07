@@ -7,7 +7,7 @@ export interface Credito {
 
 export const CREDITOS: Credito[] = [
   { arquivo: 'capa-container-escuro.jpg', autor: 'Mauro Favaron', url: 'https://unsplash.com/photos/V8V7IPeONXg' },
-  { arquivo: 'escritorio-azul.jpg', autor: 'Martin Woortman', url: 'https://unsplash.com/photos/IVhqs0wkV8U' },
+  { arquivo: 'escritorio-capa.jpg', autor: 'Yohan Marion', url: 'https://unsplash.com/photos/cAZpES9RkIg' },
   { arquivo: 'escritorio-interior.jpg', autor: 'Alex Tyson', url: 'https://unsplash.com/photos/teQrU4inRDU' },
   { arquivo: 'escritorio-branco.jpg', autor: 'Sergio Martins', url: 'https://unsplash.com/photos/GI50dxbhwsU' },
   { arquivo: 'almoxarifado-portas.jpg', autor: 'David Birozy', url: 'https://unsplash.com/photos/GdnIohvd5Cg' },

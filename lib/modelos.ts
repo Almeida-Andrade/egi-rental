@@ -58,7 +58,7 @@ export const CONTEUDO_USO: Record<Uso, ConteudoUso> = {
     ],
     indicadoPara: ['Canteiros de obras', 'Indústrias e mineradoras', 'Projetos temporários', 'Pontos de atendimento'],
     combinaveis: ['Ar-condicionado', 'Iluminação e tomadas', 'Janelas com grade', 'Divisórias internas', 'Mobiliário'],
-    capa: { src: '/fotos/escritorio-azul.jpg', alt: 'Container escritório azul com janela' },
+    capa: { src: '/fotos/escritorio-capa.jpg', alt: 'Containers azuis com janelões, transformados em espaço de trabalho' },
     galeria: [
       { src: '/fotos/escritorio-interior.jpg', alt: 'Interior de escritório compacto com mesa e computador' },
       { src: '/fotos/escritorio-branco.jpg', alt: 'Container branco com ar-condicionado instalado' },
