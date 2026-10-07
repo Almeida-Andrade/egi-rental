@@ -398,7 +398,7 @@
   .quemSomos {
     grid-template-columns: 5fr 7fr;
   }
-  .quemSomosFoto {
+  .quemSomosLado {
     position: sticky;
     top: calc(var(--altura-cabecalho) + 32px);
   }

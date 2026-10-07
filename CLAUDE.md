@@ -15,7 +15,7 @@ npm run build && npm run test:e2e   # Playwright contra o build, porta 3008
 ## Regras
 
 ### Dados
-- **O site lê só a view `v_site_containers`** (migração 0221 do OMNIS): `uso`, `tamanho_pes`, `fabricacao`. É a única porta `anon` de container no banco. Dono, valores, local (tem nome de cliente), locatário e situação nunca vêm para cá; coluna nova na view é decisão do dono e migração nova lá.
+- **O site lê só a view `v_site_containers`** (migração 0222 do OMNIS): `uso`, `tamanho_pes`, `fabricacao`. É a única porta `anon` de container no banco. Dono, valores, local (tem nome de cliente), locatário e situação nunca vêm para cá; coluna nova na view é decisão do dono e migração nova lá.
 - **O catálogo é por MODELO (uso × tamanho), nunca por container.** A frota está "a conferir" no OMNIS e a situação de cada unidade não é confiável: o site não mostra disponibilidade ("consulte"). Ligar a contagem de livres é decisão do dono, depois do pente fino.
 - **Banco fora do ar não derruba o site**: `buscarCatalogo` cai na `FROTA_RESERVA` (`lib/catalogo.ts`) e avisa no log.
 - Os valores de `Uso`, `Tamanho` e `Fabricacao` (`lib/modelos.ts`) são os do `check` da tabela `containers` do OMNIS: valor novo lá entra aqui também (uso desconhecido cai em "outro").

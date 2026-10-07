@@ -168,13 +168,15 @@ export default async function Inicio() {
       {/* Quem somos */}
       <section id="quem-somos" className={`${estilos.secao} ${estilos.secaoEscura}`} aria-labelledby="quem-somos-titulo">
         <div className={`${estilos.interno} ${estilos.quemSomos}`}>
-          <div className={`${estilos.quemSomosFoto} revelar`}>
-            <Image
-              src="/fotos/qualidade-solda.jpg"
-              alt="Soldador trabalhando numa estrutura metálica"
-              fill
-              sizes="(min-width: 960px) 45vw, 100vw"
-            />
+          <div className={estilos.quemSomosLado}>
+            <div className={`${estilos.quemSomosFoto} revelar`}>
+              <Image
+                src="/fotos/qualidade-solda.jpg"
+                alt="Soldador trabalhando numa estrutura metálica"
+                fill
+                sizes="(min-width: 960px) 45vw, 100vw"
+              />
+            </div>
           </div>
           <div>
             <TituloSecao
