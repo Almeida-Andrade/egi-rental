@@ -132,6 +132,8 @@ export function Montador() {
   const raiz = useRef<HTMLDivElement>(null)
   const [telaCheia, setTelaCheia] = useState(false)
   const [dicaGiro, setDicaGiro] = useState(true)
+  // Na tela cheia as opções (tamanho, cor, peças) ficam numa gaveta aberta pela barra de baixo
+  const [opcoesAbertas, setOpcoesAbertas] = useState(false)
 
   // Tela cheia pela API do navegador quando existe; no iPhone, que não a tem para página, o mesmo
   // efeito vem do CSS (data-tela-cheia). No celular tenta deitar a tela (só o Android aceita).
@@ -139,6 +141,7 @@ export function Montador() {
     if (telaCheia) {
       if (document.fullscreenElement) await document.exitFullscreen().catch(() => {})
       setTelaCheia(false)
+      setOpcoesAbertas(false)
       return
     }
     setTelaCheia(true)
@@ -153,7 +156,9 @@ export function Montador() {
   useEffect(() => {
     // Saiu da tela cheia pelo Esc ou pelo gesto do sistema: o estado acompanha
     const aoMudar = () => {
-      if (!document.fullscreenElement) setTelaCheia(false)
+      if (document.fullscreenElement) return
+      setTelaCheia(false)
+      setOpcoesAbertas(false)
     }
     document.addEventListener('fullscreenchange', aoMudar)
     return () => document.removeEventListener('fullscreenchange', aoMudar)
@@ -218,6 +223,8 @@ export function Montador() {
     trocar(novo)
     setSelecionado(novo.itens.at(-1)?.id ?? null)
     setIniciado(true)
+    // No celular a gaveta cobre o 3D: fecha para a pessoa ver a peça que entrou
+    if (telaCheia && window.matchMedia('(max-width: 999px)').matches) setOpcoesAbertas(false)
   }
 
   const girarSelecionado = useCallback(() => {
@@ -245,7 +252,8 @@ export function Montador() {
       const alvo = e.target as HTMLElement
       if (alvo.closest('input, textarea, select')) return
       if (e.key === 'Escape') {
-        if (!itemSelecionado && telaCheia && !document.fullscreenElement) setTelaCheia(false)
+        if (opcoesAbertas) setOpcoesAbertas(false)
+        else if (!itemSelecionado && telaCheia && !document.fullscreenElement) setTelaCheia(false)
         setSelecionado(null)
       }
       if (!itemSelecionado) return
@@ -266,7 +274,7 @@ export function Montador() {
     }
     window.addEventListener('keydown', aoTeclar)
     return () => window.removeEventListener('keydown', aoTeclar)
-  }, [itemSelecionado, girarSelecionado, duplicarSelecionado, removerSelecionado, projeto, telaCheia])
+  }, [itemSelecionado, girarSelecionado, duplicarSelecionado, removerSelecionado, projeto, telaCheia, opcoesAbertas])
 
   const linkDoProjeto = () => {
     const url = new URL(window.location.href)
@@ -293,12 +301,20 @@ export function Montador() {
     a.click()
   }
 
+  const enviarProjeto = () => window.open(linkWhatsApp(resumoDoProjeto(projeto, linkDoProjeto())), '_blank', 'noopener')
+
   const lista = contagem(projeto)
   const ocupada = areaOcupada(projeto)
 
   return (
-    <div ref={raiz} className={estilos.montador} data-tela-cheia={telaCheia}>
-      <aside className={estilos.painel} aria-label="Opções do container">
+    <div ref={raiz} className={estilos.montador} data-tela-cheia={telaCheia} data-opcoes={opcoesAbertas}>
+      <aside id="opcoes-montador" className={estilos.painel} aria-label="Opções do container">
+        <div className={estilos.cabecaGaveta}>
+          <strong>Opções do container</strong>
+          <button type="button" onClick={() => setOpcoesAbertas(false)}>
+            Fechar
+          </button>
+        </div>
         <section className={estilos.bloco}>
           <h2>Tamanho</h2>
           <div className={estilos.tamanhos} role="radiogroup" aria-label="Tamanho do container">
@@ -521,6 +537,32 @@ export function Montador() {
           )}
         </div>
 
+        {/* Tela cheia: as opções numa gaveta e o envio sempre à vista, numa barra na base */}
+        {telaCheia && (
+          <div className={estilos.barraTelaCheia}>
+            <button
+              type="button"
+              className={estilos.botaoOpcoes}
+              aria-expanded={opcoesAbertas}
+              aria-controls="opcoes-montador"
+              onClick={() => setOpcoesAbertas((v) => !v)}
+            >
+              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                <path d="M4 7h10M18 7h2M4 17h4M12 17h8" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <circle cx="16" cy="7" r="2" fill="none" stroke="currentColor" strokeWidth="2" />
+                <circle cx="10" cy="17" r="2" fill="none" stroke="currentColor" strokeWidth="2" />
+              </svg>
+              Opções
+            </button>
+            <p className={estilos.barraResumo}>
+              {descreverForma(projeto)} · {projeto.itens.length} {projeto.itens.length === 1 ? 'peça' : 'peças'}
+            </p>
+            <button type="button" className={estilos.enviar} onClick={enviarProjeto}>
+              <IconeWhatsApp /> Enviar este projeto
+            </button>
+          </div>
+        )}
+
         <section className={estilos.resumo} aria-labelledby="resumo-titulo">
           <div>
             <h2 id="resumo-titulo">
@@ -547,7 +589,7 @@ export function Montador() {
             <button
               type="button"
               className={estilos.enviar}
-              onClick={() => window.open(linkWhatsApp(resumoDoProjeto(projeto, linkDoProjeto())), '_blank', 'noopener')}
+              onClick={enviarProjeto}
             >
               <IconeWhatsApp /> Enviar este projeto
             </button>

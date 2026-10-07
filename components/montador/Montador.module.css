@@ -573,56 +573,174 @@
   gap: 6px;
 }
 
-/* Vale para a tela cheia do navegador e para o modo do iPhone, que não tem a API para página */
+/* Vale para a tela cheia do navegador e para o modo do iPhone, que não tem a API para página.
+   O 3D ocupa a tela; as opções viram gaveta e o envio fica numa barra fixa na base. */
 .montador[data-tela-cheia='true'] {
+  --barra: calc(64px + env(safe-area-inset-bottom));
   position: fixed;
   inset: 0;
   z-index: 200;
   margin: 0;
-  padding: 16px;
-  overflow: auto;
+  padding: 0;
+  overflow: hidden;
   background: var(--branco);
 }
 
-/* No computador o montador inteiro (peças e 3D) ocupa a tela */
-@media (min-width: 1000px) {
-  .montador[data-tela-cheia='true'] {
-    height: 100dvh;
-  }
-  .montador[data-tela-cheia='true'] .painel {
-    top: 0;
-    max-height: calc(100dvh - 32px);
-  }
-  .montador[data-tela-cheia='true'] .palco {
-    grid-template-rows: 1fr auto;
-    height: calc(100dvh - 32px);
-  }
-  .montador[data-tela-cheia='true'] .canvas {
-    height: auto;
-    min-height: 0;
+.montador[data-tela-cheia='true'] .canvas {
+  position: fixed;
+  inset: 0 0 var(--barra) 0;
+  z-index: 1;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+}
+
+.montador[data-tela-cheia='true'] :is(.resumo, .painel) {
+  display: none;
+}
+
+.montador[data-tela-cheia='true'] .dicaGiro {
+  display: none;
+}
+
+/* A gaveta: na lateral no computador, de baixo para cima no celular */
+.montador[data-tela-cheia='true'][data-opcoes='true'] .painel {
+  position: fixed;
+  top: 0;
+  bottom: var(--barra);
+  left: 0;
+  z-index: 3;
+  display: grid;
+  align-content: start;
+  gap: var(--gap-4);
+  width: 360px;
+  max-height: none;
+  margin: 0;
+  padding: 0 18px 18px;
+  overflow-y: auto;
+  background: var(--branco);
+  box-shadow: var(--sombra-forte);
+  animation: gavetaLado calc(0.3s * var(--tempo)) var(--curva);
+}
+
+.cabecaGaveta {
+  display: none;
+}
+
+.montador[data-tela-cheia='true'] .cabecaGaveta {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+  background: var(--branco);
+  border-bottom: 1px solid var(--linha);
+}
+
+.cabecaGaveta button {
+  min-height: 36px;
+  padding: 6px 14px;
+  font-weight: 600;
+  background: var(--branco);
+  border: 1px solid var(--linha);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.barraTelaCheia {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: var(--barra);
+  padding: 0 14px env(safe-area-inset-bottom);
+  color: var(--branco);
+  background: var(--tinta);
+}
+
+.botaoOpcoes {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 16px;
+  font-weight: 650;
+  color: var(--branco);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.botaoOpcoes[aria-expanded='true'] {
+  color: var(--tinta);
+  background: var(--branco);
+}
+
+.barraResumo {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--texto-claro-2);
+}
+
+.barraTelaCheia .enviar {
+  min-height: 44px;
+  padding: 8px 18px;
+}
+
+@keyframes gavetaLado {
+  from {
+    transform: translateX(calc(-30px * var(--deslocar)));
+    opacity: 0;
   }
 }
 
-/* No celular, só o 3D, de borda a borda */
+@keyframes gavetaBaixo {
+  from {
+    transform: translateY(calc(40px * var(--deslocar)));
+    opacity: 0;
+  }
+}
+
 @media (max-width: 999px) {
-  .montador[data-tela-cheia='true'] {
-    padding: 0;
+  .montador[data-tela-cheia='true'][data-opcoes='true'] .painel {
+    top: auto;
+    right: 0;
+    width: auto;
+    max-height: 72dvh;
+    border-radius: 20px 20px 0 0;
+    animation-name: gavetaBaixo;
   }
-  .montador[data-tela-cheia='true'] .canvas {
-    position: fixed;
-    inset: 0;
-    height: 100dvh;
-    margin: 0;
-    border: 0;
-  }
-  .montador[data-tela-cheia='true'] .dicaGiro {
-    display: none;
+  /* A barra da peça selecionada fica logo acima da barra de envio */
+  .montador[data-tela-cheia='true'] .selecao {
+    bottom: var(--barra);
   }
   /* Celular deitado fora da tela cheia: o 3D ganha altura */
   @media (orientation: landscape) {
     .canvas {
       height: 82svh;
     }
+  }
+}
+
+@media (max-width: 520px) {
+  .barraResumo {
+    display: none;
+  }
+  .barraTelaCheia {
+    justify-content: space-between;
   }
 }
 
