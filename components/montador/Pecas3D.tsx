@@ -30,9 +30,11 @@ function Caixa({ tam, pos, cor, transparente }: { tam: Vetor; pos: Vetor; cor: s
   const apagada = useContext(Apagada)
   const opacidade = apagada ? 0.15 : transparente ? 0.35 : 1
   return (
-    <mesh position={pos} castShadow receiveShadow>
+    <mesh position={pos} castShadow={!apagada} receiveShadow>
       <boxGeometry args={tam} />
+      {/* O three.js não recompila o material quando `transparent` muda: a chave força um novo */}
       <meshStandardMaterial
+        key={opacidade < 1 ? 'translucido' : 'opaco'}
         color={cor}
         roughness={0.75}
         metalness={cor === COR.inox || cor === COR.metal ? 0.35 : 0}

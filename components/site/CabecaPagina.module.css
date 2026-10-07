@@ -72,10 +72,8 @@
 
 .kicker {
   margin-bottom: var(--gap-3);
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: var(--trilha-larga);
-  text-transform: uppercase;
+  font-size: 0.95rem;
+  font-weight: 650;
   color: var(--aco-claro);
 }
 

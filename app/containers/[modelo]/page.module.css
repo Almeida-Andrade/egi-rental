@@ -76,17 +76,14 @@
 
 /* ---------- Informações ---------- */
 
-.kicker {
-  margin-bottom: var(--gap-2);
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: var(--trilha-larga);
-  text-transform: uppercase;
-  color: var(--aco);
-}
-
 .titulo {
   font-size: clamp(2.1rem, 1.5rem + 2.4vw, 3.4rem);
+}
+
+.titulo span {
+  margin-left: 0.1em;
+  font-size: 1.25em;
+  color: var(--azul);
 }
 
 .resumo {
@@ -95,20 +92,42 @@
   color: var(--texto-2);
 }
 
+/* A placa de dados, como a placa de identificação rebitada na porta do container */
 .ficha {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1px;
   margin: var(--gap-5) 0 0;
-  background: var(--linha);
-  border: 1px solid var(--linha);
+  padding: 14px;
+  color: var(--branco);
+  background: var(--tinta);
+  background-image: var(--ondulado);
   border-radius: var(--raio-marca-p);
-  overflow: hidden;
+}
+
+.ficha::before,
+.ficha::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  width: 6px;
+  height: 6px;
+  background: var(--aco);
+  border-radius: 50%;
+}
+
+.ficha::before {
+  left: 6px;
+}
+
+.ficha::after {
+  right: 6px;
 }
 
 .ficha > div {
-  padding: 14px 16px;
-  background: var(--branco);
+  padding: 12px 14px;
+  border: 1px solid var(--linha-escura);
 }
 
 .fichaInteira {
@@ -116,14 +135,24 @@
 }
 
 .ficha dt {
-  font-size: 0.78rem;
-  color: var(--texto-2);
+  font-size: 0.75rem;
+  color: var(--aco-claro);
 }
 
 .ficha dd {
-  margin: 2px 0 0;
-  font-weight: 600;
+  margin: 4px 0 0;
+  font-family: var(--fonte-marcacao), var(--fonte-titulo), sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.15rem, 0.95rem + 0.6vw, 1.45rem);
+  line-height: 1.1;
+  letter-spacing: 0.02em;
   font-variant-numeric: tabular-nums;
+}
+
+.fichaInteira dd {
+  font-family: var(--fonte-corpo);
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 .acoes {
@@ -230,5 +259,35 @@
 @media (min-width: 1080px) {
   .gradeOutros {
     grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ---------- Planta de exemplo ---------- */
+
+.plantaBloco {
+  display: grid;
+  gap: var(--gap-5);
+  align-items: center;
+}
+
+.plantaAcoes {
+  margin-top: var(--gap-4);
+}
+
+.plantaDesenho {
+  padding: var(--gap-4);
+  background-color: var(--branco);
+  background-image:
+    linear-gradient(var(--aco-fundo) 1px, transparent 1px),
+    linear-gradient(90deg, var(--aco-fundo) 1px, transparent 1px);
+  background-size: 24px 24px;
+  border: 1px solid var(--linha);
+  border-radius: var(--raio-marca);
+}
+
+@media (min-width: 960px) {
+  .plantaBloco {
+    grid-template-columns: 5fr 7fr;
+    gap: var(--gap-6);
   }
 }

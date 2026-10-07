@@ -37,7 +37,17 @@ npm run build && npm run test:e2e   # Playwright contra o build, porta 3008
 - **Comparador** (`ComparadorTamanhos`, `lib/plantas.ts`, `lib/medidas.ts`): o palco tem 13,6 m de largura e tudo é posicionado em `cqi` na mesma escala; as plantas são EXEMPLO de uso (o site diz isso) e o teste trava peça fora do container e móvel sobreposto. Modelo novo na frota ganha planta em `PLANTAS`, senão cai em "espaço livre".
 - **Números do setor** (`lib/numeros.ts`, `NumerosModular`): só número com fonte conferida na página original, e o texto diz que são do setor, não da EGI Rental. Custo da McKinsey não entra (eles dizem que ainda é exceção).
 - **Transição entre páginas**: a foto do cartão vira a foto da ficha por `ViewTransition name="foto-<slug>" share="morph" default="none"` nos dois lados. Nome repetido na mesma página quebra o morph.
-- **Bibliotecas avaliadas** (Motion, Anime.js, Kokonut UI, Bklit UI): nenhuma instalada. Kokonut e Bklit exigem Tailwind/shadcn, então as técnicas foram portadas para CSS Modules. Motion (`layoutId`, `AnimatePresence`, drag) e Anime.js (`morphTo`, `createMotionPath`, `createDraggable`) são os candidatos se um dia o CSS não bastar, sempre numa folha `'use client'` e por import dinâmico.
+- **Bibliotecas**: Kokonut UI e Bklit UI exigem Tailwind/shadcn, então só as técnicas vieram (CSS Modules). **anime.js** entra por `import()` dinâmico e só no que o CSS não faz: a mola do encaixe da régua do comparador e a cascata das peças da planta (`stagger` a partir do centro). Motion não está instalado.
+- **Dicas dos gráficos** (`Grafico` em `NumerosModular`): todo ponto com valor leva `data-dica` e `tabIndex={0}`; a dica segue o ponteiro, vira de lado perto da borda direita e o resto esmaece. Gráfico novo usa o mesmo componente.
+
+### Montador 3D (`/sob-medida/montar`)
+- **three.js + @react-three/fiber + drei, com versão exata** (o three muda API em versão "menor"). A cena (`components/montador/Cena.tsx`) entra por `next/dynamic` com `ssr: false`: o 3D só baixa nesta rota. Se o WebGL falhar, o limite de erro manda para o formulário.
+- **Toda regra mora em `lib/montador.ts`** (peças e medidas, limites, encaixe de 5 cm, conflitos, lugar livre, link, resumo, pontos de partida), com teste. A cena só desenha e devolve o item movido. A busca de lugar livre testa só a peça nova (`conflitaCom`): recalcular todos os conflitos a cada posição travava o clique com o container cheio.
+- **Conflito é aviso, nunca bloqueio**: móvel sobre móvel, peças sobrepostas na mesma parede e móvel na área de abrir da porta (0,8 m) ficam vermelhos.
+- **O projeto vive no link** (`?p=`, base64url de `[1, tamanho, cor, itens]`): é o que vai no WhatsApp e o que a equipe abre. Link é entrada não confiável: `decodificar` limita tamanho, tipos, quantidade (`MAX_ITENS`) e posição, e descarta o resto. Mudar o formato pede versão nova (o `1` na frente) e manter a leitura da antiga.
+- Paredes entre a câmera e o interior ficam translúcidas (`VigiaDasParedes`), e as peças de parede somem junto. Material que alterna entre opaco e translúcido troca de `key`: o three.js não recompila quando `transparent` muda.
+- Sem `Html` do drei: os rótulos flutuantes davam erro de desmontagem no React 19. Informação vai nos painéis HTML em volta do canvas.
+- `public/montador/previa.jpg` é captura do próprio montador (ponto de partida "escritório"), não foto de banco: fica fora de `CREDITOS`.
 
 ### Imagens
 - Fotos em `public/fotos`, do Unsplash (licença livre para uso comercial). **Foto nova entra em `lib/creditos.ts`**: o teste trava arquivo sem crédito e crédito sem arquivo.

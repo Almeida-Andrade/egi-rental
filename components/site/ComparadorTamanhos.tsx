@@ -1,12 +1,14 @@
 'use client'
 
 import Link from 'next/link'
-import { useId, useMemo, useState } from 'react'
+import type { AnimationParams } from 'animejs'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { MEDIDAS_METROS, metros, type Tamanho } from '@/lib/medidas'
 import type { Uso } from '@/lib/modelos'
-import { plantaDe, type Peca } from '@/lib/plantas'
+import { plantaDe } from '@/lib/plantas'
 import { linkWhatsApp, mensagemDoModelo } from '@/lib/whatsapp'
 import { IconeWhatsApp } from './Icone'
+import { PlantaDoContainer } from './PlantaDoContainer'
 import { useNumeroAnimado } from './useNumeroAnimado'
 import estilos from './ComparadorTamanhos.module.css'
 
@@ -35,71 +37,6 @@ function Pessoa() {
   )
 }
 
-function PecaDaPlanta({ peca, i }: { peca: Peca; i: number }) {
-  const x = peca.x * 100
-  const y = peca.y * 100
-  const w = peca.w * 100
-  const h = peca.h * 100
-  const estilo = { '--i': i } as React.CSSProperties
-
-  switch (peca.tipo) {
-    case 'porta':
-      return (
-        <g className={estilos.abertura} style={estilo}>
-          <rect x={x} y={y - 4} width={w} height={h + 8} className={estilos.vao} />
-          <path d={`M${x + w} ${y} A${w} ${w} 0 0 0 ${x} ${y - w}`} className={estilos.giro} />
-          <line x1={x} y1={y} x2={x} y2={y - w} className={estilos.folha} />
-        </g>
-      )
-    case 'portas-fundo': {
-      // Portas de abrir para fora, desenhadas curtas para não sair do palco no 40 pés
-      const r = 35
-      return (
-        <g className={estilos.abertura} style={estilo}>
-          <rect x={x - 4} y={y} width={w + 8} height={h} className={estilos.vao} />
-          <path d={`M${x + w} ${y} l${r} ${-r * 0.15} M${x + w} ${y + h} l${r} ${r * 0.15}`} className={estilos.folha} />
-          <path d={`M${x + w} ${y + r} A${r} ${r} 0 0 0 ${x + w + r} ${y - r * 0.15}`} className={estilos.giro} />
-          <path d={`M${x + w} ${y + h - r} A${r} ${r} 0 0 1 ${x + w + r} ${y + h + r * 0.15}`} className={estilos.giro} />
-        </g>
-      )
-    }
-    case 'janela':
-      return (
-        <g className={estilos.abertura} style={estilo}>
-          <rect x={x} y={y - 4} width={w} height={h + 8} className={estilos.vao} />
-          <line x1={x} y1={y + h / 2} x2={x + w} y2={y + h / 2} className={estilos.vidro} />
-        </g>
-      )
-    case 'divisoria':
-      return <rect x={x} y={y} width={w} height={h} className={estilos.divisoria} style={estilo} />
-    case 'cadeira':
-    case 'vaso':
-    case 'pia':
-      return <rect x={x} y={y} width={w} height={h} rx={Math.min(w, h) / 2.4} className={estilos.movel} style={estilo} />
-    case 'fogao':
-      return (
-        <g className={estilos.peca} style={estilo}>
-          <rect x={x} y={y} width={w} height={h} className={estilos.movelForte} />
-          {[0.3, 0.7].flatMap((fx) =>
-            [0.3, 0.7].map((fy) => <circle key={`${fx}${fy}`} cx={x + w * fx} cy={y + h * fy} r={w * 0.12} className={estilos.boca} />),
-          )}
-        </g>
-      )
-    case 'chuveiro':
-      return (
-        <g className={estilos.peca} style={estilo}>
-          <rect x={x} y={y} width={w} height={h} className={estilos.movel} />
-          <path d={`M${x} ${y}L${x + w} ${y + h}M${x + w} ${y}L${x} ${y + h}`} className={estilos.traco} />
-        </g>
-      )
-    case 'prateleira':
-    case 'palete':
-      return <rect x={x} y={y} width={w} height={h} className={estilos.hachura} style={estilo} />
-    default:
-      return <rect x={x} y={y} width={w} height={h} rx="3" className={estilos.movelForte} style={estilo} />
-  }
-}
-
 export function ComparadorTamanhos({ modelos }: { modelos: ModeloComparavel[] }) {
   const id = useId()
   const tamanhos = useMemo(() => [...new Set(modelos.map((m) => m.tamanho))].sort((a, b) => a - b), [modelos])
@@ -116,8 +53,68 @@ export function ComparadorTamanhos({ modelos }: { modelos: ModeloComparavel[] })
 
   const { externa, interna } = MEDIDAS_METROS[tamanho]
   const planta = modelo ? plantaDe(modelo.uso, tamanho) : null
-  const comprimento = useNumeroAnimado(externa.comprimento)
+  const comprimentoAnimado = useNumeroAnimado(externa.comprimento)
   const area = useNumeroAnimado(interna.comprimento * interna.largura)
+
+  // Régua: a alça na ponta estica o container; ao soltar ele encaixa no tamanho mais perto, com mola.
+  const [esticado, setEsticado] = useState<number | null>(null)
+  const [arrastando, setArrastando] = useState(false)
+  const elevacao = useRef<HTMLDivElement>(null)
+  const planta3 = useRef<SVGSVGElement>(null)
+  const comprimento = esticado ?? comprimentoAnimado
+
+  const metrosDoPonteiro = (clienteX: number) => {
+    const caixa = elevacao.current?.getBoundingClientRect()
+    if (!caixa) return null
+    const m = ((clienteX - caixa.left) / caixa.width) * PALCO_M - INICIO_CAIXA_M
+    return Math.min(MEDIDAS_METROS[40].externa.comprimento + 0.3, Math.max(2.4, m))
+  }
+
+  const soltar = async (m: number) => {
+    setArrastando(false)
+    const maisPerto = tamanhos.reduce((melhor, t) =>
+      Math.abs(MEDIDAS_METROS[t].externa.comprimento - m) < Math.abs(MEDIDAS_METROS[melhor].externa.comprimento - m)
+        ? t
+        : melhor,
+    )
+    escolherTamanho(maisPerto)
+    const alvo = MEDIDAS_METROS[maisPerto].externa.comprimento
+    const { animate, spring } = await import('animejs')
+    const reduzido = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const estado = { m }
+    const movimento: AnimationParams = reduzido
+      ? { ease: 'outQuad', duration: 180 }
+      : { ease: spring({ bounce: 0.4, duration: 520 }) }
+    animate(estado, {
+      m: alvo,
+      ...movimento,
+      onUpdate: () => setEsticado(estado.m),
+      onComplete: () => setEsticado(null),
+    })
+  }
+
+  // Peças da planta surgem do centro para as pontas, em cascata (anime.js).
+  useEffect(() => {
+    const svg = planta3.current
+    if (!svg) return
+    let cancelar = () => {}
+    import('animejs').then(({ animate, stagger }) => {
+      const pecas = svg.querySelectorAll('[data-peca]')
+      if (!pecas.length) return
+      const reduzido = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      const animacao = animate(pecas, {
+        opacity: [0, 1],
+        scale: reduzido ? [1, 1] : [0.55, 1],
+        delay: stagger(reduzido ? 15 : 45, { from: 'center' }),
+        duration: reduzido ? 200 : 520,
+        ease: reduzido ? 'outQuad' : 'outBack(1.6)',
+      })
+      cancelar = () => {
+        animacao.cancel()
+      }
+    })
+    return () => cancelar()
+  }, [slug, tamanho])
 
   if (!modelo || !planta) return null
 
@@ -165,9 +162,13 @@ export function ComparadorTamanhos({ modelos }: { modelos: ModeloComparavel[] })
         </fieldset>
       </div>
 
-      <div className={estilos.palco} style={{ '--comprimento': emPalco(externa.comprimento) } as React.CSSProperties}>
-        <p className={estilos.rotuloVista}>Vista lateral, em escala</p>
-        <div className={estilos.elevacao} aria-hidden="true">
+      <div
+        className={estilos.palco}
+        data-esticando={esticado !== null || arrastando}
+        style={{ '--comprimento': emPalco(esticado ?? externa.comprimento) } as React.CSSProperties}
+      >
+        <p className={estilos.rotuloVista}>Vista lateral, em escala · arraste a ponta para mudar o tamanho</p>
+        <div ref={elevacao} className={estilos.elevacao} aria-hidden="true">
           <div className={estilos.pessoaLugar} style={{ left: emPalco(0.25) }}>
             <Pessoa />
             <span>1,75 m</span>
@@ -178,6 +179,29 @@ export function ComparadorTamanhos({ modelos }: { modelos: ModeloComparavel[] })
             </span>
             <span className={estilos.altura}>{metros(externa.altura)} m</span>
           </div>
+          <div
+            className={estilos.alca}
+            style={{ left: `calc(${emPalco(INICIO_CAIXA_M)} + var(--comprimento))` }}
+            data-arrastando={arrastando}
+            onPointerDown={(e) => {
+              e.currentTarget.setPointerCapture(e.pointerId)
+              setArrastando(true)
+              const m = metrosDoPonteiro(e.clientX)
+              if (m !== null) setEsticado(m)
+            }}
+            onPointerMove={(e) => {
+              if (!arrastando) return
+              const m = metrosDoPonteiro(e.clientX)
+              if (m !== null) setEsticado(m)
+            }}
+            onPointerUp={(e) => {
+              if (!arrastando) return
+              soltar(metrosDoPonteiro(e.clientX) ?? comprimento)
+            }}
+            onPointerCancel={() => soltar(comprimento)}
+          >
+            <span />
+          </div>
           <div className={estilos.chao} />
           <div className={estilos.cota} style={{ left: emPalco(INICIO_CAIXA_M) }}>
             <span className="marcacao">{metros(comprimento)} m</span>
@@ -186,24 +210,12 @@ export function ComparadorTamanhos({ modelos }: { modelos: ModeloComparavel[] })
 
         <p className={estilos.rotuloVista}>Planta vista de cima · exemplo de uso</p>
         <div className={estilos.plantaLugar} style={{ marginLeft: emPalco(INICIO_CAIXA_M) }}>
-          <svg
-            key={`${modelo.slug}`}
-            className={estilos.planta}
-            viewBox={`-12 -12 ${planta.comprimento * 100 + 24} ${planta.largura * 100 + 24}`}
-            role="img"
-            aria-label={`Planta de exemplo do ${modelo.nomeCompleto}: ${planta.legenda}`}
-          >
-            <rect
-              x="0"
-              y="0"
-              width={planta.comprimento * 100}
-              height={planta.largura * 100}
-              className={estilos.parede}
-            />
-            {planta.pecas.map((p, i) => (
-              <PecaDaPlanta key={`${p.tipo}-${i}`} peca={p} i={i} />
-            ))}
-          </svg>
+          <PlantaDoContainer
+            key={modelo.slug}
+            ref={planta3}
+            planta={planta}
+            rotulo={`Planta de exemplo do ${modelo.nomeCompleto}: ${planta.legenda}`}
+          />
         </div>
       </div>
 

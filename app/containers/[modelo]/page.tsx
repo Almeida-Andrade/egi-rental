@@ -8,10 +8,12 @@ import { CartaoModelo } from '@/components/site/CartaoModelo'
 import { DadosEstruturados } from '@/components/site/DadosEstruturados'
 import { FaixaSobMedida } from '@/components/site/FaixaSobMedida'
 import { Icone } from '@/components/site/Icone'
+import { PlantaDoContainer } from '@/components/site/PlantaDoContainer'
 import { TituloSecao } from '@/components/site/TituloSecao'
 import { modeloPorSlug, outrosModelos } from '@/lib/catalogo'
 import { buscarCatalogo } from '@/lib/dados/catalogo'
-import { ROTULO_FABRICACAO } from '@/lib/modelos'
+import { ROTULO_FABRICACAO, type Uso } from '@/lib/modelos'
+import { plantaDe } from '@/lib/plantas'
 import { URL_SITE } from '@/lib/site'
 import { linkWhatsApp, mensagemDoModelo } from '@/lib/whatsapp'
 import estilos from './page.module.css'
@@ -19,6 +21,14 @@ import estilos from './page.module.css'
 export const revalidate = 3600
 
 type Parametros = { params: Promise<{ modelo: string }> }
+
+// De qual ponto de partida o montador 3D abre, a partir do uso do modelo.
+const PARTIDA_DO_USO: Partial<Record<Uso, string>> = {
+  escritorio: 'escritorio',
+  hibrido: 'escritorio',
+  wc: 'banheiro',
+  stand: 'loja',
+}
 
 export async function generateStaticParams() {
   const catalogo = await buscarCatalogo()
@@ -54,6 +64,7 @@ export default async function FichaModelo({ params }: Parametros) {
   const fotos = [modelo.capa, ...modelo.galeria]
   const outros = outrosModelos(catalogo, modelo)
   const linkPedido = linkWhatsApp(mensagemDoModelo(modelo.nomeCompleto))
+  const planta = plantaDe(modelo.uso, modelo.tamanho)
 
   return (
     <>
@@ -109,8 +120,9 @@ export default async function FichaModelo({ params }: Parametros) {
           </div>
 
           <div className={estilos.info}>
-            <p className={estilos.kicker}>Container {modelo.tamanho} pés</p>
-            <h1 className={estilos.titulo}>{modelo.nomeCompleto}</h1>
+            <h1 className={estilos.titulo}>
+              {modelo.nome} <span className="marcacao">{modelo.tamanho}&apos;</span>
+            </h1>
             <p className={estilos.resumo}>{modelo.resumo}</p>
 
             <dl className={estilos.ficha}>
@@ -191,6 +203,31 @@ export default async function FichaModelo({ params }: Parametros) {
                 </p>
               </div>
             )}
+          </div>
+        </div>
+      </section>
+
+      <section className={`${estilos.secao} ${estilos.papel}`} aria-labelledby="planta-titulo">
+        <div className={`${estilos.interno} ${estilos.plantaBloco}`}>
+          <div>
+            <TituloSecao
+              id="planta-titulo"
+              kicker="Exemplo de uso"
+              titulo="Como ele pode ficar por dentro"
+              texto={`${planta.legenda}. É um exemplo: o layout final é combinado no orçamento.`}
+            />
+            <div className={estilos.plantaAcoes}>
+              <BotaoLink
+                href={`/sob-medida/montar${PARTIDA_DO_USO[modelo.uso] ? `?partida=${PARTIDA_DO_USO[modelo.uso]}` : ''}`}
+                variante="primario"
+                seta
+              >
+                Montar o meu em 3D
+              </BotaoLink>
+            </div>
+          </div>
+          <div className={estilos.plantaDesenho}>
+            <PlantaDoContainer planta={planta} rotulo={`Planta de exemplo do ${modelo.nomeCompleto}: ${planta.legenda}`} />
           </div>
         </div>
       </section>

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
+import Link from 'next/link'
 import { Suspense } from 'react'
 import { BotaoLink } from '@/components/site/Botao'
 import { CabecaPagina } from '@/components/site/CabecaPagina'
@@ -44,7 +45,34 @@ export default function SobMedida() {
         </BotaoLink>
       </CabecaPagina>
 
-      <section className={estilos.secao} aria-labelledby="adaptacoes-titulo">
+      <section className={estilos.secao} aria-labelledby="montador-titulo">
+        <div className={`${estilos.interno} ${estilos.vitrine}`}>
+          <Link href="/sob-medida/montar" className={estilos.vitrineImagem} aria-hidden="true" tabIndex={-1}>
+            <Image
+              src="/montador/previa.jpg"
+              alt=""
+              fill
+              sizes="(min-width: 960px) 55vw, 100vw"
+            />
+            <span className={`${estilos.vitrineSelo} marcacao`}>3D</span>
+          </Link>
+          <div>
+            <TituloSecao
+              id="montador-titulo"
+              kicker="Montador 3D"
+              titulo="Monte o seu container e mande para a gente"
+              texto="Escolha 10, 20 ou 40 pés, a cor da chapa e arraste mesas, banheiro, cozinha, porta e janela até ficar do seu jeito. O projeto vai pelo WhatsApp e a equipe abre o mesmo container que você montou."
+            />
+            <div className={estilos.vitrineAcoes}>
+              <BotaoLink href="/sob-medida/montar" variante="primario" grande seta>
+                Abrir o montador
+              </BotaoLink>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className={`${estilos.secao} ${estilos.papel}`} aria-labelledby="adaptacoes-titulo">
         <div className={estilos.interno}>
           <TituloSecao
             id="adaptacoes-titulo"

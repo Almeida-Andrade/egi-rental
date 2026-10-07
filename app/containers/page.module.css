@@ -76,3 +76,23 @@
 .tabela td:last-child {
   color: var(--texto-2);
 }
+
+.comparador {
+  margin-top: var(--gap-5);
+}
+
+.tabelaDetalhe {
+  margin-top: var(--gap-5);
+  border-top: 1px solid var(--linha);
+}
+
+.tabelaDetalhe summary {
+  padding: var(--gap-3) 0;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.tabelaNota {
+  max-width: 70ch;
+  color: var(--texto-2);
+}

@@ -25,7 +25,8 @@ export function metros(valor: number): string {
 }
 
 function textoDimensoes(d: Dimensoes): string {
-  return `${metros(d.comprimento)} × ${metros(d.largura)} × ${metros(d.altura)} m`
+  // Espaço inquebrável antes do "m": a unidade nunca desce sozinha para a linha de baixo.
+  return `${metros(d.comprimento)} × ${metros(d.largura)} × ${metros(d.altura)}\u00a0m`
 }
 
 function medidasDe(tamanho: Tamanho): Medidas {

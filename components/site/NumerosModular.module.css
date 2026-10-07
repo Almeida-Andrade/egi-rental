@@ -144,11 +144,30 @@
 }
 
 .escala {
-  display: flex;
-  justify-content: space-between;
+  position: relative;
+  height: 1.2em;
   margin-left: calc(9.5rem + var(--gap-3));
   font-size: 0.75rem;
   color: rgba(255, 255, 255, 0.45);
+}
+
+/* Cada marca no seu ponto da barra: 0, metade e prazo inteiro */
+.escala span {
+  position: absolute;
+  top: 0;
+}
+
+.escala span:nth-child(1) {
+  left: 0;
+}
+
+.escala span:nth-child(2) {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.escala span:nth-child(3) {
+  right: 0;
 }
 
 /* ---------- Medidor de tracinhos ---------- */
@@ -278,12 +297,56 @@
 }
 
 .colunaAzul {
-  background: #9db4e8;
+  background:
+    linear-gradient(0deg, #9db4e8 var(--cheio), transparent var(--cheio)),
+    repeating-linear-gradient(-45deg, #9db4e8 0 2px, transparent 2px 6px);
+  outline: 1px solid #9db4e8;
   transition-delay: calc(0.4s * var(--tempo));
 }
 
 .cartao[data-visivel='true'] :is(.colunaCinza, .colunaAzul) {
   transform: none;
+}
+
+/* ---------- Dicas ---------- */
+
+.grafico {
+  position: relative;
+}
+
+.grafico [data-dica] {
+  cursor: help;
+  outline-offset: 3px;
+  transition: opacity calc(0.18s * var(--tempo));
+}
+
+/* Quem não está sob o ponteiro esmaece, para o valor apontado saltar aos olhos */
+.grafico:has([data-dica]:hover) [data-dica]:not(:hover) {
+  opacity: 0.35;
+}
+
+.dica {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  max-width: 230px;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  font-weight: 550;
+  line-height: 1.35;
+  color: var(--tinta);
+  background: var(--branco);
+  border-radius: 8px 2px 8px 8px;
+  box-shadow: var(--sombra-forte);
+  pointer-events: none;
+  animation: dica calc(0.18s * var(--tempo)) var(--curva);
+}
+
+@keyframes dica {
+  from {
+    opacity: 0;
+  }
 }
 
 /* ---------- Fontes ---------- */

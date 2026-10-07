@@ -30,6 +30,57 @@ function useVisivel<T extends Element>() {
   return [ref, visivel] as const
 }
 
+interface Dica {
+  texto: string
+  x: number
+  y: number
+  virar: boolean
+}
+
+// Valor exato de quem está sob o ponteiro (ou com foco do teclado). Perto da borda direita a dica
+// vira para a esquerda; o resto do gráfico esmaece pelo CSS.
+function Grafico({ className, rotulo, children }: { className: string; rotulo: string; children: React.ReactNode }) {
+  const caixa = useRef<HTMLDivElement>(null)
+  const [dica, setDica] = useState<Dica | null>(null)
+
+  const mostrar = (alvo: EventTarget | null, x?: number, y?: number) => {
+    const el = alvo instanceof Element ? (alvo.closest('[data-dica]') as HTMLElement | null) : null
+    const area = caixa.current?.getBoundingClientRect()
+    if (!el || !area || !el.dataset.dica) {
+      setDica(null)
+      return
+    }
+    const r = el.getBoundingClientRect()
+    const px = (x ?? r.left + r.width / 2) - area.left
+    const py = (y ?? r.top) - area.top
+    setDica({ texto: el.dataset.dica, x: px, y: py, virar: px > area.width - 230 })
+  }
+
+  return (
+    <div
+      ref={caixa}
+      className={`${className} ${estilos.grafico}`}
+      role="group"
+      aria-label={rotulo}
+      onPointerMove={(e) => mostrar(e.target, e.clientX, e.clientY)}
+      onPointerLeave={() => setDica(null)}
+      onFocus={(e) => mostrar(e.target)}
+      onBlur={() => setDica(null)}
+    >
+      {children}
+      {dica && (
+        <div
+          className={estilos.dica}
+          role="tooltip"
+          style={{ transform: `translate(${dica.x}px, ${dica.y}px) translate(${dica.virar ? 'calc(-100% - 14px)' : '14px'}, -110%)` }}
+        >
+          {dica.texto}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function Fonte({ chave, numero }: { chave: ChaveFonte; numero: number }) {
   return (
     <a className={estilos.fonte} href={FONTES[chave].url} target="_blank" rel="noopener">
@@ -89,24 +140,35 @@ function CartaoPrazo() {
           {TEMPO.menosMax}%.<sup>1</sup>
         </span>
       </p>
-      <div
+      <Grafico
         className={estilos.barras}
-        role="img"
-        aria-label={`Obra tradicional: 100% do prazo. Modular: de ${de}% a ${ate}% do prazo.`}
+        rotulo={`Obra tradicional: 100% do prazo. Modular: de ${de}% a ${ate}% do prazo.`}
       >
         <div className={estilos.linhaBarra}>
           <span>Obra tradicional</span>
           <div className={estilos.trilho}>
-            <div className={estilos.barraCinza} style={{ '--v': 1 } as React.CSSProperties} />
+            <div
+              className={estilos.barraCinza}
+              style={{ '--v': 1 } as React.CSSProperties}
+              tabIndex={0}
+              data-dica="Obra tradicional: 100% do prazo"
+            />
           </div>
         </div>
         <div className={estilos.linhaBarra}>
           <span>Modular</span>
           <div className={estilos.trilho}>
-            <div className={estilos.barraAzul} style={{ '--v': de / 100 } as React.CSSProperties} />
+            <div
+              className={estilos.barraAzul}
+              style={{ '--v': de / 100 } as React.CSSProperties}
+              tabIndex={0}
+              data-dica={`Modular, no melhor caso: ${de}% do prazo (${TEMPO.menosMax}% mais rápido)`}
+            />
             <div
               className={estilos.barraFaixa}
               style={{ '--de': de / 100, '--v': (ate - de) / 100 } as React.CSSProperties}
+              tabIndex={0}
+              data-dica={`Faixa medida: de ${de}% a ${ate}% do prazo, ou ${TEMPO.menosMin}% a ${TEMPO.menosMax}% mais rápido`}
             />
           </div>
         </div>
@@ -115,7 +177,7 @@ function CartaoPrazo() {
           <span>50%</span>
           <span>100% do prazo</span>
         </div>
-      </div>
+      </Grafico>
     </article>
   )
 }
@@ -125,14 +187,16 @@ function CartaoResiduo() {
   return (
     <article ref={ref} className={estilos.cartao} data-visivel={visivel}>
       <p className={estilos.rotulo}>Resíduo na obra</p>
-      <div className={estilos.medidorLugar}>
-        <Medidor pct={RESIDUO.menosAte} />
+      <Grafico className={estilos.medidorLugar} rotulo={`Até ${RESIDUO.menosAte}% menos resíduo`}>
+        <div tabIndex={0} data-dica={`Até ${RESIDUO.menosAte}% menos resíduo. Cada traço vale 2,5%.`}>
+          <Medidor pct={RESIDUO.menosAte} />
+        </div>
         <p className={estilos.medidorValor}>
           <small>até</small>
           <Numero valor={RESIDUO.menosAte} visivel={visivel} sufixo="%" />
           <small>menos</small>
         </p>
-      </div>
+      </Grafico>
       <p className={estilos.texto}>
         de madeira, papelão, plástico e concreto desperdiçados, comparado à obra convencional.<sup>2</sup>
       </p>
@@ -145,15 +209,20 @@ function CartaoAprovacao() {
   return (
     <article ref={ref} className={estilos.cartao} data-visivel={visivel}>
       <p className={estilos.rotulo}>Quem já usa</p>
-      <div className={estilos.grade} role="img" aria-label={`${APROVACAO.deCada10} em cada 10 profissionais`}>
+      <Grafico className={estilos.grade} rotulo={`${APROVACAO.deCada10} em cada 10 profissionais`}>
         {Array.from({ length: 10 }, (_, i) => (
           <span
             key={i}
             className={i < APROVACAO.deCada10 ? estilos.caixaAcesa : estilos.caixaApagada}
             style={{ '--i': i } as React.CSSProperties}
+            data-dica={
+              i < APROVACAO.deCada10
+                ? `${APROVACAO.deCada10} em cada 10 relatam mais produtividade e prazo previsível`
+                : `1 em cada 10 não relatou o ganho`
+            }
           />
         ))}
-      </div>
+      </Grafico>
       <p className={estilos.texto}>
         <strong className="marcacao">{APROVACAO.deCada10} em 10</strong> profissionais relatam mais produtividade,
         qualidade e previsibilidade de prazo com construção modular.<sup>3</sup>
@@ -168,23 +237,34 @@ function CartaoEnergia() {
   return (
     <article ref={ref} className={estilos.cartao} data-visivel={visivel}>
       <p className={estilos.rotulo}>Reusar em vez de derreter</p>
-      <div
+      <Grafico
         className={estilos.colunas}
-        role="img"
-        aria-label={`Derreter: ${REUSO.kwhDerreter} kWh. Reusar: de ${REUSO.kwhReusarMin} a ${REUSO.kwhReusarMax} kWh.`}
+        rotulo={`Derreter: ${REUSO.kwhDerreter} kWh. Reusar: de ${REUSO.kwhReusarMin} a ${REUSO.kwhReusarMax} kWh.`}
       >
         <div className={estilos.coluna}>
-          <div className={estilos.colunaCinza} style={{ '--v': 1 } as React.CSSProperties} />
+          <div
+            className={estilos.colunaCinza}
+            style={{ '--v': 1 } as React.CSSProperties}
+            tabIndex={0}
+            data-dica={`Derreter o aço: cerca de ${REUSO.kwhDerreter.toLocaleString('pt-BR')} kWh`}
+          />
           <span>Derreter</span>
         </div>
         <div className={estilos.coluna}>
           <div
             className={estilos.colunaAzul}
-            style={{ '--v': REUSO.kwhReusarMax / REUSO.kwhDerreter } as React.CSSProperties}
+            style={
+              {
+                '--v': REUSO.kwhReusarMax / REUSO.kwhDerreter,
+                '--cheio': `${(REUSO.kwhReusarMin / REUSO.kwhReusarMax) * 100}%`,
+              } as React.CSSProperties
+            }
+            tabIndex={0}
+            data-dica={`Reusar como construção: de ${REUSO.kwhReusarMin} a ${REUSO.kwhReusarMax} kWh`}
           />
           <span>Reusar</span>
         </div>
-      </div>
+      </Grafico>
       <p className={estilos.texto}>
         <strong className="marcacao">
           {energia.min}–{energia.max}%

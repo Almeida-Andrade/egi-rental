@@ -1,0 +1,69 @@
+.planta {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.parede {
+  fill: var(--branco);
+  stroke: var(--tinta);
+  stroke-width: 8;
+}
+
+/* A entrada das peças é do anime.js (stagger a partir do centro) */
+.planta [data-peca] {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.movel {
+  fill: var(--aco-fundo);
+  stroke: var(--aco);
+  stroke-width: 2.5;
+}
+
+.movelForte {
+  fill: var(--aco-claro);
+  stroke: var(--aco);
+  stroke-width: 2.5;
+}
+
+.hachura {
+  fill: var(--azul-claro);
+  stroke: var(--azul);
+  stroke-width: 2.5;
+  stroke-dasharray: 10 6;
+}
+
+.divisoria {
+  fill: var(--tinta);
+}
+
+.vao {
+  fill: var(--branco);
+}
+
+.giro,
+.traco {
+  fill: none;
+  stroke: var(--aco);
+  stroke-width: 2;
+  stroke-dasharray: 6 5;
+}
+
+.folha {
+  stroke: var(--tinta);
+  stroke-width: 3;
+}
+
+.vidro {
+  stroke: var(--azul);
+  stroke-width: 4;
+}
+
+.boca {
+  fill: none;
+  stroke: var(--aco);
+  stroke-width: 2;
+}

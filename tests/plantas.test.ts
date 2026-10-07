@@ -7,7 +7,7 @@ const catalogo = montarCatalogo(FROTA_RESERVA)
 
 describe('medidas', () => {
   it('o texto sai dos números, com vírgula e duas casas', () => {
-    expect(MEDIDAS[20].externa).toBe('6,06 × 2,44 × 2,59 m')
+    expect(MEDIDAS[20].externa).toBe('6,06 × 2,44 × 2,59\u00a0m')
     expect(MEDIDAS[40].areaM2).toBe(28.3)
     expect(MEDIDAS[10].areaM2).toBe(6.7)
   })

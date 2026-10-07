@@ -2,6 +2,54 @@
   padding: var(--gap-7) 0;
 }
 
+.papel {
+  background: var(--papel);
+}
+
+.vitrine {
+  display: grid;
+  gap: var(--gap-5);
+  align-items: center;
+}
+
+.vitrineImagem {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: #d5dbe2;
+  border-radius: 64px 8px 8px 8px;
+}
+
+.vitrineImagem img {
+  object-fit: cover;
+  transition: transform calc(0.8s * var(--tempo)) var(--curva);
+}
+
+.vitrineImagem:hover img {
+  transform: scale(calc(1 + 0.04 * var(--deslocar)));
+}
+
+.vitrineSelo {
+  position: absolute;
+  right: 16px;
+  bottom: 12px;
+  font-size: 3rem;
+  line-height: 1;
+  color: var(--azul);
+}
+
+.vitrineAcoes {
+  margin-top: var(--gap-4);
+}
+
+@media (min-width: 960px) {
+  .vitrine {
+    grid-template-columns: 7fr 5fr;
+    gap: var(--gap-6);
+  }
+}
+
 .escura {
   background: var(--tinta);
   color: var(--texto-claro);

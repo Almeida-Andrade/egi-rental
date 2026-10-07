@@ -224,6 +224,47 @@
   transition: width calc(0.7s * var(--tempo)) var(--curva-porta);
 }
 
+/* Durante o arrasto e a mola, a largura segue o dedo, sem transição atrasando */
+.palco[data-esticando='true'] :is(.caixa, .cota, .plantaLugar) {
+  transition: none;
+}
+
+/* A planta é do tamanho anterior até soltar: fica esmaecida para não enganar */
+.palco[data-esticando='true'] .plantaLugar {
+  opacity: 0.3;
+}
+
+.alca {
+  position: absolute;
+  bottom: calc(0.55 / 13.6 * 100cqi + 2px + 2.59 / 13.6 * 100cqi / 2 - 22px);
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-left: -22px;
+  cursor: ew-resize;
+  touch-action: none;
+}
+
+.alca span {
+  width: 14px;
+  height: 34px;
+  background:
+    linear-gradient(90deg, transparent 4px, rgba(10, 18, 34, 0.35) 4px 5px, transparent 5px 9px, rgba(10, 18, 34, 0.35) 9px 10px, transparent 10px),
+    var(--branco);
+  border: 1.5px solid var(--tinta);
+  border-radius: 6px;
+  box-shadow: var(--sombra);
+  transition: transform calc(0.2s * var(--tempo)) var(--curva);
+}
+
+.alca:hover span,
+.alca[data-arrastando='true'] span {
+  transform: scale(1.15);
+  background-color: var(--azul-claro);
+}
+
 /* As barras de trava das portas, na ponta */
 .caixa::after {
   content: '';
@@ -255,7 +296,7 @@
 
 .altura {
   position: absolute;
-  left: calc(100% + 8px);
+  left: calc(100% + 26px);
   top: 50%;
   font-size: 0.72rem;
   font-weight: 600;
@@ -301,89 +342,6 @@
 .plantaLugar {
   width: var(--comprimento);
   transition: width calc(0.7s * var(--tempo)) var(--curva-porta);
-}
-
-.planta {
-  display: block;
-  width: 100%;
-  height: auto;
-  overflow: visible;
-}
-
-.parede {
-  fill: var(--branco);
-  stroke: var(--tinta);
-  stroke-width: 8;
-}
-
-.peca,
-.movel,
-.movelForte,
-.hachura,
-.divisoria,
-.abertura {
-  animation: surgir calc(0.45s * var(--tempo)) var(--curva) both;
-  animation-delay: calc(var(--i) * 45ms * var(--tempo) + 120ms * var(--tempo));
-  transform-box: fill-box;
-  transform-origin: center;
-}
-
-@keyframes surgir {
-  from {
-    opacity: 0;
-    transform: scale(calc(1 - 0.35 * var(--deslocar)));
-  }
-}
-
-.movel {
-  fill: var(--aco-fundo);
-  stroke: var(--aco);
-  stroke-width: 2.5;
-}
-
-.movelForte {
-  fill: var(--aco-claro);
-  stroke: var(--aco);
-  stroke-width: 2.5;
-}
-
-.hachura {
-  fill: var(--azul-claro);
-  stroke: var(--azul);
-  stroke-width: 2.5;
-  stroke-dasharray: 10 6;
-}
-
-.divisoria {
-  fill: var(--tinta);
-}
-
-.vao {
-  fill: var(--branco);
-}
-
-.giro,
-.traco {
-  fill: none;
-  stroke: var(--aco);
-  stroke-width: 2;
-  stroke-dasharray: 6 5;
-}
-
-.folha {
-  stroke: var(--tinta);
-  stroke-width: 3;
-}
-
-.vidro {
-  stroke: var(--azul);
-  stroke-width: 4;
-}
-
-.boca {
-  fill: none;
-  stroke: var(--aco);
-  stroke-width: 2;
 }
 
 /* ---------- Resumo ---------- */

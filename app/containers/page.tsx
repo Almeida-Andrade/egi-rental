@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { CabecaPagina } from '@/components/site/CabecaPagina'
 import { CartaoModelo } from '@/components/site/CartaoModelo'
+import { ComparadorTamanhos } from '@/components/site/ComparadorTamanhos'
 import { FaixaSobMedida } from '@/components/site/FaixaSobMedida'
 import { TituloSecao } from '@/components/site/TituloSecao'
 import { tamanhosDoCatalogo } from '@/lib/catalogo'
@@ -64,32 +65,50 @@ export default async function Containers() {
             id="tamanhos-titulo"
             kicker="Tamanhos"
             titulo="Qual tamanho escolher?"
-            texto="Medidas de referência do padrão marítimo. Container fabricado pode variar um pouco: confirmamos a medida exata no orçamento."
+            texto="Arraste a ponta do container ou escolha o tamanho: o desenho está em escala, ao lado de uma pessoa de 1,75 m."
           />
-          <div className={estilos.tabelaRolagem}>
-            <table className={estilos.tabela}>
-              <thead>
-                <tr>
-                  <th scope="col">Tamanho</th>
-                  <th scope="col">Área interna</th>
-                  <th scope="col">Medidas externas (C × L × A)</th>
-                  <th scope="col">Medidas internas (C × L × A)</th>
-                  <th scope="col">Bom para</th>
-                </tr>
-              </thead>
-              <tbody>
-                {tamanhos.map((t) => (
-                  <tr key={t}>
-                    <th scope="row">{t} pés</th>
-                    <td>≈ {MEDIDAS[t].areaM2.toLocaleString('pt-BR')} m²</td>
-                    <td>{MEDIDAS[t].externa}</td>
-                    <td>{MEDIDAS[t].interna}</td>
-                    <td>{USO_DO_TAMANHO[t]}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className={estilos.comparador}>
+            <ComparadorTamanhos
+              modelos={catalogo.map((m) => ({
+                slug: m.slug,
+                nome: m.nome,
+                nomeCompleto: m.nomeCompleto,
+                uso: m.uso,
+                tamanho: m.tamanho,
+              }))}
+            />
           </div>
+          <details className={estilos.tabelaDetalhe}>
+            <summary>Ver a tabela de medidas</summary>
+            <p className={estilos.tabelaNota}>
+              Medidas de referência do padrão marítimo. Container fabricado pode variar um pouco: confirmamos a medida
+              exata no orçamento.
+            </p>
+            <div className={estilos.tabelaRolagem}>
+              <table className={estilos.tabela}>
+                <thead>
+                  <tr>
+                    <th scope="col">Tamanho</th>
+                    <th scope="col">Área interna</th>
+                    <th scope="col">Medidas externas (C × L × A)</th>
+                    <th scope="col">Medidas internas (C × L × A)</th>
+                    <th scope="col">Bom para</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tamanhos.map((t) => (
+                    <tr key={t}>
+                      <th scope="row">{t} pés</th>
+                      <td>≈ {MEDIDAS[t].areaM2.toLocaleString('pt-BR')} m²</td>
+                      <td>{MEDIDAS[t].externa}</td>
+                      <td>{MEDIDAS[t].interna}</td>
+                      <td>{USO_DO_TAMANHO[t]}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </details>
         </div>
       </section>
 
