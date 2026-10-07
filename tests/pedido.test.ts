@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatarTelefone, montarMensagem, validarPedido, type Pedido } from '@/lib/pedido'
+import { formatarTelefone, linhasDaMensagem, montarMensagem, validarPedido, type Pedido } from '@/lib/pedido'
 
 const base: Pedido = { tipo: 'orcamento', nome: 'Maria Souza', telefone: '98 99999-1234' }
 
@@ -41,5 +41,21 @@ describe('montarMensagem', () => {
     const texto = montarMensagem({ ...base, tipo: 'sob-medida', mensagem: 'Stand com balcão' })
     expect(texto.startsWith('Olá! Preciso de um container sob medida')).toBe(true)
     expect(texto.endsWith('Stand com balcão')).toBe(true)
+  })
+})
+
+describe('linhasDaMensagem', () => {
+  it('separa as linhas e marca o negrito entre asteriscos', () => {
+    expect(linhasDaMensagem('Olá\n*Nome:* Maria')).toEqual([
+      [{ texto: 'Olá', negrito: false }],
+      [
+        { texto: 'Nome:', negrito: true },
+        { texto: ' Maria', negrito: false },
+      ],
+    ])
+  })
+
+  it('linha vazia vira linha sem trecho, e asterisco sozinho não é negrito', () => {
+    expect(linhasDaMensagem('a\n\n2 * 3')).toEqual([[{ texto: 'a', negrito: false }], [], [{ texto: '2 * 3', negrito: false }]])
   })
 })

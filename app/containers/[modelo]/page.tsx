@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { ViewTransition } from 'react'
 import { BotaoLink } from '@/components/site/Botao'
 import { CartaoModelo } from '@/components/site/CartaoModelo'
 import { DadosEstruturados } from '@/components/site/DadosEstruturados'
@@ -83,8 +84,8 @@ export default async function FichaModelo({ params }: Parametros) {
 
         <div className={estilos.topo}>
           <div className={estilos.galeria} data-fotos={Math.min(fotos.length, 3)}>
-            {fotos.slice(0, 3).map((foto, i) => (
-              <div key={foto.src} className={estilos.foto}>
+            {fotos.slice(0, 3).map((foto, i) => {
+              const imagem = (
                 <Image
                   src={foto.src}
                   alt={foto.alt}
@@ -92,8 +93,19 @@ export default async function FichaModelo({ params }: Parametros) {
                   priority={i === 0}
                   sizes={i === 0 ? '(min-width: 1080px) 700px, 100vw' : '(min-width: 1080px) 340px, 50vw'}
                 />
-              </div>
-            ))}
+              )
+              return (
+                <div key={foto.src} className={estilos.foto}>
+                  {i === 0 ? (
+                    <ViewTransition name={`foto-${modelo.slug}`} share="morph" default="none">
+                      {imagem}
+                    </ViewTransition>
+                  ) : (
+                    imagem
+                  )}
+                </div>
+              )
+            })}
           </div>
 
           <div className={estilos.info}>

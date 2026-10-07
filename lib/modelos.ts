@@ -1,3 +1,7 @@
+import type { Tamanho } from './medidas'
+
+export { MEDIDAS, MEDIDAS_METROS, metros, type Medidas, type Tamanho } from './medidas'
+
 // O texto e as fotos de cada uso. Os valores de `Uso`, `Tamanho` e `Fabricacao` são os do
 // check da tabela `containers` do OMNIS (0153): valor novo lá entra aqui também.
 export type Uso =
@@ -11,8 +15,6 @@ export type Uso =
   | 'hibrido'
   | 'area_tecnica'
   | 'outro'
-
-export type Tamanho = 10 | 20 | 40
 
 export type Fabricacao = 'maritimo' | 'fabricado'
 
@@ -33,19 +35,6 @@ export interface ConteudoUso {
   // capa própria de um tamanho, quando a foto geral não serve para ele
   capaPorTamanho?: Partial<Record<Tamanho, Foto>>
   galeria: Foto[]
-}
-
-export interface Medidas {
-  externa: string
-  interna: string
-  areaM2: number
-}
-
-// Padrão marítimo ISO (comprimento × largura × altura). Container fabricado pode variar.
-export const MEDIDAS: Record<Tamanho, Medidas> = {
-  10: { externa: '2,99 × 2,44 × 2,59 m', interna: '2,83 × 2,35 × 2,39 m', areaM2: 6.7 },
-  20: { externa: '6,06 × 2,44 × 2,59 m', interna: '5,90 × 2,35 × 2,39 m', areaM2: 13.9 },
-  40: { externa: '12,19 × 2,44 × 2,59 m', interna: '12,03 × 2,35 × 2,39 m', areaM2: 28.3 },
 }
 
 export const ROTULO_FABRICACAO: Record<Fabricacao, string> = {

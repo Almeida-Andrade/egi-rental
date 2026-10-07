@@ -69,6 +69,46 @@
   color: #b42318;
 }
 
+.previa {
+  margin: 0;
+  padding: var(--gap-3);
+  background:
+    radial-gradient(rgba(10, 18, 34, 0.06) 1px, transparent 1px) 0 0 / 14px 14px,
+    #e9efe6;
+  border-radius: var(--raio-marca-p);
+}
+
+.previa figcaption {
+  margin-bottom: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--texto-2);
+}
+
+/* O balão verde da conversa, do lado de quem envia */
+.balao {
+  position: relative;
+  width: fit-content;
+  max-width: 100%;
+  margin-left: auto;
+  padding: 10px 12px;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  background: #d9fdd3;
+  border-radius: 10px 0 10px 10px;
+  box-shadow: 0 1px 1px rgba(10, 18, 34, 0.12);
+}
+
+.linhaBalao {
+  display: block;
+  min-height: 1.45em;
+}
+
+.balao b {
+  font-weight: 700;
+}
+
 .acoes {
   display: flex;
   flex-wrap: wrap;

@@ -34,20 +34,18 @@ export const APLICACOES: Aplicacao[] = [
   },
 ]
 
-export const DIFERENCIAIS = [
-  { titulo: 'Estruturas resistentes', texto: 'Containers duráveis, inspecionados antes de cada locação.' },
-  { titulo: 'Do jeito do seu projeto', texto: 'Adaptamos o container ao uso, em vez de você se adaptar a ele.' },
-  { titulo: 'Entrega e retirada', texto: 'Levamos, posicionamos e retiramos no fim do contrato.' },
-  { titulo: 'Prazo flexível', texto: 'Locação de curto, médio ou longo prazo, conforme a obra pede.' },
-  { titulo: 'Atendimento direto', texto: 'Você fala com quem decide, sem intermediários.' },
-  { titulo: 'Custo-benefício', texto: 'Espaço pronto sem construir, sem imobilizar capital.' },
+export const INCLUSO = [
+  { titulo: 'Entrega e retirada', texto: 'Levamos até o local, posicionamos e buscamos no fim do contrato.' },
+  { titulo: 'Prazo do seu jeito', texto: 'Locação de curto, médio ou longo prazo, conforme a obra pede.' },
+  { titulo: 'Container inspecionado', texto: 'Cada um passa por inspeção e adaptação antes de sair.' },
+  { titulo: 'Ajuste ao uso', texto: 'Adaptamos o container ao projeto, em vez de você se adaptar a ele.' },
 ]
 
 export const PASSOS = [
   { titulo: 'Conte o que precisa', texto: 'Pelo WhatsApp ou pelo formulário: o uso, o tamanho e onde o container vai ficar.' },
   { titulo: 'Receba a proposta', texto: 'Indicamos o modelo certo e enviamos o orçamento com prazo e condições.' },
   { titulo: 'Entregamos no local', texto: 'Levamos o container e deixamos posicionado, pronto para uso.' },
-  { titulo: 'Retiramos no fim', texto: 'Terminou a obra ou o evento, buscamos o container. Simples assim.' },
+  { titulo: 'Retiramos no fim', texto: 'Terminou a obra ou o evento, buscamos o container no local.' },
 ]
 
 export const ADAPTACOES = [

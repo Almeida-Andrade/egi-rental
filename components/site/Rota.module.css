@@ -1,0 +1,108 @@
+.rota {
+  position: relative;
+  view-timeline-name: --rota;
+  view-timeline-axis: block;
+}
+
+/* Celular: a estrada desce pela esquerda; desktop: corre por cima dos passos */
+.estrada {
+  position: absolute;
+  left: 21px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: repeating-linear-gradient(180deg, var(--aco-claro) 0 10px, transparent 10px 18px);
+}
+
+.caminhao {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  color: var(--branco);
+  background: var(--azul);
+  border-radius: 14px 4px 4px 4px;
+  box-shadow: 0 0 0 6px var(--branco);
+  transform: translate(-50%, 0);
+}
+
+@supports (animation-timeline: view()) {
+  .caminhao {
+    animation: descer linear both;
+    animation-timeline: --rota;
+    animation-range: cover 15% cover 70%;
+  }
+}
+
+@keyframes descer {
+  to {
+    top: calc(100% - 46px);
+  }
+}
+
+.passos {
+  display: grid;
+  gap: var(--gap-5);
+  margin: 0;
+  padding: 0 0 0 76px;
+  list-style: none;
+}
+
+.passos li {
+  position: relative;
+}
+
+.numero {
+  display: block;
+  font-size: 2.6rem;
+  line-height: 1;
+  color: var(--aco-claro);
+}
+
+.passos h3 {
+  margin-top: 6px;
+  font-size: 1.3rem;
+}
+
+.passos p {
+  margin-top: 6px;
+  max-width: 34ch;
+  color: var(--texto-2);
+}
+
+@media (min-width: 900px) {
+  .estrada {
+    left: 0;
+    right: 0;
+    top: 22px;
+    bottom: auto;
+    width: auto;
+    height: 2px;
+    background: repeating-linear-gradient(90deg, var(--aco-claro) 0 14px, transparent 14px 24px);
+  }
+  .caminhao {
+    top: 50%;
+    left: 0;
+    transform: translate(0, -50%);
+  }
+  @supports (animation-timeline: view()) {
+    .caminhao {
+      animation-name: correr;
+      animation-range: cover 30% cover 62%;
+    }
+  }
+  .passos {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--gap-5);
+    padding: 76px 0 0;
+  }
+}
+
+@keyframes correr {
+  to {
+    left: calc(100% - 46px);
+  }
+}

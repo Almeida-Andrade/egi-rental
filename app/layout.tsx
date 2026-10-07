@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Archivo, Inter } from 'next/font/google'
+import { Archivo, Big_Shoulders_Stencil } from 'next/font/google'
 import { BotaoWhatsApp } from '@/components/site/BotaoWhatsApp'
 import { Cabecalho } from '@/components/site/Cabecalho'
 import { Rodape } from '@/components/site/Rodape'
@@ -9,13 +9,22 @@ import './globals.css'
 // O rodapé lista o catálogo em toda página: nenhuma pode ficar estática para sempre.
 export const revalidate = 3600
 
-const titulo = Archivo({
+// Uma família só, com a largura variável fazendo o papel de título; a stencil é a das marcações
+// pintadas nos containers e só aparece em número e código.
+const archivo = Archivo({
   subsets: ['latin'],
   axes: ['wdth'],
-  variable: '--fonte-titulo',
+  variable: '--fonte-archivo',
   display: 'swap',
 })
-const corpo = Inter({ subsets: ['latin'], variable: '--fonte-corpo', display: 'swap' })
+const stencil = Big_Shoulders_Stencil({
+  subsets: ['latin'],
+  axes: ['opsz'],
+  variable: '--fonte-marcacao',
+  display: 'swap',
+  adjustFontFallback: false,
+  fallback: ['Arial Narrow', 'sans-serif'],
+})
 
 const TITULO = 'EGI Rental — Locação de containers em São Luís'
 const DESCRICAO =
@@ -50,7 +59,8 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR" className={`${titulo.variable} ${corpo.variable}`}>
+    // O script da abertura marca data-portas no <html> antes da hidratação, de propósito.
+    <html lang="pt-BR" className={`${archivo.variable} ${stencil.variable}`} suppressHydrationWarning>
       <body>
         <a className="pular-conteudo" href="#conteudo">
           Pular para o conteúdo

@@ -54,9 +54,8 @@ export default function SobMedida() {
             texto="Cada projeto é combinado no orçamento. Estes são os pedidos mais comuns."
           />
           <ul className={estilos.adaptacoes}>
-            {ADAPTACOES.map((a, i) => (
-              <li key={a.titulo} className="revelar">
-                <span className={estilos.numero}>{String(i + 1).padStart(2, '0')}</span>
+            {ADAPTACOES.map((a) => (
+              <li key={a.titulo}>
                 <h3>{a.titulo}</h3>
                 <p>{a.texto}</p>
               </li>
@@ -76,7 +75,7 @@ export default function SobMedida() {
           />
           <ul className={estilos.inspiracoes}>
             {INSPIRACOES.map((foto) => (
-              <li key={foto.src} className="revelar">
+              <li key={foto.src}>
                 <Image src={foto.src} alt={foto.alt} fill sizes="(min-width: 960px) 33vw, 100vw" />
               </li>
             ))}

@@ -30,6 +30,15 @@ npm run build && npm run test:e2e   # Playwright contra o build, porta 3008
 - `'use client'` só na folha: hoje só `MenuPrincipal` e `FormularioPedido`. Prop para o cliente é estreita (o formulário recebe só os nomes dos modelos).
 - Comentário só para restrição que o código não expressa, seco, no presente.
 
+### Identidade e movimento (o que tira a cara de site genérico)
+- **Uma família só, Archivo** (largura variável faz o papel de título, `font-stretch` 118–125%), e a **Big Shoulders Stencil** só em número e código, como as marcações pintadas nos containers (classe global `.marcacao`). Nada de Inter, gradiente roxo, vidro fosco, palavra colorida no título nem rótulo em caixa alta em toda seção.
+- **Movimento com motivo**: um momento orquestrado na abertura (as portas do container se abrem uma vez por visita, `Abertura` + `PortasDeAbertura`), interação que informa (comparador em escala, troca de foto nas aplicações, prévia da mensagem no formulário) e rolagem que conta algo (caminhão na rota, desenho técnico traçado). Nada de "aparece ao rolar" em todo bloco.
+- **Movimento reduzido encurta, nunca desliga**: `--tempo` (multiplica durações) e `--deslocar` (zera deslocamentos) em `tokens.css`. Animação nova usa as duas variáveis. O Windows do dono reporta movimento reduzido: testar as duas versões (Playwright com `reducedMotion: 'no-preference'`).
+- **Comparador** (`ComparadorTamanhos`, `lib/plantas.ts`, `lib/medidas.ts`): o palco tem 13,6 m de largura e tudo é posicionado em `cqi` na mesma escala; as plantas são EXEMPLO de uso (o site diz isso) e o teste trava peça fora do container e móvel sobreposto. Modelo novo na frota ganha planta em `PLANTAS`, senão cai em "espaço livre".
+- **Números do setor** (`lib/numeros.ts`, `NumerosModular`): só número com fonte conferida na página original, e o texto diz que são do setor, não da EGI Rental. Custo da McKinsey não entra (eles dizem que ainda é exceção).
+- **Transição entre páginas**: a foto do cartão vira a foto da ficha por `ViewTransition name="foto-<slug>" share="morph" default="none"` nos dois lados. Nome repetido na mesma página quebra o morph.
+- **Bibliotecas avaliadas** (Motion, Anime.js, Kokonut UI, Bklit UI): nenhuma instalada. Kokonut e Bklit exigem Tailwind/shadcn, então as técnicas foram portadas para CSS Modules. Motion (`layoutId`, `AnimatePresence`, drag) e Anime.js (`morphTo`, `createMotionPath`, `createDraggable`) são os candidatos se um dia o CSS não bastar, sempre numa folha `'use client'` e por import dinâmico.
+
 ### Imagens
 - Fotos em `public/fotos`, do Unsplash (licença livre para uso comercial). **Foto nova entra em `lib/creditos.ts`**: o teste trava arquivo sem crédito e crédito sem arquivo.
 - Logo: `public/marca` (PNG transparente, normal e branca, vertical e horizontal, tirados do arquivo original). Cores medidas da logo: aço `#597B97`, azul `#2B4EA2`, tinta `#080C18`. A curva grande num canto só (`--raio-marca`) e o quadrado azul são os da logo.

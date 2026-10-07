@@ -72,3 +72,22 @@ export function montarMensagem(p: Pedido): string {
   const mensagem = p.mensagem?.trim()
   return [abertura, '', ...campos, ...(mensagem ? ['', mensagem] : [])].join('\n')
 }
+
+export interface Trecho {
+  texto: string
+  negrito: boolean
+}
+
+// O WhatsApp põe em negrito o que fica entre asteriscos; a prévia do site mostra igual.
+export function linhasDaMensagem(texto: string): Trecho[][] {
+  return texto.split('\n').map((linha) =>
+    linha
+      .split(/(\*[^*\n]+\*)/)
+      .filter(Boolean)
+      .map((parte) =>
+        parte.length > 2 && parte.startsWith('*') && parte.endsWith('*')
+          ? { texto: parte.slice(1, -1), negrito: true }
+          : { texto: parte, negrito: false },
+      ),
+  )
+}

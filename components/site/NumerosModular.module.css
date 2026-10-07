@@ -1,0 +1,332 @@
+.painel {
+  --linha-painel: rgba(255, 255, 255, 0.1);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1px;
+  color: var(--texto-claro);
+  background: var(--linha-painel);
+  border: 1px solid var(--linha-painel);
+}
+
+.cartao {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-3);
+  padding: var(--gap-4);
+  background: var(--tinta);
+}
+
+/* Marcas de cruz nos cantos, de prancha de desenho */
+.cartao::before,
+.cartao::after {
+  content: '';
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  background:
+    linear-gradient(var(--aco), var(--aco)) center / 1px 100% no-repeat,
+    linear-gradient(var(--aco), var(--aco)) center / 100% 1px no-repeat;
+}
+
+.cartao::before {
+  top: -6px;
+  left: -6px;
+}
+
+.cartao::after {
+  right: -6px;
+  bottom: -6px;
+}
+
+.rotulo {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--aco-claro);
+}
+
+.numero {
+  display: inline-block;
+  min-width: 2.2ch;
+  font-size: clamp(3.4rem, 2.4rem + 3.4vw, 5.4rem);
+  line-height: 0.9;
+  color: var(--branco);
+}
+
+.chamada {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--gap-2) var(--gap-4);
+}
+
+.chamada > span:last-child {
+  max-width: 44ch;
+  padding-bottom: 6px;
+  color: var(--texto-claro-2);
+}
+
+.texto {
+  margin-top: auto;
+  font-size: 0.95rem;
+  color: var(--texto-claro-2);
+}
+
+.texto strong {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--branco);
+}
+
+.painel sup {
+  font-size: 0.65em;
+  color: #9db4e8;
+}
+
+/* ---------- Barras horizontais ---------- */
+
+.barras {
+  display: grid;
+  gap: 14px;
+  margin-top: var(--gap-3);
+}
+
+.linhaBarra {
+  display: grid;
+  grid-template-columns: 9.5rem 1fr;
+  align-items: center;
+  gap: var(--gap-3);
+  font-size: 0.9rem;
+  color: var(--texto-claro-2);
+}
+
+.trilho {
+  position: relative;
+  height: 30px;
+  background:
+    repeating-linear-gradient(90deg, var(--linha-painel) 0 1px, transparent 1px 10%) 0 0 / 100% 100%;
+}
+
+.barraCinza,
+.barraAzul,
+.barraFaixa {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: calc(var(--v) * 100%);
+  border-radius: 2px 6px 6px 2px;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform calc(1.2s * var(--tempo)) var(--curva-porta);
+}
+
+.barraCinza {
+  background: #3a4660;
+}
+
+.barraAzul {
+  background: var(--azul);
+  transition-delay: calc(0.25s * var(--tempo));
+}
+
+/* A faixa hachurada é a incerteza: de 50% a 80% do prazo */
+.barraFaixa {
+  left: calc(var(--de) * 100%);
+  background: repeating-linear-gradient(-45deg, #9db4e8 0 2px, transparent 2px 7px);
+  border: 1px solid #9db4e8;
+  border-radius: 0 6px 6px 0;
+  transition-delay: calc(0.9s * var(--tempo));
+}
+
+.cartao[data-visivel='true'] :is(.barraCinza, .barraAzul, .barraFaixa) {
+  transform: scaleX(1);
+}
+
+.escala {
+  display: flex;
+  justify-content: space-between;
+  margin-left: calc(9.5rem + var(--gap-3));
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* ---------- Medidor de tracinhos ---------- */
+
+.medidorLugar {
+  position: relative;
+  max-width: 280px;
+}
+
+.medidor {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.tracoApagado,
+.tracoAceso {
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.tracoApagado {
+  stroke: rgba(255, 255, 255, 0.12);
+}
+
+.tracoAceso {
+  stroke: rgba(255, 255, 255, 0.12);
+  transition: stroke calc(0.25s * var(--tempo));
+  transition-delay: calc(var(--i) * 28ms * var(--tempo));
+}
+
+.cartao[data-visivel='true'] .tracoAceso {
+  stroke: #9db4e8;
+}
+
+.medidorValor {
+  position: absolute;
+  left: 50%;
+  bottom: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translateX(-50%);
+  line-height: 1;
+}
+
+.medidorValor small {
+  font-size: 0.78rem;
+  color: var(--texto-claro-2);
+}
+
+.medidorValor .numero {
+  font-size: clamp(2.6rem, 2rem + 2vw, 3.6rem);
+}
+
+/* ---------- Grade de containers ---------- */
+
+.grade {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  max-width: 300px;
+}
+
+.caixaAcesa,
+.caixaApagada {
+  aspect-ratio: 2.35 / 1;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.caixaAcesa {
+  transition: background-color calc(0.35s * var(--tempo)), transform calc(0.5s * var(--tempo)) var(--curva);
+  transition-delay: calc(var(--i) * 90ms * var(--tempo));
+  transform: translateY(calc(6px * var(--deslocar)));
+}
+
+/* Chapa ondulada em miniatura */
+.cartao[data-visivel='true'] .caixaAcesa {
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.18) 0 2px, transparent 2px 6px),
+    var(--azul);
+  transform: none;
+}
+
+.caixaApagada {
+  border: 1px dashed rgba(255, 255, 255, 0.3);
+  background: transparent;
+}
+
+/* ---------- Colunas ---------- */
+
+.colunas {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--gap-4);
+  height: 150px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--linha-painel);
+}
+
+.coluna {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  width: 64px;
+  height: 100%;
+  font-size: 0.8rem;
+  color: var(--texto-claro-2);
+}
+
+.colunaCinza,
+.colunaAzul {
+  width: 100%;
+  height: calc(var(--v) * 100% - 24px);
+  min-height: 6px;
+  border-radius: 6px 6px 2px 2px;
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform calc(1.1s * var(--tempo)) var(--curva-porta);
+}
+
+.colunaCinza {
+  background: repeating-linear-gradient(-45deg, #3a4660 0 3px, #2b3550 3px 8px);
+}
+
+.colunaAzul {
+  background: #9db4e8;
+  transition-delay: calc(0.4s * var(--tempo));
+}
+
+.cartao[data-visivel='true'] :is(.colunaCinza, .colunaAzul) {
+  transform: none;
+}
+
+/* ---------- Fontes ---------- */
+
+.fontes {
+  display: grid;
+  gap: 6px;
+  padding: var(--gap-4);
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.55);
+  background: var(--tinta);
+}
+
+.fonte {
+  width: fit-content;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.25);
+  text-underline-offset: 3px;
+}
+
+.fonte:hover {
+  color: var(--branco);
+}
+
+@media (min-width: 760px) {
+  .painel {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .largo,
+  .fontes {
+    grid-column: 1 / -1;
+  }
+  .cartao {
+    padding: var(--gap-5);
+  }
+}
+
+@media (max-width: 480px) {
+  .linhaBarra {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  .escala {
+    margin-left: 0;
+  }
+}

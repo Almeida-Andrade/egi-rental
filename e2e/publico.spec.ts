@@ -5,7 +5,7 @@ test('a home mostra a abertura, o catálogo e o caminho para o sob medida', asyn
   await page.goto('/')
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
   await expect(page.locator('article').first()).toBeVisible()
-  await expect(page.getByRole('link', { name: /projeto sob medida/i })).toHaveAttribute('href', '/sob-medida')
+  await expect(page.getByRole('link', { name: /começar meu projeto/i })).toHaveAttribute('href', '/sob-medida')
 })
 
 test('do catálogo à ficha, com o pedido de orçamento já escrito', async ({ page }) => {
@@ -13,9 +13,17 @@ test('do catálogo à ficha, com o pedido de orçamento já escrito', async ({ p
   const primeiro = page.locator('article h3 a').first()
   const nome = (await primeiro.textContent())?.trim() ?? ''
   await primeiro.click()
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(nome)
+  await expect(page.getByRole('heading', { level: 1 })).toContainText(nome)
   const pedido = page.getByRole('link', { name: /pedir orçamento deste modelo/i })
   await expect(pedido).toHaveAttribute('href', new RegExp(`^https://wa\\.me/\\d+\\?text=.*${encodeURIComponent(nome)}`))
+})
+
+test('o comparador troca o tamanho e a planta acompanha', async ({ page }) => {
+  await page.goto('/#tamanhos')
+  const grupo = page.getByRole('group', { name: 'Tamanho' })
+  await grupo.getByRole('radio', { name: /40/ }).check()
+  await expect(page.getByRole('img', { name: /Planta de exemplo do .* 40 pés/ })).toBeVisible()
+  await expect(page.locator('dd').filter({ hasText: '12,19 m' }).first()).toBeVisible()
 })
 
 test('modelo que não existe responde 404', async ({ page }) => {

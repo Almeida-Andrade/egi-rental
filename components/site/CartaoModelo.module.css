@@ -4,66 +4,90 @@
   flex-direction: column;
   height: 100%;
   background: var(--branco);
-  border: 1px solid var(--linha);
-  border-radius: var(--raio-marca);
-  overflow: hidden;
-  transition: box-shadow 0.3s var(--curva), transform 0.3s var(--curva), border-color 0.3s;
+  border-top: 3px solid var(--tinta);
+  transition: border-color calc(0.3s * var(--tempo));
 }
 
 .cartao:hover {
-  transform: translateY(-4px);
-  border-color: transparent;
-  box-shadow: var(--sombra-forte);
+  border-top-color: var(--azul);
 }
 
 .cartao:focus-within {
   outline: 3px solid var(--azul);
-  outline-offset: 3px;
+  outline-offset: 4px;
 }
 
 .foto {
   position: relative;
   aspect-ratio: 4 / 3;
-  background: var(--aco-fundo);
   overflow: hidden;
+  background: var(--aco-fundo);
 }
 
 .foto img {
   object-fit: cover;
-  transition: transform 0.6s var(--curva);
+  transition: transform calc(0.9s * var(--tempo)) var(--curva);
 }
 
 .cartao:hover .foto img {
-  transform: scale(1.04);
+  transform: scale(calc(1 + 0.05 * var(--deslocar)));
 }
 
-.selo {
+.foto::after {
+  content: '';
   position: absolute;
-  left: 14px;
-  top: 14px;
-  padding: 5px 10px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--branco);
-  background: rgba(10, 18, 34, 0.72);
-  backdrop-filter: blur(6px);
-  border-radius: 4px;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(10, 18, 34, 0.55) 0%, transparent 45%);
+  pointer-events: none;
+}
+
+/* O tamanho pintado na lateral, como nos containers */
+.pintado {
+  position: absolute;
+  left: 18px;
+  bottom: 8px;
+  z-index: 1;
+  font-size: clamp(3.4rem, 2.6rem + 3vw, 5rem);
+  line-height: 0.9;
+  color: rgba(255, 255, 255, 0.94);
+  transition: transform calc(0.5s * var(--tempo)) var(--curva);
+}
+
+.cartao:hover .pintado {
+  transform: translateY(calc(-6px * var(--deslocar)));
 }
 
 .corpo {
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 10px;
-  padding: var(--gap-4);
+  gap: 8px;
+  padding: 18px 0 6px;
+}
+
+.tipo {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--aco);
 }
 
 .corpo h3 {
-  font-size: 1.35rem;
+  font-size: 1.55rem;
 }
 
-.corpo > p {
+.resumo {
   color: var(--texto-2);
+}
+
+.medidas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-top: auto;
+  padding-top: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 /* O link cobre o cartão inteiro, com um só alvo para o leitor de tela */
@@ -71,40 +95,62 @@
   content: '';
   position: absolute;
   inset: 0;
+  z-index: 2;
 }
 
 .link:focus-visible {
   outline: none;
 }
 
-.ficha {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: var(--gap-3);
-  margin: var(--gap-2) 0 0;
-  padding-top: var(--gap-3);
-  border-top: 1px solid var(--linha);
-}
-
-.ficha dt {
-  font-size: 0.75rem;
-  letter-spacing: 0.04em;
-  color: var(--texto-2);
-}
-
-.ficha dd {
-  margin: 2px 0 0;
-  font-weight: 600;
-  font-size: 0.92rem;
-  font-variant-numeric: tabular-nums;
-}
-
 .ver {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: auto;
-  padding-top: var(--gap-2);
-  font-weight: 600;
-  color: var(--azul);
+  position: absolute;
+  right: 14px;
+  top: 14px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  color: var(--tinta);
+  background: var(--branco);
+  border: 1.5px solid var(--branco);
+  border-radius: 50%;
+  transition: background-color calc(0.25s * var(--tempo)), color 0.25s, border-color 0.25s,
+    transform calc(0.35s * var(--tempo)) var(--curva);
+}
+
+.cartao:hover .ver {
+  color: var(--branco);
+  background: var(--azul);
+  border-color: var(--azul);
+  transform: rotate(calc(-45deg * var(--deslocar)));
+}
+
+/* O primeiro do catálogo ocupa a largura toda, foto de um lado e texto do outro */
+@media (min-width: 900px) {
+  .destaque {
+    display: grid;
+    grid-template-columns: 1.35fr 1fr;
+    gap: var(--gap-5);
+    border-top: 0;
+  }
+  .destaque .foto {
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    border-radius: var(--raio-marca);
+  }
+  .destaque .corpo {
+    justify-content: center;
+    padding: 0;
+    border-top: 3px solid var(--tinta);
+  }
+  .destaque:hover .corpo {
+    border-top-color: var(--azul);
+  }
+  .destaque .corpo h3 {
+    font-size: clamp(2rem, 1.4rem + 1.6vw, 2.8rem);
+  }
+  .destaque .resumo {
+    font-size: 1.15rem;
+  }
 }

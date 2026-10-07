@@ -22,6 +22,34 @@
   transform: translateX(3px);
 }
 
+/* No hover o rótulo sobe e uma cópia entra por baixo */
+.rotulo {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+}
+
+.rotuloTexto,
+.rotuloEco {
+  display: block;
+  transition: transform calc(0.4s * var(--tempo)) cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.rotuloEco {
+  position: absolute;
+  inset: 0;
+  transform: translateY(110%);
+}
+
+.botao:hover .rotuloTexto {
+  transform: translateY(-110%);
+}
+
+.botao:hover .rotuloEco {
+  transform: none;
+}
+
 .botao:active {
   transform: scale(0.98);
 }

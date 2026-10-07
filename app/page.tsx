@@ -1,13 +1,17 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { Abertura } from '@/components/site/Abertura'
 import { BotaoLink } from '@/components/site/Botao'
 import { CartaoModelo } from '@/components/site/CartaoModelo'
+import { ComparadorTamanhos } from '@/components/site/ComparadorTamanhos'
 import { DadosEstruturados } from '@/components/site/DadosEstruturados'
 import { FaixaSobMedida } from '@/components/site/FaixaSobMedida'
-import { Icone, IconeWhatsApp, type NomeIcone } from '@/components/site/Icone'
-import { TituloSecao } from '@/components/site/TituloSecao'
+import { Icone, IconeWhatsApp } from '@/components/site/Icone'
+import { ListaAplicacoes } from '@/components/site/ListaAplicacoes'
+import { NumerosModular } from '@/components/site/NumerosModular'
+import { Rota } from '@/components/site/Rota'
 import { tamanhosDoCatalogo } from '@/lib/catalogo'
-import { APLICACOES, DIFERENCIAIS, PASSOS } from '@/lib/conteudo'
+import { APLICACOES, INCLUSO, PASSOS } from '@/lib/conteudo'
 import { buscarCatalogo } from '@/lib/dados/catalogo'
 import { CONTATO, EMPRESA, URL_SITE } from '@/lib/site'
 import { linkWhatsApp, mensagemGeral } from '@/lib/whatsapp'
@@ -15,16 +19,15 @@ import estilos from './page.module.css'
 
 export const revalidate = 3600
 
-const ICONES_DIFERENCIAIS: NomeIcone[] = ['escudo', 'ferramenta', 'caminhao', 'calendario', 'aperto', 'moeda']
-
-function listaDeTamanhos(tamanhos: number[]): string {
-  if (tamanhos.length <= 1) return `${tamanhos[0] ?? 20} pés`
-  return `${tamanhos.slice(0, -1).join(', ')} e ${tamanhos.at(-1)} pés`
+function juntar(itens: string[]): string {
+  return itens.length < 2 ? itens.join('') : `${itens.slice(0, -1).join(', ')} e ${itens.at(-1)}`
 }
 
 export default async function Inicio() {
   const catalogo = await buscarCatalogo()
   const tamanhos = tamanhosDoCatalogo(catalogo)
+  const usos = [...new Set(catalogo.filter((m) => m.uso !== 'hibrido').map((m) => m.nome.toLowerCase()))]
+  const [destaque, ...demais] = catalogo
 
   return (
     <>
@@ -56,7 +59,6 @@ export default async function Inicio() {
         }}
       />
 
-      {/* Abertura */}
       <section className={estilos.hero} aria-labelledby="hero-titulo">
         <Image
           className={estilos.heroFoto}
@@ -66,110 +68,119 @@ export default async function Inicio() {
           priority
           sizes="100vw"
         />
+        <Abertura />
         <div className={estilos.heroInterno}>
-          <p className={estilos.heroKicker}>Locação de containers · {EMPRESA.cidade} — {EMPRESA.uf}</p>
           <h1 id="hero-titulo" className={estilos.heroTitulo}>
-            O espaço que a sua obra precisa, <em>entregue pronto.</em>
+            <span>Containers para alugar</span> <span>em São Luís.</span>
           </h1>
           <p className={estilos.heroTexto}>
-            Containers para escritório, almoxarifado, sanitário e stand em locação de curto, médio e longo
-            prazo, com entrega e retirada no local. E, quando o catálogo não basta, montamos sob medida.
+            {juntar(usos).replace(/^./, (l) => l.toUpperCase())}, de {tamanhos[0]} a {tamanhos.at(-1)} pés.
+            A gente leva até a sua obra, posiciona e busca no fim do contrato.
           </p>
           <div className={estilos.heroAcoes}>
-            <BotaoLink href="/containers" variante="claro" grande seta>
-              Ver os containers
-            </BotaoLink>
             <BotaoLink href={linkWhatsApp(mensagemGeral())} variante="whatsapp" grande>
               Pedir orçamento
             </BotaoLink>
-          </div>
-        </div>
-        <ul className={estilos.heroFatos}>
-          <li>
-            <Icone nome="calendario" /> Curto, médio e longo prazo
-          </li>
-          <li>
-            <Icone nome="caminhao" /> Entrega e retirada no local
-          </li>
-          <li>
-            <Icone nome="regua" /> Modelos de {listaDeTamanhos(tamanhos)}
-          </li>
-          <li>
-            <Icone nome="ferramenta" /> Projetos sob medida
-          </li>
-        </ul>
-      </section>
-
-      {/* Catálogo */}
-      <section className={estilos.secao} aria-labelledby="catalogo-titulo">
-        <div className={estilos.interno}>
-          <div className={estilos.cabecaComAcao}>
-            <TituloSecao
-              id="catalogo-titulo"
-              kicker="Nossos containers"
-              titulo="Um container para cada etapa do projeto"
-              texto="Modelos da nossa frota, prontos para locação. Escolha pelo uso e fale com a gente para confirmar a disponibilidade."
-            />
-            <BotaoLink href="/containers" variante="secundario" seta>
-              Ver catálogo completo
+            <BotaoLink href="#tamanhos" variante="contorno-claro" grande>
+              Comparar os tamanhos
             </BotaoLink>
           </div>
+        </div>
+        <p className={`${estilos.heroMarcacao} marcacao`} aria-hidden="true">
+          EGI RENTAL <span>·</span> SÃO LUÍS — MA <span>·</span> {tamanhos.map((t) => `${t}'`).join('  ')}
+        </p>
+      </section>
+
+      <section className={estilos.secao} aria-labelledby="catalogo-titulo">
+        <div className={estilos.interno}>
+          <div className={estilos.cabeca}>
+            <h2 id="catalogo-titulo" className={estilos.titulo}>
+              O que tem na frota
+            </h2>
+            <p className={estilos.lead}>
+              Cada modelo existe hoje na nossa frota. Disponibilidade muda conforme os contratos: confirmamos na
+              conversa.
+            </p>
+            <Link href="/containers" className={estilos.linkSeco}>
+              Catálogo completo <Icone nome="seta" tamanho={18} />
+            </Link>
+          </div>
+          {destaque && <CartaoModelo modelo={destaque} prioridade destaque />}
           <ul className={estilos.gradeModelos}>
-            {catalogo.slice(0, 6).map((modelo, i) => (
-              <li key={modelo.slug} className="revelar">
-                <CartaoModelo modelo={modelo} prioridade={i < 3} />
+            {demais.map((modelo) => (
+              <li key={modelo.slug}>
+                <CartaoModelo modelo={modelo} />
               </li>
             ))}
           </ul>
+        </div>
+      </section>
+
+      <section id="tamanhos" className={`${estilos.secao} ${estilos.secaoPapel}`} aria-labelledby="tamanhos-titulo">
+        <div className={estilos.interno}>
+          <div className={estilos.cabeca}>
+            <h2 id="tamanhos-titulo" className={estilos.titulo}>
+              Qual tamanho cabe no seu terreno?
+            </h2>
+            <p className={estilos.lead}>
+              Troque o tamanho e o uso: o desenho está em escala, ao lado de uma pessoa de 1,75 m.
+            </p>
+          </div>
+          <ComparadorTamanhos
+            modelos={catalogo.map((m) => ({
+              slug: m.slug,
+              nome: m.nome,
+              nomeCompleto: m.nomeCompleto,
+              uso: m.uso,
+              tamanho: m.tamanho,
+            }))}
+          />
+        </div>
+      </section>
+
+      <section className={`${estilos.secao} ${estilos.secaoEscura}`} aria-labelledby="numeros-titulo">
+        <div className={estilos.interno}>
+          <div className={estilos.cabeca}>
+            <h2 id="numeros-titulo" className={estilos.titulo}>
+              Por que container, e não obra?
+            </h2>
+            <p className={`${estilos.lead} ${estilos.leadClaro}`}>
+              Quem troca a construção no local por módulos prontos ganha prazo e gera menos entulho. Os números do
+              setor, com as fontes.
+            </p>
+          </div>
+          <NumerosModular />
         </div>
       </section>
 
       <FaixaSobMedida />
 
-      {/* Aplicações */}
-      <section id="aplicacoes" className={`${estilos.secao} ${estilos.secaoPapel}`} aria-labelledby="aplicacoes-titulo">
+      <section id="aplicacoes" className={estilos.secao} aria-labelledby="aplicacoes-titulo">
         <div className={estilos.interno}>
-          <TituloSecao
-            id="aplicacoes-titulo"
-            kicker="Aplicações"
-            titulo="Onde os nossos containers trabalham"
-            texto="Da frente de obra ao evento de fim de semana: estrutura rápida, segura e sem construção."
-          />
-          <ul className={estilos.gradeAplicacoes}>
-            {APLICACOES.map((a, i) => (
-              <li key={a.titulo} className={`${estilos.aplicacao} ${i === 0 ? estilos.aplicacaoDestaque : ''} revelar`}>
-                <Image src={a.foto.src} alt={a.foto.alt} fill sizes="(min-width: 960px) 40vw, 100vw" />
-                <div className={estilos.aplicacaoTexto}>
-                  <h3>{a.titulo}</h3>
-                  <p>{a.texto}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <div className={estilos.cabeca}>
+            <h2 id="aplicacoes-titulo" className={estilos.titulo}>
+              Onde eles trabalham
+            </h2>
+          </div>
+          <ListaAplicacoes aplicacoes={APLICACOES} />
         </div>
       </section>
 
-      {/* Como funciona */}
-      <section className={estilos.secao} aria-labelledby="passos-titulo">
+      <section className={`${estilos.secao} ${estilos.secaoPapel}`} aria-labelledby="passos-titulo">
         <div className={estilos.interno}>
-          <TituloSecao id="passos-titulo" kicker="Como funciona" titulo="Do pedido à retirada, sem complicação" centro />
-          <ol className={estilos.passos}>
-            {PASSOS.map((p, i) => (
-              <li key={p.titulo} className="revelar">
-                <span className={estilos.passoNumero}>{String(i + 1).padStart(2, '0')}</span>
-                <h3>{p.titulo}</h3>
-                <p>{p.texto}</p>
-              </li>
-            ))}
-          </ol>
+          <div className={estilos.cabeca}>
+            <h2 id="passos-titulo" className={estilos.titulo}>
+              Do pedido à retirada
+            </h2>
+          </div>
+          <Rota passos={PASSOS} />
         </div>
       </section>
 
-      {/* Quem somos */}
       <section id="quem-somos" className={`${estilos.secao} ${estilos.secaoEscura}`} aria-labelledby="quem-somos-titulo">
         <div className={`${estilos.interno} ${estilos.quemSomos}`}>
           <div className={estilos.quemSomosLado}>
-            <div className={`${estilos.quemSomosFoto} revelar`}>
+            <div className={estilos.quemSomosFoto}>
               <Image
                 src="/fotos/qualidade-solda.jpg"
                 alt="Soldador trabalhando numa estrutura metálica"
@@ -179,56 +190,41 @@ export default async function Inicio() {
             </div>
           </div>
           <div>
-            <TituloSecao
-              id="quem-somos-titulo"
-              kicker="Quem somos"
-              titulo="Engenharia de grupo, atendimento de perto"
-              claro
-            />
+            <h2 id="quem-somos-titulo" className={estilos.titulo}>
+              Do mesmo grupo da {EMPRESA.irma.nome}
+            </h2>
             <div className={estilos.quemSomosTexto}>
               <p>
-                A {EMPRESA.nome} faz parte do {EMPRESA.grupo}, ao lado da{' '}
+                A {EMPRESA.nome} é do {EMPRESA.grupo}, ao lado da{' '}
                 <a href={EMPRESA.irma.url} target="_blank" rel="noopener">
                   {EMPRESA.irma.nome}
                 </a>
-                , referência em engenharia, infraestrutura e construção civil no Maranhão.
+                , que constrói e administra imóveis no Maranhão. Os containers saem da mesma cultura de obra:
+                inspecionados e adaptados antes de chegar ao cliente.
               </p>
-              <p>
-                Com foco em inovação e eficiência, oferecemos containers e estruturas modulares para
-                diferentes finalidades: de canteiros de obra e escritórios móveis a eventos e armazenagem
-                temporária.
-              </p>
-              <p>
-                Cada container passa por inspeção e adaptação antes de chegar ao cliente, para entregar
-                segurança, funcionalidade e conforto no uso de todo dia.
-              </p>
+              <p>Você fala direto com quem decide, sem intermediário.</p>
             </div>
-            <ul className={estilos.diferenciais}>
-              {DIFERENCIAIS.map((d, i) => (
-                <li key={d.titulo}>
-                  <span className={estilos.diferencialIcone}>
-                    <Icone nome={ICONES_DIFERENCIAIS[i] ?? 'check'} />
-                  </span>
-                  <div>
-                    <h3>{d.titulo}</h3>
-                    <p>{d.texto}</p>
-                  </div>
-                </li>
+            <h3 className={estilos.inclusoTitulo}>O que vem com a locação</h3>
+            <dl className={estilos.incluso}>
+              {INCLUSO.map((d) => (
+                <div key={d.titulo}>
+                  <dt>{d.titulo}</dt>
+                  <dd>{d.texto}</dd>
+                </div>
               ))}
-            </ul>
+            </dl>
           </div>
         </div>
       </section>
 
-      {/* Contato */}
       <section className={estilos.secao} aria-labelledby="contato-titulo">
         <div className={`${estilos.interno} ${estilos.fechamento}`}>
-          <TituloSecao
-            id="contato-titulo"
-            kicker="Fale com a gente"
-            titulo="Conte o que você precisa. A gente responde rápido."
-            texto={CONTATO.horario + '.'}
-          />
+          <div>
+            <h2 id="contato-titulo" className={estilos.titulo}>
+              Conta pra gente o que você precisa.
+            </h2>
+            <p className={estilos.lead}>{CONTATO.horario}. Pelo WhatsApp a resposta é mais rápida.</p>
+          </div>
           <div className={estilos.canais}>
             <a className={`${estilos.canal} ${estilos.canalDestaque}`} href={linkWhatsApp(mensagemGeral())} target="_blank" rel="noopener">
               <IconeWhatsApp tamanho={26} />
@@ -255,7 +251,7 @@ export default async function Inicio() {
               <Icone nome="seta" tamanho={24} />
               <span>
                 <small>Formulário</small>
-                Pedir orçamento detalhado
+                Orçamento detalhado
               </span>
             </Link>
           </div>

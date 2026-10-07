@@ -1,0 +1,132 @@
+.lista {
+  display: grid;
+  gap: var(--gap-5);
+}
+
+.itens {
+  border-top: 1px solid var(--linha);
+}
+
+.item {
+  border-bottom: 1px solid var(--linha);
+}
+
+.titulo {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 22px 0 22px 0;
+  font-family: var(--fonte-titulo);
+  font-stretch: 118%;
+  font-weight: 750;
+  font-size: clamp(1.35rem, 1rem + 1.5vw, 2.1rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  text-align: left;
+  color: var(--texto-2);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  transition: color calc(0.3s * var(--tempo)), padding-left calc(0.45s * var(--tempo)) var(--curva);
+}
+
+.titulo::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 0;
+  height: 14px;
+  background: var(--azul);
+  border-radius: 2px;
+  transform: translateY(-50%);
+  transition: width calc(0.45s * var(--tempo)) var(--curva);
+}
+
+.item[data-ativa='true'] .titulo {
+  padding-left: 30px;
+  color: var(--texto);
+}
+
+.item[data-ativa='true'] .titulo::before {
+  width: 14px;
+}
+
+/* A gaveta abre por altura de grade, sem medir nada no JavaScript */
+.detalhe {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows calc(0.45s * var(--tempo)) var(--curva);
+}
+
+.detalhe > div {
+  overflow: hidden;
+}
+
+.item[data-ativa='true'] .detalhe {
+  grid-template-rows: 1fr;
+}
+
+.detalhe p {
+  max-width: 46ch;
+  padding: 0 0 22px 30px;
+  font-size: 1.05rem;
+  color: var(--texto-2);
+}
+
+.fotoCelular {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  margin-bottom: 22px;
+  overflow: hidden;
+  border-radius: var(--raio-marca);
+}
+
+.fotoCelular img {
+  object-fit: cover;
+}
+
+.palco {
+  display: none;
+}
+
+.foto {
+  position: absolute;
+  inset: 0;
+}
+
+@media (min-width: 960px) {
+  .lista {
+    grid-template-columns: 5fr 7fr;
+    gap: var(--gap-6);
+    align-items: start;
+  }
+  .fotoCelular {
+    display: none;
+  }
+  .palco {
+    position: sticky;
+    top: calc(var(--altura-cabecalho) + 24px);
+    display: block;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: var(--tinta);
+    border-radius: 64px 8px 8px 8px;
+  }
+  .foto {
+    clip-path: inset(0 0 0 100%);
+    transition: clip-path calc(0.75s * var(--tempo)) var(--curva-porta);
+  }
+  .foto img {
+    object-fit: cover;
+    transform: scale(calc(1 + 0.08 * var(--deslocar)));
+    transition: transform calc(1.4s * var(--tempo)) var(--curva);
+  }
+  .foto[data-ativa='true'] {
+    z-index: 1;
+    clip-path: inset(0 0 0 0);
+  }
+  .foto[data-ativa='true'] img {
+    transform: none;
+  }
+}

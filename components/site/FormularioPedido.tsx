@@ -2,7 +2,7 @@
 
 import { useSearchParams } from 'next/navigation'
 import { useId, useState } from 'react'
-import { montarMensagem, validarPedido, type ErrosPedido, type Pedido, type TipoPedido } from '@/lib/pedido'
+import { linhasDaMensagem, montarMensagem, validarPedido, type ErrosPedido, type Pedido, type TipoPedido } from '@/lib/pedido'
 import { CONTATO } from '@/lib/site'
 import { linkWhatsApp } from '@/lib/whatsapp'
 import { Icone, IconeWhatsApp } from './Icone'
@@ -21,6 +21,7 @@ export function FormularioPedido({ tipo, modelos = [] }: Props) {
   const parametros = useSearchParams()
   const modeloDaUrl = parametros.get('modelo') ?? ''
   const [erros, setErros] = useState<ErrosPedido>({})
+  const [previa, setPrevia] = useState('')
 
   function lerPedido(form: HTMLFormElement): Pedido {
     const dados = new FormData(form)
@@ -72,7 +73,11 @@ export function FormularioPedido({ tipo, modelos = [] }: Props) {
     )
 
   return (
-    <form className={estilos.form} noValidate onSubmit={(e) => {
+    <form
+      className={estilos.form}
+      noValidate
+      onInput={(e) => setPrevia(montarMensagem(lerPedido(e.currentTarget)))}
+      onSubmit={(e) => {
         e.preventDefault()
         enviar(e.currentTarget, 'whatsapp')
       }}
@@ -144,6 +149,19 @@ export function FormularioPedido({ tipo, modelos = [] }: Props) {
           {erro('mensagem')}
         </label>
       </div>
+
+      <figure className={estilos.previa}>
+        <figcaption>Assim a mensagem chega para a gente</figcaption>
+        <p className={estilos.balao}>
+          {linhasDaMensagem(previa || montarMensagem({ tipo, nome: '', telefone: '', modelo: modeloDaUrl })).map(
+            (linha, i) => (
+              <span key={i} className={estilos.linhaBalao}>
+                {linha.map((trecho, j) => (trecho.negrito ? <b key={j}>{trecho.texto}</b> : trecho.texto))}
+              </span>
+            ),
+          )}
+        </p>
+      </figure>
 
       <div className={estilos.acoes}>
         <button type="submit" className={estilos.whatsapp}>

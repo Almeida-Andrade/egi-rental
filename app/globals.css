@@ -17,8 +17,9 @@ body {
   background: var(--branco);
   color: var(--texto);
   font-family: var(--fonte-corpo), system-ui, sans-serif;
-  font-size: 1rem;
-  line-height: 1.6;
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  font-stretch: 100%;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -29,10 +30,10 @@ h3,
 h4 {
   margin: 0;
   font-family: var(--fonte-titulo), system-ui, sans-serif;
-  font-stretch: 112%;
-  font-weight: 700;
-  line-height: 1.08;
-  letter-spacing: -0.015em;
+  font-stretch: 118%;
+  font-weight: 750;
+  line-height: 1.02;
+  letter-spacing: -0.025em;
   text-wrap: balance;
 }
 
@@ -104,36 +105,23 @@ textarea {
   transform: none;
 }
 
-/* Revela os blocos ao rolar, só onde o navegador sabe fazer sem JavaScript */
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .revelar {
-      animation: revelar linear both;
-      animation-timeline: view();
-      animation-range: entry 0% entry 45%;
-    }
-  }
+/* Números e códigos com a letra das marcações do container */
+.marcacao {
+  font-family: var(--fonte-marcacao), var(--fonte-titulo), sans-serif;
+  font-weight: 800;
+  font-variation-settings: 'opsz' 72;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
 }
 
-@keyframes revelar {
-  from {
-    opacity: 0;
-    transform: translateY(28px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
+/* A foto do cartão vira a foto da ficha */
+::view-transition-group(.morph) {
+  animation-duration: calc(450ms * var(--tempo));
+  animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
-  }
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
   }
 }

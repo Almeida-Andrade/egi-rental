@@ -3,10 +3,14 @@
   top: 0;
   z-index: 40;
   height: var(--altura-cabecalho);
-  background: rgba(255, 255, 255, 0.86);
-  backdrop-filter: saturate(1.6) blur(14px);
-  -webkit-backdrop-filter: saturate(1.6) blur(14px);
-  border-bottom: 1px solid rgba(10, 18, 34, 0.08);
+  background: var(--branco);
+  border-bottom: 1px solid var(--linha);
+  transition: transform calc(0.35s * var(--tempo)) var(--curva);
+}
+
+/* Rolando para baixo o cabeçalho sai do caminho; para cima, volta */
+.cabecalho[data-escondido='true'] {
+  transform: translateY(-100%);
 }
 
 .interno {

@@ -18,7 +18,12 @@ export function BotaoLink({ href, children, variante = 'primario', grande, seta 
   const conteudo = (
     <>
       {variante === 'whatsapp' && <IconeWhatsApp />}
-      <span>{children}</span>
+      <span className={estilos.rotulo}>
+        <span className={estilos.rotuloTexto}>{children}</span>
+        <span className={estilos.rotuloEco} aria-hidden="true">
+          {children}
+        </span>
+      </span>
       {seta && <Icone nome="seta" tamanho={18} />}
     </>
   )
