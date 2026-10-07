@@ -27,7 +27,10 @@ export default async function Inicio() {
   const catalogo = await buscarCatalogo()
   const tamanhos = tamanhosDoCatalogo(catalogo)
   const usos = [...new Set(catalogo.filter((m) => m.uso !== 'hibrido').map((m) => m.nome.toLowerCase()))]
-  const [destaque, ...demais] = catalogo
+  // Na home, o destaque e uma fileira de três: linha com um cartão sozinho quebra a grade.
+  // O catálogo inteiro fica em /containers.
+  const [destaque, ...outros] = catalogo
+  const demais = outros.slice(0, 3)
 
   return (
     <>

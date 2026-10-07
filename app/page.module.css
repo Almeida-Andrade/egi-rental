@@ -97,9 +97,13 @@
   margin-top: var(--gap-6);
 }
 
-@media (min-width: 640px) {
+@media (min-width: 640px) and (max-width: 1079px) {
   .gradeModelos {
     grid-template-columns: repeat(2, 1fr);
+  }
+  /* Em duas colunas, o terceiro ficaria sozinho na linha: no tablet a fileira é de dois */
+  .gradeModelos > li:nth-child(3) {
+    display: none;
   }
 }
 
