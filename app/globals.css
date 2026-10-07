@@ -6,9 +6,10 @@
   box-sizing: border-box;
 }
 
+/* Sem scroll-behavior: smooth: o salto para uma âncora da home atravessa a abertura e as seções com
+   content-visibility, que mudam de altura no caminho, e a rolagem suave parava longe do destino */
 html {
   -webkit-text-size-adjust: 100%;
-  scroll-behavior: smooth;
   scroll-padding-top: calc(var(--altura-cabecalho) + 16px);
 }
 
@@ -120,8 +121,3 @@ textarea {
   animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-}
