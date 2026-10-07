@@ -1,0 +1,68 @@
+/* Tudo em `em`: o tamanho da marca é o font-size de quem a usa */
+.marca {
+  --cor-l: #315467;
+  --cor-quadrado: #284aab;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55em;
+  line-height: 1;
+  color: var(--tinta);
+}
+
+.marca[data-claro='true'] {
+  --cor-l: #6f8fab;
+  --cor-quadrado: #4069d1;
+  color: var(--branco);
+}
+
+.simbolo {
+  flex-shrink: 0;
+  width: auto;
+  height: 2.6em;
+}
+
+.l {
+  fill: var(--cor-l);
+}
+
+.quadrado {
+  fill: var(--cor-quadrado);
+}
+
+.nome {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.egi {
+  font-family: var(--fonte-titulo);
+  font-weight: 600;
+  font-size: 2.1em;
+  letter-spacing: 0.05em;
+  line-height: 0.82;
+}
+
+/* O RENTAL em negrito e espaçado para ter a largura do EGI, grande o bastante para ler no celular */
+.rental {
+  margin-top: 0.42em;
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  font-size: 0.72em;
+  letter-spacing: 0.27em;
+  color: var(--cor-l);
+}
+
+.marca[data-claro='true'] .rental {
+  color: #b9cadb;
+}
+
+.marca[data-arranjo='vertical'] {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.7em;
+}
+
+.marca[data-arranjo='vertical'] .simbolo {
+  height: 4.4em;
+}

@@ -188,23 +188,23 @@ function CartaoPrazo() {
   return (
     <article ref={ref} className={`${estilos.cartao} ${estilos.largo}`} data-visivel={visivel}>
       <p className={estilos.rotulo}>Prazo de obra</p>
-      <p className={estilos.chamada}>
+      <div className={estilos.chamada}>
         <Numero valor={exibido} sufixo="%" />
         <span>
           mais rápido, no melhor caso. Projetos modulares já encurtaram o cronograma de {TEMPO.menosMin}% a{' '}
           {TEMPO.menosMax}%.<sup>1</sup>
         </span>
-      </p>
-      {/* O mesmo ganho em tempo de obra, trocando de exemplo; a chave refaz a entrada a cada troca */}
-      <div className={estilos.exemplo}>
-        <p className={estilos.exemploRotulo}>Exemplo ilustrativo, no melhor caso</p>
-        <div key={exemplo.tradicional} className={estilos.exemploTroca}>
-          <span>
-            Obra tradicional <strong>{exemplo.tradicional}</strong>
-          </span>
-          <span className={estilos.exemploModular}>
-            Modular <strong>a partir de {exemplo.modular}</strong>
-          </span>
+        {/* O mesmo ganho em tempo de obra, trocando de exemplo; a chave refaz a entrada a cada troca */}
+        <div className={estilos.exemplo}>
+          <p className={estilos.exemploRotulo}>Exemplo ilustrativo, no melhor caso</p>
+          <div key={exemplo.tradicional} className={estilos.exemploTroca}>
+            <span>
+              Obra tradicional <strong>{exemplo.tradicional}</strong>
+            </span>
+            <span className={estilos.exemploModular}>
+              Modular <strong>a partir de {exemplo.modular}</strong>
+            </span>
+          </div>
         </div>
       </div>
       <Grafico

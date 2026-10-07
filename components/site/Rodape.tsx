@@ -1,10 +1,10 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import { buscarCatalogo } from '@/lib/dados/catalogo'
 import { NAVEGACAO } from '@/lib/navegacao'
 import { AVISO_ILUSTRATIVO, CONTATO, EMPRESA } from '@/lib/site'
 import { linkWhatsApp, mensagemGeral } from '@/lib/whatsapp'
 import { Icone, IconeWhatsApp } from './Icone'
+import { Marca } from './Marca'
 import estilos from './Rodape.module.css'
 
 export async function Rodape() {
@@ -15,7 +15,7 @@ export async function Rodape() {
     <footer className={estilos.rodape}>
       <div className={estilos.interno}>
         <div className={estilos.marca}>
-          <Image src="/marca/egi-rental-vertical-branca.png" alt="EGI Rental" width={218} height={376} />
+          <Marca arranjo="vertical" claro rotulo="EGI Rental" />
           <p>
             {EMPRESA.slogan}. Uma empresa do {EMPRESA.grupo}, ao lado da{' '}
             <a href={EMPRESA.irma.url} target="_blank" rel="noopener">

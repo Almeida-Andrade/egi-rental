@@ -29,7 +29,6 @@
   flex-shrink: 0;
 }
 
-.marca img {
-  width: auto;
-  height: 42px;
+.marca {
+  font-size: 16px;
 }

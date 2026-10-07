@@ -12,10 +12,9 @@
   padding: var(--gap-6) var(--margem) var(--gap-5);
 }
 
-.marca img {
-  width: 92px;
-  height: auto;
+.marca > :first-child {
   margin-bottom: var(--gap-4);
+  font-size: 18px;
 }
 
 .marca p {
@@ -83,10 +82,10 @@
     align-items: center;
     gap: var(--gap-4);
   }
-  .marca img {
+  .marca > :first-child {
     flex-shrink: 0;
-    width: 72px;
     margin-bottom: 0;
+    font-size: 15px;
   }
 }
 
