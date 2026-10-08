@@ -20,10 +20,6 @@ import estilos from './page.module.css'
 
 export const revalidate = 3600
 
-function juntar(itens: string[]): string {
-  return itens.length < 2 ? itens.join('') : `${itens.slice(0, -1).join(', ')} e ${itens.at(-1)}`
-}
-
 export default async function Inicio() {
   const catalogo = await buscarCatalogo()
   const tamanhos = tamanhosDoCatalogo(catalogo)
@@ -63,10 +59,10 @@ export default async function Inicio() {
       />
 
       <ContainerAbrindo capitulos={capitulosDaAbertura(usos)}>
-        <h1 id="hero-titulo">Containers para alugar em São Luís.</h1>
+        <h1 id="hero-titulo">Containers para locação em São Luís.</h1>
         <p className={estilos.heroTexto}>
-          {juntar(usos).replace(/^./, (l) => l.toUpperCase())}, de {tamanhos[0]} a {tamanhos.at(-1)} pés.
-          A gente leva até a sua obra, posiciona e busca no fim do contrato.
+          {usos.join(', ').replace(/^./, (l) => l.toUpperCase())} ou customizado ao seu gosto, de {tamanhos[0]} a{' '}
+          {tamanhos.at(-1)} pés. A gente leva até a sua obra, posiciona e busca no fim do contrato.
         </p>
         <div className={estilos.heroAcoes}>
           <BotaoLink href={linkWhatsApp(mensagemGeral())} variante="whatsapp" grande>
