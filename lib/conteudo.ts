@@ -31,7 +31,7 @@ export const APLICACOES: Aplicacao[] = [
 
 export const INCLUSO = [
   { titulo: 'Entrega e retirada', texto: 'Levamos até o local, posicionamos e buscamos no fim do contrato.' },
-  { titulo: 'Prazo do seu jeito', texto: 'Locação de curto, médio ou longo prazo, conforme a obra pede.' },
+  { titulo: 'Prazo do seu jeito', texto: 'Locação de médio ou longo prazo, conforme a obra pede.' },
   { titulo: 'Container inspecionado', texto: 'Cada um passa por inspeção e adaptação antes de sair.' },
   { titulo: 'Ajuste ao uso', texto: 'Adaptamos o container ao projeto, em vez de você se adaptar a ele.' },
 ]
