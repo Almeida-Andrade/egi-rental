@@ -28,7 +28,7 @@ export const CONTATO = {
     { rotulo: '(98) 99102-2068', tel: '+5598991022068' },
     { rotulo: '(98) 98481-2776', tel: '+5598984812776' },
   ],
-  email: 'contato@egirental.com.br',
+  email: 'contato@grupoaandrade.com.br',
   instagram: { usuario: '@egi.rental', url: 'https://www.instagram.com/egi.rental' },
   horario: 'Segunda a sábado, em horário comercial',
 }
